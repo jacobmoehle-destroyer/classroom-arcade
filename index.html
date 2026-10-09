@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,110 +7,251 @@
   <meta name="theme-color" content="#111827">
   <title>Classroom Arcade</title>
   <style>
-    :root { color-scheme: dark; --bg:#0b1020; --panel:#151d31; --text:#f4f7ff; --muted:#b9c4da; --accent:#8bd3ff; }
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #151d31;
+      --text: #f4f7ff;
+      --muted: #b9c4da;
+      --accent: #8bd3ff;
+    }
+
     * { box-sizing: border-box; }
-    body { margin:0; font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%); color:var(--text); }
-    header { padding:36px 18px 24px; text-align:center; }
-    header .eyebrow { text-transform:uppercase; letter-spacing:.16em; color:var(--accent); font-size:.78rem; font-weight:800; }
-    h1 { margin:.35rem 0; font-size:clamp(2rem,7vw,3.3rem); line-height:1.05; }
-    header p { max-width:680px; margin:12px auto; color:var(--muted); }
-    main { width:min(1050px,100%); margin:auto; padding:0 16px 36px; }
-    .notice { border:1px solid #53627c; background:#151d31cc; border-radius:14px; padding:14px 16px; color:var(--muted); margin-bottom:22px; }
-    .notice strong { color:var(--text); }
-    .section-title { margin:28px 0 12px; font-size:1.3rem; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); gap:14px; }
-    .card { background:linear-gradient(145deg,#1a2540,#111827); border:1px solid #34415c; border-radius:16px; padding:18px; display:flex; flex-direction:column; min-height:205px; }
-    .icon { font-size:2rem; }
-    .card h3 { margin:8px 0 5px; font-size:1.12rem; }
-    .card p { margin:0 0 14px; color:var(--muted); flex:1; }
-    a.button { display:inline-block; text-align:center; border-radius:10px; background:var(--accent); color:#07111f; font-weight:800; text-decoration:none; padding:10px 14px; }
-    a.button:focus-visible, a.button:hover { outline:3px solid white; outline-offset:2px; }
-    .tag { color:#b8e9c7; font-size:.78rem; font-weight:700; margin-bottom:4px; }
-    footer { text-align:center; color:var(--muted); padding:10px 18px 30px; font-size:.9rem; }
-    .small { font-size:.88rem; color:var(--muted); }
+
+    body {
+      margin: 0;
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background: radial-gradient(ellipse at top, #1c2d4c, var(--bg) 58%);
+      color: var(--text);
+    }
+
+    header {
+      padding: 36px 18px 24px;
+      text-align: center;
+    }
+
+    header .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: .35rem 0;
+      font-size: clamp(2rem, 7vw, 3.3rem);
+      line-height: 1.05;
+    }
+
+    header p {
+      max-width: 680px;
+      margin: 12px auto;
+      color: var(--muted);
+    }
+
+    main {
+      width: min(1050px, 100%);
+      margin: auto;
+      padding: 0 16px 36px;
+    }
+
+    .notice {
+      border: 1px solid #53627c;
+      background: #151d31cc;
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .notice strong { color: var(--text); }
+
+    .section-title {
+      margin: 28px 0 12px;
+      font-size: 1.3rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #1a2540, #111827);
+      border: 1px solid #34415c;
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      min-height: 205px;
+    }
+
+    .icon { font-size: 2rem; }
+
+    .card h3 {
+      margin: 8px 0 5px;
+      font-size: 1.12rem;
+    }
+
+    .card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    a.button {
+      display: inline-block;
+      text-align: center;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #07111f;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 10px 14px;
+      margin-top: 8px;
+    }
+
+    a.button:hover,
+    a.button:focus-visible {
+      outline: 3px solid white;
+      outline-offset: 2px;
+    }
+
+    a.button.secondary {
+      background: #273650;
+      color: var(--text);
+      border: 1px solid #53627c;
+    }
+
+    .tag {
+      color: #b8e9c7;
+      font-size: .78rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 10px 18px 30px;
+      font-size: .9rem;
+    }
+
+    .small {
+      font-size: .88rem;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="eyebrow">A student-friendly game library</div>
     <h1>🕹️ Classroom Arcade</h1>
-    <p>Pick a game, open it in Safari, and have fun. Use only games approved by your teacher or school.</p>
+    <p>Pick a game, open it in your browser, and have fun. Use only games approved by your teacher or school.</p>
   </header>
+
   <main>
-    <div class="notice"><strong>Teacher note:</strong> This starter page links to game libraries; it does not host game files or bypass school filters. Preview each game on a school iPad, check its content and privacy, and ask IT to approve the exact domains first.</div>
+    <div class="notice">
+      <strong>Teacher note:</strong> This page links to browser games and
+      a self-hosted DOOM player. Review games for age suitability, privacy,
+      licensing, and school compatibility before use.
+    </div>
 
     <h2 class="section-title">Play in your browser</h2>
+
     <section class="grid" aria-label="Browser game libraries">
+
       <article class="card">
-        <div class="icon" aria-hidden="true">🎮</div><div class="tag">Browser games</div>
+        <div class="icon" aria-hidden="true">🎮</div>
+        <div class="tag">Browser games</div>
         <h3>itch.io HTML5 Games</h3>
         <p>A large collection of games designed to run in web browsers. Choose age-appropriate games and test touch controls first.</p>
         <a class="button" href="https://itch.io/games/html5" target="_blank" rel="noopener noreferrer">Browse HTML5 games ↗</a>
       </article>
+
       <article class="card">
-        <div class="icon" aria-hidden="true">🧩</div><div class="tag">Creative games</div>
+        <div class="icon" aria-hidden="true">🧩</div>
+        <div class="tag">Creative games</div>
         <h3>Scratch Games</h3>
-        <p>Student-friendly projects and simple games. Some projects may have comments, sharing, or external links, so review school settings.</p>
+        <p>Student-friendly projects and simple games. Review comments, sharing, and external links according to school policy.</p>
         <a class="button" href="https://scratch.mit.edu/explore/projects/games/" target="_blank" rel="noopener noreferrer">Explore Scratch ↗</a>
       </article>
+
       <article class="card">
-        <div class="icon" aria-hidden="true">🌍</div><div class="tag">Classic-inspired</div>
+        <div class="icon" aria-hidden="true">🌍</div>
+        <div class="tag">Classic-inspired</div>
         <h3>ClassiCube</h3>
-        <p>An open-source, block-building game inspired by early sandbox games. Check the official site for browser options and compatibility.</p>
+        <p>An open-source block-building game inspired by early sandbox games. Check the official site for browser options and compatibility.</p>
         <a class="button" href="https://www.classicube.net/" target="_blank" rel="noopener noreferrer">Visit ClassiCube ↗</a>
       </article>
+
       <article class="card">
-        <div class="icon" aria-hidden="true">🏛️</div><div class="tag">Strategy</div>
+        <div class="icon" aria-hidden="true">🏛️</div>
+        <div class="tag">Strategy</div>
         <h3>Freeciv-web</h3>
-        <p>A browser-based, open-source turn-based strategy game. Ask IT to review the site and test performance on the school iPad.</p>
+        <p>A browser-based, open-source turn-based strategy game. Test performance on your device before playing.</p>
         <a class="button" href="https://www.freecivweb.org/" target="_blank" rel="noopener noreferrer">Play Freeciv-web ↗</a>
       </article>
+
       <article class="card">
         <div class="icon" aria-hidden="true">💀</div>
         <div class="tag">Classic PC game · Requires your own game data</div>
         <h3>DOOM (1993)</h3>
-        <p>Launch Dwasm, a browser-based Doom engine, and select your own compatible GOG WAD file. This card opens Dwasm; it does not automatically load your WAD.</p>
-        <a class="button" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open DOOM in Dwasm ↗</a>
-        <p class="small">Your WAD stays on your device when you select it in Dwasm. Do not upload copyrighted game data to this public website.</p>
+        <p>Choose the built-in Dwasm player hosted in Classroom Arcade, or open the external Dwasm website. The game requires a compatible WAD file.</p>
+        <a class="button" href="./doom/">Play DOOM inside Classroom Arcade 🎮</a>
+        <a class="button secondary" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open external Dwasm ↗</a>
+        <p class="small">Select your legally obtained DOOM WAD in the player. Do not upload commercial game data to this public website.</p>
       </article>
+
       <article class="card">
         <div class="icon" aria-hidden="true">💀</div>
         <div class="tag">Classic PC game · Requires your own game data</div>
         <h3>DOOM II: Hell on Earth</h3>
-        <p>Use the same Dwasm engine and select your compatible `DOOM2.WAD` file when prompted. Test on each device.</p>
-        <a class="button" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open DOOM II in Dwasm ↗</a>
-        <p class="small">Dwasm may require you to choose the WAD each time. The link cannot pass your local file automatically.</p>
+        <p>Use the built-in player or external Dwasm site, then select a compatible DOOM II WAD file.</p>
+        <a class="button" href="./doom/">Play DOOM II inside Classroom Arcade 🎮</a>
+        <a class="button secondary" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open external Dwasm ↗</a>
+        <p class="small">The internal player may require you to choose the WAD file after opening it.</p>
       </article>
     </section>
 
-    <h2 class="section-title">Classic PC ports — teacher setup required</h2>
+    <h2 class="section-title">Classic PC ports — setup required</h2>
+
     <section class="grid" aria-label="Classic PC port resources">
       <article class="card">
-        <div class="icon" aria-hidden="true">🛠️</div><div class="tag">Open-source engine</div>
+        <div class="icon" aria-hidden="true">🛠️</div>
+        <div class="tag">Open-source engine</div>
         <h3>Chocolate Doom</h3>
-        <p>A classic Doom engine project. A website alone is not enough: a browser build and compatible game data are needed. The original commercial game data is not automatically free.</p>
+        <p>A classic DOOM engine project. A website alone is not enough: a browser build and compatible game data are needed.</p>
         <a class="button" href="https://www.chocolate-doom.org/" target="_blank" rel="noopener noreferrer">Project website ↗</a>
       </article>
+
       <article class="card">
-        <div class="icon" aria-hidden="true">📚</div><div class="tag">Porting reference</div>
+        <div class="icon" aria-hidden="true">📚</div>
+        <div class="tag">Porting reference</div>
         <h3>WebAssembly game ports</h3>
-        <p>WebAssembly can run compatible compiled programs in a browser. A port still needs suitable controls, audio, storage, and permission to distribute all game assets.</p>
+        <p>WebAssembly allows supported compiled programs to run in browsers. Ports still need suitable controls, audio, storage, and properly licensed assets.</p>
         <a class="button" href="https://webassembly.org/" target="_blank" rel="noopener noreferrer">Learn about WebAssembly ↗</a>
       </article>
     </section>
 
     <h2 class="section-title">Before adding a game</h2>
+
     <div class="notice">
       <ul>
-        <li>Confirm the game is suitable for your students and allowed by school policy.</li>
-        <li>Check its license; don't upload copyrighted game files or ROMs without permission.</li>
-        <li>Test in Safari on the actual iPad, including touch controls, audio, landscape mode, and any sign-in prompts.</li>
-        <li>Ask IT to approve the specific game domain. Hosting this page on GitHub Pages does not unblock other sites.</li>
-        <li>Prefer games with no account requirement, no chat, minimal tracking, and no external purchases.</li>
+        <li>Confirm that the game is suitable for students and allowed by school policy.</li>
+        <li>Check licenses; do not upload copyrighted game files without permission.</li>
+        <li>Test Safari touch controls, audio, landscape mode, and sign-in requirements.</li>
+        <li>Ask school IT to approve any blocked game domains. Hosting this page on GitHub Pages does not automatically unblock other sites.</li>
+        <li>Prefer games with no account requirement, minimal tracking, and no external purchases.</li>
       </ul>
     </div>
-    <p class="small">Starter template: edit this file to rename the arcade, remove links, and add games your school has approved.</p>
+
+    <p class="small">Edit this file to rename the arcade, remove links, or add games your school has approved.</p>
   </main>
+
   <footer>Classroom Arcade · Free starter template · Not affiliated with the linked game projects</footer>
 </body>
 </html>
