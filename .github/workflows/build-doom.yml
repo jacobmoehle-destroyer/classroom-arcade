@@ -1,0 +1,40 @@
+
+name: Build Dwasm DOOM Player
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out Classroom Arcade
+        uses: actions/checkout@v4
+
+      - name: Check out Dwasm source
+        uses: actions/checkout@v4
+        with:
+          repository: GMH-Code/Dwasm
+          path: dwasm
+
+      - name: Show build instructions
+        run: |
+          echo "Dwasm source downloaded."
+          echo "Checking build tools and project instructions."
+          cmake --version
+          git --version
+          sed -n '1,220p' dwasm/README.md
+          echo "---- CMake dependencies ----"
+          grep -nE 'find_package|add_subdirectory|GL4ES|SINGLE_HTML_FILE' \
+            dwasm/CMakeLists.txt || true
+
+      - name: Save build inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dwasm-build-inspection
+          path: dwasm/README.md
+          if-no-files-found: error
