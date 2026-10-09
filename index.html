@@ -8,7 +8,7 @@
   <style>
     :root { color-scheme: dark; --bg:#0b1020; --panel:#151d31; --text:#f4f7ff; --muted:#b9c4da; --accent:#8bd3ff; }
     * { box-sizing: border-box; }
-    body { margin:0; font: 16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%); color:var(--text); }
+    body { margin:0; font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%); color:var(--text); }
     header { padding:36px 18px 24px; text-align:center; }
     header .eyebrow { text-transform:uppercase; letter-spacing:.16em; color:var(--accent); font-size:.78rem; font-weight:800; }
     h1 { margin:.35rem 0; font-size:clamp(2rem,7vw,3.3rem); line-height:1.05; }
@@ -64,16 +64,22 @@
         <p>A browser-based, open-source turn-based strategy game. Ask IT to review the site and test performance on the school iPad.</p>
         <a class="button" href="https://www.freecivweb.org/" target="_blank" rel="noopener noreferrer">Play Freeciv-web ↗</a>
       </article>
-      
       <article class="card">
-       <h2>💀 DOOM (1993)</h2>
-        <p>Play the original classic in your browser using your own game data.</p>
-        <a   href="https://dwasm.m-h.org.uk/"target="_blank"rel="noopener noreferrer"  >Open DOOM in Dwasm →
-       </a>
-       <p><small>Requires a compatible WAD file.</small></p>
+        <div class="icon" aria-hidden="true">💀</div>
+        <div class="tag">Classic PC game · Requires your own game data</div>
+        <h3>DOOM (1993)</h3>
+        <p>Launch Dwasm, a browser-based Doom engine, and select your own compatible GOG WAD file. This card opens Dwasm; it does not automatically load your WAD.</p>
+        <a class="button" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open DOOM in Dwasm ↗</a>
+        <p class="small">Your WAD stays on your device when you select it in Dwasm. Do not upload copyrighted game data to this public website.</p>
       </article>
-   
-    
+      <article class="card">
+        <div class="icon" aria-hidden="true">💀</div>
+        <div class="tag">Classic PC game · Requires your own game data</div>
+        <h3>DOOM II: Hell on Earth</h3>
+        <p>Use the same Dwasm engine and select your compatible `DOOM2.WAD` file when prompted. Test on each device.</p>
+        <a class="button" href="https://dwasm.m-h.org.uk/" target="_blank" rel="noopener noreferrer">Open DOOM II in Dwasm ↗</a>
+        <p class="small">Dwasm may require you to choose the WAD each time. The link cannot pass your local file automatically.</p>
+      </article>
     </section>
 
     <h2 class="section-title">Classic PC ports — teacher setup required</h2>
