@@ -10,7 +10,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Check out Classroom Arcade
         uses: actions/checkout@v4
@@ -21,20 +20,54 @@ jobs:
           repository: GMH-Code/Dwasm
           path: dwasm
 
-      - name: Show build instructions
+      - name: Install native build dependencies
         run: |
-          echo "Dwasm source downloaded."
-          echo "Checking build tools and project instructions."
-          cmake --version
-          git --version
-          sed -n '1,220p' dwasm/README.md
-          echo "---- CMake dependencies ----"
-          grep -nE 'find_package|add_subdirectory|GL4ES|SINGLE_HTML_FILE' \
-            dwasm/CMakeLists.txt || true
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake git python3 \
+            libsdl2-dev libsdl2-image-dev \
+            libsdl2-mixer-dev libsdl2-net-dev \
+            libpcre3-dev zlib1g-dev libmad0-dev \
+            libfluidsynth-dev libdumb1-dev \
+            libvorbis-dev libportmidi-dev \
+            libasound2-dev
 
-      - name: Save build inspection report
+      - name: Build native PrBoomX resources
+        run: |
+          cmake -S dwasm -B dwasm/build_native \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build dwasm/build_native --parallel 2
+          test -f dwasm/build_native/prboomx.wad
+          sha256sum dwasm/build_native/prboomx.wad
+
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git \
+            "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install latest
+          "$RUNNER_TEMP/emsdk/emsdk" activate latest
+
+      - name: Build WebAssembly player
+        shell: bash
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          cp dwasm/build_native/prboomx.wad \
+            dwasm/wasm/fs/prboomx.wad
+          cd dwasm
+          mkdir build
+          cd build
+          emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --parallel 2
+          ls -lah
+
+      - name: Upload browser build
         uses: actions/upload-artifact@v4
         with:
-          name: dwasm-build-inspection
-          path: dwasm/README.md
+          name: dwasm-browser-player
+          path: |
+            dwasm/build/index.html
+            dwasm/build/index.js
+            dwasm/build/index.data
+            dwasm/build/index.wasm
           if-no-files-found: error
+
