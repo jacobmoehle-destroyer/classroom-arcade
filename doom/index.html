@@ -11,12 +11,7 @@
   box-sizing: border-box;
 }
 
-:root {
-  color-scheme: dark;
-}
-
-html,
-body {
+html, body {
   margin: 0;
   min-height: 100%;
   background: #111;
@@ -25,74 +20,70 @@ body {
 }
 
 body {
-  padding: 14px;
+  padding: 12px;
   text-align: center;
 }
 
-button,
-input {
-  font: inherit;
-}
-
 button {
-  cursor: pointer;
+  padding: 8px 12px;
   color: #fff;
   background: #292929;
   border: 1px solid #555;
-  border-radius: 7px;
-  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
 }
 
 button:hover {
-  background: #3b3b3b;
+  background: #414141;
 }
 
-button:active {
-  background: #555;
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
 
-#pageHeader {
-  width: 100%;
-  max-width: 1000px;
+header {
   margin: 0 auto 12px;
 }
 
 h1 {
-  font-size: 25px;
   margin: 0 0 5px;
+  font-size: 23px;
 }
 
 #subtitle {
   color: #aaa;
-  font-size: 13px;
-  margin-bottom: 12px;
+  font-size: 12px;
 }
 
 #launcher {
-  max-width: 960px;
+  width: min(100%, 700px);
   margin: 0 auto 12px;
-  padding: 12px;
+  padding: 10px;
   background: #1b1b1b;
   border: 1px solid #333;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 #launcher label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
+  font-size: 13px;
   font-weight: bold;
 }
 
 #wadPicker {
   display: block;
-  max-width: 100%;
-  margin: 0 auto 10px;
-  font-size: 13px;
+  width: min(100%, 400px);
+  margin: 0 auto 8px;
+  font-size: 12px;
 }
 
-#launcherButtons {
+.toolbar {
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   gap: 7px;
 }
@@ -100,87 +91,66 @@ h1 {
 #startButton {
   background: #792020;
   border-color: #a44;
-  font-weight: bold;
 }
 
-#status {
-  min-height: 18px;
-  margin-top: 9px;
-  font-size: 12px;
-  color: #bbb;
-  overflow-wrap: anywhere;
-}
-
-/* Main game stays a reasonable size on desktop. */
+/* The important fix: constrain the ACTUAL game frame. */
 #gameWrapper {
   position: relative;
-  width: min(100%, 960px);
-  margin: 0 auto;
+  width: min(640px, 100%);
   aspect-ratio: 4 / 3;
-  max-height: 72vh;
+  height: auto;
+  margin: 0 auto;
+  overflow: hidden;
   background: #000;
   border: 1px solid #444;
-  border-radius: 5px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 #game {
   display: block;
   width: 100%;
   height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
   background: #000;
+  object-fit: contain;
   image-rendering: pixelated;
-  image-rendering: crisp-edges;
 }
 
-/* Buttons that are always available below the game. */
+/* Keep the controls separate from the game layout. */
 #gameToolbar {
-  width: min(100%, 960px);
-  margin: 10px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  width: min(640px, 100%);
+  margin: 9px auto;
 }
 
-#controlsToggle {
-  background: #24412a;
-  border-color: #477b50;
+#status {
+  margin-top: 8px;
+  color: #bbb;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 #console {
-  width: min(100%, 960px);
-  height: 65px;
-  margin: 12px auto;
-  padding: 8px;
+  width: min(640px, 100%);
+  height: 54px;
   overflow: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  text-align: left;
-  font: 11px/1.4 monospace;
-  color: #bdbdbd;
+  margin: 10px auto;
+  padding: 7px;
+  color: #bbb;
   background: #080808;
   border: 1px solid #333;
-  border-radius: 5px;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 11px/1.4 monospace;
 }
 
-/* Small, translucent controls float over the game.
-   They never take up a separate row of screen space. */
+/* Small overlay touch controls. */
 #touchControls {
   position: absolute;
   inset: 0;
   z-index: 5;
   pointer-events: none;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: none;
 }
 
 #touchControls.hidden {
@@ -195,42 +165,39 @@ h1 {
 }
 
 #movementPad {
-  left: 8px;
-  bottom: 8px;
-  grid-template-columns: repeat(3, 34px);
-  grid-template-rows: repeat(2, 34px);
+  left: 6px;
+  bottom: 6px;
+  grid-template-columns: repeat(3, 31px);
+  grid-template-rows: repeat(2, 31px);
 }
 
 #actionPad {
-  right: 8px;
-  bottom: 8px;
-  grid-template-columns: repeat(2, 38px);
-  grid-template-rows: repeat(2, 34px);
+  right: 6px;
+  bottom: 6px;
+  grid-template-columns: 34px 34px;
+  grid-template-rows: repeat(2, 31px);
 }
 
 .touchButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: 0;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   padding: 0;
-  color: white;
-  background: rgba(30, 30, 30, 0.58);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  background: rgba(35, 35, 35, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 7px;
-  font-size: 15px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: bold;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
   touch-action: none;
 }
 
-.touchButton.pressed,
-.touchButton:active {
-  background: rgba(180, 45, 30, 0.8);
+.touchButton.pressed {
+  background: rgba(180, 45, 30, 0.85);
 }
 
 #moveUp {
@@ -253,38 +220,31 @@ h1 {
   grid-row: 2;
 }
 
-#fireButton {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  font-size: 11px;
-}
-
 #useButton {
   grid-column: 1;
   grid-row: 1;
-  font-size: 11px;
+  font-size: 10px;
+}
+
+#fireButton {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 10px;
 }
 
 #runButton {
   grid-column: 1;
   grid-row: 2;
-  font-size: 11px;
+  font-size: 10px;
 }
 
-#fireButton {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
-
-/* Fullscreen uses the whole display, but normal mode stays compact. */
 #gameWrapper:fullscreen {
   width: 100vw;
   height: 100vh;
-  max-height: none;
   max-width: none;
   aspect-ratio: auto;
+  margin: 0;
   border: 0;
-  border-radius: 0;
 }
 
 #gameWrapper:fullscreen #game {
@@ -292,92 +252,73 @@ h1 {
   height: 100%;
 }
 
-#gameWrapper:fullscreen #movementPad {
-  left: max(12px, env(safe-area-inset-left));
-  bottom: max(12px, env(safe-area-inset-bottom));
-}
-
-#gameWrapper:fullscreen #actionPad {
-  right: max(12px, env(safe-area-inset-right));
-  bottom: max(12px, env(safe-area-inset-bottom));
-}
-
-/* Narrow windows and phones. */
-@media (max-width: 600px) {
+/* iPad and phone: still small, but use available screen width. */
+@media (max-width: 700px) {
   body {
     padding: 6px;
   }
 
-  #pageHeader {
-    margin-bottom: 8px;
-  }
-
   h1 {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   #launcher {
-    padding: 9px;
     margin-bottom: 8px;
+    padding: 8px;
   }
 
   #gameWrapper {
-    width: 100%;
-    max-height: 65vh;
+    width: min(480px, 100%);
+  }
+
+  #gameToolbar {
+    margin: 8px auto;
   }
 
   #console {
-    height: 45px;
+    height: 42px;
   }
 }
 
-/* Landscape tablets/phones: prioritize the game display. */
+/* Landscape iPad: don't force a full-screen game. */
 @media (orientation: landscape) and (max-height: 600px) {
   body {
     padding: 4px;
   }
 
-  #pageHeader {
+  header {
     display: none;
   }
 
   #launcher {
-    padding: 5px;
-    margin-bottom: 5px;
+    width: 100%;
+    padding: 4px;
+    margin-bottom: 4px;
   }
 
   #launcher label {
     display: inline-block;
-    margin: 0 6px 0 0;
-    font-size: 12px;
+    margin: 0 5px;
   }
 
   #wadPicker {
     display: inline-block;
-    width: 190px;
-    margin: 0 5px;
-  }
-
-  #launcherButtons {
-    display: inline-flex;
+    width: 170px;
+    margin: 0 4px;
   }
 
   #launcher button {
-    padding: 5px 8px;
+    padding: 4px 7px;
     font-size: 12px;
   }
 
   #status {
-    min-height: 0;
-    margin-top: 4px;
+    margin-top: 3px;
   }
 
   #gameWrapper {
-    width: auto;
-    height: calc(100dvh - 75px);
-    max-height: none;
-    max-width: 100%;
-    aspect-ratio: 4 / 3;
+    width: min(480px, 100%);
+    max-height: 58vh;
   }
 
   #gameToolbar {
@@ -387,23 +328,13 @@ h1 {
   #console {
     display: none;
   }
-
-  #movementPad {
-    transform: scale(0.9);
-    transform-origin: bottom left;
-  }
-
-  #actionPad {
-    transform: scale(0.9);
-    transform-origin: bottom right;
-  }
 }
 </style>
 </head>
 
 <body>
 
-<header id="pageHeader">
+<header>
   <h1>CLASSROOM ARCADE: DOOM</h1>
   <div id="subtitle">Dwasm browser player</div>
 </header>
@@ -412,41 +343,39 @@ h1 {
   <label for="wadPicker">Choose a DOOM WAD file</label>
   <input id="wadPicker" type="file" accept=".wad,.WAD">
 
-  <div id="launcherButtons">
+  <div class="toolbar">
     <button id="startButton" type="button">Load / Restart DOOM</button>
     <button id="backButton" type="button">Back to Arcade</button>
   </div>
 
-  <div id="status">Choose a compatible IWAD file, then select Load / Restart DOOM.</div>
+  <div id="status">Choose a compatible IWAD file, then load DOOM.</div>
 </section>
 
-<main>
-  <div id="gameWrapper">
-    <canvas id="game" oncontextmenu="event.preventDefault()"></canvas>
+<div id="gameWrapper">
+  <canvas id="game" oncontextmenu="event.preventDefault()"></canvas>
 
-    <div id="touchControls" class="hidden" aria-label="Touch controls">
-      <div id="movementPad" class="controlCluster">
-        <button class="touchButton" id="moveUp" data-key="ArrowUp" aria-label="Move forward">▲</button>
-        <button class="touchButton" id="moveLeft" data-key="ArrowLeft" aria-label="Turn left">◀</button>
-        <button class="touchButton" id="moveDown" data-key="ArrowDown" aria-label="Move backward">▼</button>
-        <button class="touchButton" id="moveRight" data-key="ArrowRight" aria-label="Turn right">▶</button>
-      </div>
+  <div id="touchControls" class="hidden">
+    <div id="movementPad" class="controlCluster">
+      <button class="touchButton" id="moveUp" data-key="ArrowUp">▲</button>
+      <button class="touchButton" id="moveLeft" data-key="ArrowLeft">◀</button>
+      <button class="touchButton" id="moveDown" data-key="ArrowDown">▼</button>
+      <button class="touchButton" id="moveRight" data-key="ArrowRight">▶</button>
+    </div>
 
-      <div id="actionPad" class="controlCluster">
-        <button class="touchButton" id="useButton" data-key=" " aria-label="Use">USE</button>
-        <button class="touchButton" id="fireButton" data-key="Control" aria-label="Fire">FIRE</button>
-        <button class="touchButton" id="runButton" data-key="Shift" aria-label="Run">RUN</button>
-      </div>
+    <div id="actionPad" class="controlCluster">
+      <button class="touchButton" id="useButton" data-key=" ">USE</button>
+      <button class="touchButton" id="fireButton" data-key="Control">FIRE</button>
+      <button class="touchButton" id="runButton" data-key="Shift">RUN</button>
     </div>
   </div>
+</div>
 
-  <div id="gameToolbar">
-    <button id="controlsToggle" type="button">Show Controls</button>
-    <button id="fullscreenButton" type="button">Fullscreen</button>
-  </div>
+<div id="gameToolbar" class="toolbar">
+  <button id="controlsToggle" type="button">Show Controls</button>
+  <button id="fullscreenButton" type="button">Fullscreen</button>
+</div>
 
-  <pre id="console">Dwasm output will appear here.</pre>
-</main>
+<pre id="console">Dwasm output will appear here.</pre>
 
 <script>
 (() => {
@@ -466,70 +395,50 @@ h1 {
   let selectedWad = null;
   let engineStarted = false;
   let loading = false;
-  let activePointers = new Map();
+  const activePointers = new Map();
 
   function setStatus(message) {
     statusBox.textContent = message;
   }
 
   function log(message) {
-    const line = String(message);
-    consoleBox.textContent += "\n" + line;
+    consoleBox.textContent += "\n" + String(message);
     consoleBox.scrollTop = consoleBox.scrollHeight;
   }
-
-  consoleBox.textContent = "Dwasm output will appear here.";
 
   wadPicker.addEventListener("change", () => {
     selectedWad = wadPicker.files && wadPicker.files[0]
       ? wadPicker.files[0]
       : null;
 
-    if (selectedWad) {
-      setStatus("Selected WAD: " + selectedWad.name);
-    } else {
-      setStatus("Choose a compatible IWAD file.");
-    }
+    setStatus(selectedWad
+      ? "Selected WAD: " + selectedWad.name
+      : "Choose a compatible IWAD file.");
   });
 
-  /*
-   * Controls start hidden on a typical computer and visible on
-   * touch-first devices. The toggle works on both.
-   */
-  function isTouchDevice() {
-    return (
-      window.matchMedia("(pointer: coarse)").matches ||
-      navigator.maxTouchPoints > 0
-    );
-  }
+  let controlsVisible =
+    window.matchMedia("(pointer: coarse)").matches ||
+    navigator.maxTouchPoints > 0;
 
-  let controlsVisible = isTouchDevice();
-
-  function updateControlsVisibility() {
+  function updateControls() {
     touchControls.classList.toggle("hidden", !controlsVisible);
     controlsToggle.textContent = controlsVisible
       ? "Hide Controls"
       : "Show Controls";
     controlsToggle.setAttribute("aria-pressed", String(controlsVisible));
 
-    if (!controlsVisible) {
-      releaseAllControls();
-    }
+    if (!controlsVisible) releaseAllControls();
   }
 
   controlsToggle.addEventListener("click", () => {
     controlsVisible = !controlsVisible;
-    updateControlsVisibility();
+    updateControls();
   });
 
-  updateControlsVisibility();
+  updateControls();
 
-  /*
-   * Send key events to the document, where the working Dwasm
-   * keyboard input handlers can receive them.
-   */
   function sendKey(key, type) {
-    const keyCodeMap = {
+    const keyCodes = {
       ArrowUp: 38,
       ArrowDown: 40,
       ArrowLeft: 37,
@@ -539,31 +448,27 @@ h1 {
       " ": 32
     };
 
-    const letter = key.length === 1 ? key.toLowerCase() : "";
     const codeMap = {
-      w: "KeyW",
-      a: "KeyA",
-      s: "KeyS",
-      d: "KeyD",
+      ArrowUp: "ArrowUp",
+      ArrowDown: "ArrowDown",
+      ArrowLeft: "ArrowLeft",
+      ArrowRight: "ArrowRight",
+      Control: "ControlLeft",
+      Shift: "ShiftLeft",
       " ": "Space"
     };
 
-    const event = new KeyboardEvent(type, {
+    const eventOptions = {
       key: key,
-      code: codeMap[letter] || codeMap[key] || key,
-      keyCode: keyCodeMap[key] || (letter ? letter.charCodeAt(0) : 0),
-      which: keyCodeMap[key] || (letter ? letter.charCodeAt(0) : 0),
+      code: codeMap[key] || key,
+      keyCode: keyCodes[key] || 0,
+      which: keyCodes[key] || 0,
       bubbles: true,
       cancelable: true
-    });
+    };
 
-    document.dispatchEvent(event);
-    window.dispatchEvent(new KeyboardEvent(type, {
-      key: key,
-      code: codeMap[letter] || codeMap[key] || key,
-      bubbles: true,
-      cancelable: true
-    }));
+    document.dispatchEvent(new KeyboardEvent(type, eventOptions));
+    window.dispatchEvent(new KeyboardEvent(type, eventOptions));
   }
 
   function pressControl(button, pointerId) {
@@ -591,9 +496,7 @@ h1 {
       active => active.key === item.key
     );
 
-    if (!stillHeld) {
-      sendKey(item.key, "keyup");
-    }
+    if (!stillHeld) sendKey(item.key, "keyup");
   }
 
   function releaseAllControls() {
@@ -605,10 +508,7 @@ h1 {
     }
 
     activePointers.clear();
-
-    for (const key of keys) {
-      sendKey(key, "keyup");
-    }
+    keys.forEach(key => sendKey(key, "keyup"));
   }
 
   document.querySelectorAll(".touchButton").forEach(button => {
@@ -641,6 +541,7 @@ h1 {
   });
 
   window.addEventListener("blur", releaseAllControls);
+
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) releaseAllControls();
   });
@@ -652,7 +553,7 @@ h1 {
       } else {
         await document.exitFullscreen();
       }
-    } catch (error) {
+    } catch (_) {
       setStatus("Fullscreen could not be started in this browser.");
     }
   });
@@ -677,7 +578,7 @@ h1 {
     }
 
     if (engineStarted) {
-      setStatus("The engine has already started. Refresh the page to load a different WAD.");
+      setStatus("The engine is already running. Refresh the page to load another WAD.");
       return;
     }
 
@@ -690,20 +591,19 @@ h1 {
       const wadBytes = new Uint8Array(await selectedWad.arrayBuffer());
 
       /*
-       * Keep the existing Dwasm engine files in this same directory.
-       * The selected WAD is written into Emscripten's virtual filesystem
-       * before PrBoomX starts.
+       * Preserve the Dwasm startup approach:
+       * selected WAD is written to the virtual filesystem before launch.
        */
       window.Module = {
         canvas: gameCanvas,
         arguments: ["-iwad", "/doom.wad"],
 
-        print: function(text) {
-          log(text);
+        print: function(message) {
+          log(message);
         },
 
-        printErr: function(text) {
-          log(text);
+        printErr: function(message) {
+          log(message);
         },
 
         locateFile: function(path) {
@@ -739,14 +639,12 @@ h1 {
       script.src = "index.js";
       script.async = true;
 
-      script.onload = function() {
-        log("Dwasm engine script loaded.");
-      };
+      script.onload = () => log("Dwasm engine script loaded.");
 
-      script.onerror = function() {
+      script.onerror = () => {
         loading = false;
         startButton.disabled = false;
-        setStatus("Could not load index.js. Check that the Dwasm files are in the doom folder.");
+        setStatus("Could not load index.js. Check the doom folder.");
         log("ERROR: Failed to load index.js.");
       };
 
