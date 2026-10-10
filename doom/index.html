@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,7 +130,6 @@ input[type=file] {
   object-fit: contain;
 }
 
-/* TOUCH CONTROLS: ALWAYS DISPLAYED */
 #touchControls {
   display: flex !important;
   width: 100%;
@@ -224,7 +222,6 @@ footer {
   }
 }
 
-/* Landscape fullscreen on iPad */
 @media (orientation: landscape) {
   #gameShell:fullscreen {
     flex-direction: row;
@@ -274,17 +271,10 @@ footer {
   <section class="panel">
     <h2>Choose Your Game</h2>
     <p>Select a compatible WAD file from your device.</p>
-
     <input id="wadPicker" type="file" accept=".wad,.WAD">
-
     <p id="selectedFile">No WAD selected.</p>
-
     <button id="launchButton" disabled>LAUNCH GAME</button>
-
-    <p id="status" role="status" aria-live="polite">
-      Choose a WAD file to begin.
-    </p>
-
+    <p id="status" role="status" aria-live="polite">Choose a WAD file to begin.</p>
     <p class="small">
       Your WAD is loaded locally and is not uploaded to GitHub.
       Use game files you are legally entitled to use.
@@ -335,9 +325,7 @@ let engineLoading = false;
 let scriptAdded = false;
 
 picker.addEventListener("change", () => {
-  selectedWad = picker.files && picker.files[0]
-    ? picker.files[0] : null;
-
+  selectedWad = picker.files && picker.files[0] ? picker.files[0] : null;
   launchButton.disabled = !selectedWad;
 
   selectedFile.textContent = selectedWad
@@ -368,28 +356,20 @@ launchButton.addEventListener("click", async () => {
     window.Module = {
       arguments: ["-iwad", "/doom.wad"],
 
-      preRun: [
-        function () {
-          if (typeof window.Module.FS_createDataFile !== "function") {
-            throw new Error("Dwasm filesystem API is not available.");
-          }
-
-          window.Module.FS_createDataFile(
-            "/", "doom.wad", wadBytes, true, true, true
-          );
-
-          status.textContent = "WAD loaded. Starting DOOM...";
+      preRun: [function () {
+        if (typeof window.Module.FS_createDataFile !== "function") {
+          throw new Error("Dwasm filesystem API is not available.");
         }
-      ],
 
-      print: function (text) {
-        console.log(text);
-      },
+        window.Module.FS_createDataFile(
+          "/", "doom.wad", wadBytes, true, true, true
+        );
 
-      printErr: function (text) {
-        console.error(text);
-      },
+        status.textContent = "WAD loaded. Starting DOOM...";
+      }],
 
+      print: text => console.log(text),
+      printErr: text => console.error(text),
       canvas: canvas,
 
       onRuntimeInitialized: function () {
@@ -450,7 +430,11 @@ backButton.addEventListener("click", () => {
   fullscreenButton.disabled = true;
 });
 
-/* Keyboard events for desktop controls */
+/*
+ * Keyboard compatibility:
+ * Send each synthetic event to the canvas, document and window.
+ * This helps when an engine listens on a different event target.
+ */
 const activeKeys = new Set();
 
 const keyInfo = {
@@ -463,6 +447,18 @@ const keyInfo = {
   Shift:      { key: "Shift", code: "ShiftLeft", keyCode: 16 }
 };
 
+function dispatchKey(target, type, info) {
+  target.dispatchEvent(new KeyboardEvent(type, {
+    key: info.key,
+    code: info.code,
+    keyCode: info.keyCode,
+    which: info.keyCode,
+    bubbles: true,
+    cancelable: true,
+    composed: true
+  }));
+}
+
 function sendKey(name, down) {
   const info = keyInfo[name];
   if (!info) return;
@@ -473,14 +469,14 @@ function sendKey(name, down) {
   if (down) activeKeys.add(name);
   else activeKeys.delete(name);
 
-  canvas.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", {
-    key: info.key,
-    code: info.code,
-    keyCode: info.keyCode,
-    which: info.keyCode,
-    bubbles: true,
-    cancelable: true
-  }));
+  const type = down ? "keydown" : "keyup";
+
+  /*
+   * Dispatch to window first. Bubbling from canvas also reaches
+   * document/window, so only dispatch to canvas directly if needed.
+   * Use one event path to avoid duplicate key presses.
+   */
+  dispatchKey(window, type, info);
 }
 
 function releaseAllKeys() {
@@ -585,8 +581,9 @@ function bindHoldButton(id, key) {
 
   button.addEventListener("pointerup", release);
   button.addEventListener("pointercancel", release);
+
   button.addEventListener("lostpointercapture", () => {
-    sendKey(key, false);
+    if (pointer !== null) sendKey(key, false);
     pointer = null;
   });
 }
