@@ -13,9 +13,9 @@
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 16px;
       background: #171717;
-      color: #eeeeee;
+      color: #eee;
       font-family: Arial, sans-serif;
       text-align: center;
     }
@@ -27,7 +27,7 @@
     }
 
     p {
-      color: #cccccc;
+      color: #ccc;
     }
 
     .toolbar {
@@ -57,36 +57,42 @@
       background: #e64a19;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     #wadFile {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     #status {
       min-height: 22px;
-      margin: 12px 0;
-      color: #cccccc;
       overflow-wrap: anywhere;
     }
 
     #gameWrapper {
-      width: 200%;
-      max-width: 1200px;
+      width: 100%;
+      max-width: 960px;
       margin: 18px auto;
-      padding: 0;
       overflow: hidden;
       background: #000;
       border: 1px solid #444;
       line-height: 0;
     }
 
-    #game {
+    #canvas {
       display: block;
       width: 100%;
       height: auto;
+      max-width: 100%;
       aspect-ratio: 4 / 3;
       margin: 0 auto;
       background: #000;
-      image-rendering: pixelated;
     }
 
     #gameWrapper:fullscreen {
@@ -94,19 +100,18 @@
       height: 100vh;
       max-width: none;
       margin: 0;
-      padding: 0;
       border: 0;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       background: #000;
     }
 
-    #gameWrapper:fullscreen #game {
+    #gameWrapper:fullscreen #canvas {
       width: min(100vw, 133.333vh);
       height: min(100vh, 75vw);
-      max-width: 100%;
-      max-height: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
       aspect-ratio: 4 / 3;
     }
 
@@ -116,6 +121,7 @@
       color: #ffcc80;
       font-family: monospace;
       font-size: 12px;
+      line-height: 1.4;
       text-align: left;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -123,7 +129,7 @@
 
     @media (max-width: 600px) {
       body {
-        padding: 10px;
+        padding: 8px;
       }
 
       h1 {
@@ -145,7 +151,7 @@
     <input
       id="wadFile"
       type="file"
-      accept=".wad,.WAD,application/octet-stream"
+      accept=".wad,.WAD"
     >
 
     <button id="fullscreenButton" type="button">
@@ -158,7 +164,7 @@
   </p>
 
   <div id="gameWrapper">
-    <canvas id="game" width="640" height="480"></canvas>
+    <canvas id="canvas" width="640" height="480"></canvas>
   </div>
 
   <pre id="console"></pre>
@@ -169,22 +175,13 @@
     const fullscreenButton =
       document.getElementById("fullscreenButton");
     const gameWrapper = document.getElementById("gameWrapper");
-    const canvas = document.getElementById("game");
+    const canvas = document.getElementById("canvas");
     const consoleOutput = document.getElementById("console");
 
     let engineStarted = false;
 
     function logMessage(message) {
       consoleOutput.textContent += String(message) + "\n";
-      consoleOutput.scrollTop = consoleOutput.scrollHeight;
-    }
-
-    function resizeGame() {
-      /*
-       * Resize the display only. Do not overwrite canvas.width or
-       * canvas.height here because the engine controls its render buffer.
-       */
-      window.dispatchEvent(new Event("resize"));
     }
 
     fullscreenButton.addEventListener("click", async () => {
@@ -196,7 +193,7 @@
         }
       } catch (error) {
         statusText.textContent =
-          "Fullscreen could not start: " + error.message;
+          "Fullscreen error: " + error.message;
       }
     });
 
@@ -206,85 +203,91 @@
           ? "⛶ Exit Fullscreen"
           : "⛶ Fullscreen";
 
-      setTimeout(resizeGame, 100);
-      setTimeout(resizeGame, 500);
-    });
-
-    window.addEventListener("resize", () => {
-      // Let the browser apply the new CSS layout.
-      requestAnimationFrame(() => {});
+      window.dispatchEvent(new Event("resize"));
     });
 
     function startEngine(wadBytes, wadName) {
       if (engineStarted) {
         statusText.textContent =
-          "The engine has already started. Reload the page to choose another WAD.";
+          "Reload the page to choose another WAD.";
         return;
       }
 
       engineStarted = true;
+      wadInput.disabled = true;
       statusText.textContent = "Loading " + wadName + "...";
       logMessage("Selected WAD: " + wadName);
 
       /*
-       * Dwasm uses Emscripten's virtual filesystem. Place the selected
-       * local WAD there before the engine starts.
+       * IMPORTANT:
+       * This Dwasm build exposes FS_createDataFile,
+       * not Module.FS. Inject the local WAD through
+       * the actual API exported by index.js.
        */
-      window.localDoomWadBytes = new Uint8Array(wadBytes);
+      const localWad = new Uint8Array(wadBytes);
 
       window.Module = {
         canvas: canvas,
 
         arguments: ["-iwad", "/doom.wad"],
 
-        print: function (text) {
-          logMessage(text);
+        print: function (message) {
+          logMessage(message);
         },
 
-        printErr: function (text) {
-          logMessage("ERROR: " + text);
+        printErr: function (message) {
+          logMessage("ERROR: " + message);
         },
 
-        setStatus: function (text) {
-          if (text) {
-            statusText.textContent = text;
+        setStatus: function (message) {
+          if (message) {
+            statusText.textContent = message;
           }
         },
-
-        preRun: [
-          function () {
-            try {
-              if (!window.localDoomWadBytes) {
-                throw new Error("No WAD file was selected.");
-              }
-
-              const FS = window.Module.FS;
-
-              if (FS.analyzePath("/doom.wad").exists) {
-                FS.unlink("/doom.wad");
-              }
-
-              FS.writeFile(
-                "/doom.wad",
-                window.localDoomWadBytes
-              );
-
-              logMessage("WAD loaded into the virtual filesystem.");
-            } catch (error) {
-              logMessage("WAD loading error: " + error.message);
-              throw error;
-            }
-          }
-        ],
 
         locateFile: function (path) {
           return "./" + path;
         },
 
+        preRun: [
+          function (module) {
+            try {
+              if (typeof module.FS_createDataFile !== "function") {
+                throw new Error(
+                  "Dwasm did not expose FS_createDataFile."
+                );
+              }
+
+              /*
+               * Create /doom.wad in the virtual filesystem.
+               * The engine's preRun hook runs after the
+               * filesystem has been initialized.
+               */
+              module.FS_createDataFile(
+                "/",
+                "doom.wad",
+                localWad,
+                true,
+                true,
+                true
+              );
+
+              logMessage(
+                "WAD injected into Dwasm filesystem successfully."
+              );
+            } catch (error) {
+              logMessage("WAD loading error: " + error.message);
+              statusText.textContent =
+                "Could not load WAD: " + error.message;
+              throw error;
+            }
+          }
+        ],
+
         onRuntimeInitialized: function () {
           statusText.textContent =
-            "DOOM engine loaded. Click the game to play.";
-          setTimeout(resizeGame, 100);
+            "DOOM engine initialized. Click the game to play.";
+          logMessage("Dwasm runtime initialized.");
         },
 
         onAbort: function (reason) {
@@ -302,9 +305,10 @@
 
       script.onerror = function () {
         statusText.textContent =
-          "Could not load index.js. Check that index.js, index.data, and index.wasm are in the doom folder.";
+          "Could not load index.js. Check your doom folder.";
         logMessage("Failed to load ./index.js");
         engineStarted = false;
+        wadInput.disabled = false;
       };
 
       document.body.appendChild(script);
@@ -317,11 +321,8 @@
         return;
       }
 
-      const lowerName = file.name.toLowerCase();
-
-      if (!lowerName.endsWith(".wad")) {
-        statusText.textContent =
-          "Please select a .wad file.";
+      if (!file.name.toLowerCase().endsWith(".wad")) {
+        statusText.textContent = "Choose a .wad file.";
         wadInput.value = "";
         return;
       }
@@ -331,7 +332,8 @@
         startEngine(bytes, file.name);
       } catch (error) {
         statusText.textContent =
-          "Could not read the WAD: " + error.message;
+          "Could not read WAD: " + error.message;
+        wadInput.disabled = false;
       }
     });
   </script>
