@@ -251,14 +251,24 @@
           }
         },
 
-        preRun: [
-          function () {
-            try {
-              if (!window.localDoomWadBytes) {
-                throw new Error("No WAD file was selected.");
-              }
+       preRun: [
+  function () {
+    if (!window.localDoomWadBytes) {
+      throw new Error("No WAD file was selected.");
+    }
 
-              const FS = window.Module.FS;
+    const FS = window.FS || (typeof FS !== "undefined" ? FS : null);
+
+    if (!FS || typeof FS.writeFile !== "function") {
+      throw new Error(
+        "Dwasm filesystem is not available yet. The engine needs a different WAD-loading hook."
+      );
+    }
+
+    FS.writeFile("/doom.wad", window.localDoomWadBytes);
+    console.log("WAD loaded into Dwasm filesystem.");
+  }
+],
 
               if (FS.analyzePath("/doom.wad").exists) {
                 FS.unlink("/doom.wad");
