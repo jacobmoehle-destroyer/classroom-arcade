@@ -1,1 +1,266 @@
-<!doctypehtml><html lang=en-us><head><meta charset=utf-8><title>Dwasm</title><style>body{background-color:#000;color:#e0e0e0;font-family:Arial,Helvetica,sans-serif;font-size:16px;margin:0}.emscripten{padding-right:0;margin-left:auto;margin-right:auto;display:block}textarea.emscripten{font-family:monospace;font-size:14px;width:calc(100% - 24px);height:calc(100vh - 24px);margin-top:8px;background-color:inherit;color:silver;border:1px solid #404040;resize:none;display:none;outline:0}div.emscripten{text-align:center}canvas.emscripten{border:0 none;background-color:inherit;display:none;outline:0}.spinner{height:50px;width:50px;margin:0 auto;-webkit-animation:rotation .8s linear infinite;-moz-animation:rotation .8s linear infinite;-o-animation:rotation .8s linear infinite;animation:rotation .8s linear infinite;border-left:10px solid #402020;border-right:10px solid #402020;border-bottom:10px solid #402020;border-top:10px solid #e0e080;border-radius:100%;background-color:inherit}@-webkit-keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}@-moz-keyframes rotation{from{-moz-transform:rotate(0)}to{-moz-transform:rotate(360deg)}}@-o-keyframes rotation{from{-o-transform:rotate(0)}to{-o-transform:rotate(360deg)}}@keyframes rotation{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style></head><body><figure id=spinner style=overflow:visible><div class=spinner></div><div style=margin-top:.5em;text-align:center><strong>Dwasm</strong></div></figure><div class=emscripten id=status>Downloading...</div><div class=emscripten><progress hidden id=progress max=100 value=0></progress></div><textarea class=emscripten id=output readonly></textarea><canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas><script>var statusElement=document.getElementById("status"),progressElement=document.getElementById("progress"),spinnerElement=document.getElementById("spinner"),canvasElement=document.getElementById("canvas"),outputElement=document.getElementById("output"),Module={_canLockPointer:!0,print:(outputElement.value="",(...e)=>{var t=e.join(" ");console.log(t),outputElement.value+=t+"\n",outputElement.scrollTop=outputElement.scrollHeight}),canvas:(canvasElement.addEventListener("webglcontextlost",e=>{alert("WebGL context lost. You will need to reload the page."),e.preventDefault()},!1),canvasElement),setStatus:e=>{if(Module.setStatus.last??={time:Date.now(),text:""},e!==Module.setStatus.last.text){var t=e.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/),n=Date.now();t&&n-Module.setStatus.last.time<30||(Module.setStatus.last.time=n,Module.setStatus.last.text=e,t?(e=t[1],progressElement.value=100*parseInt(t[2]),progressElement.max=100*parseInt(t[4]),progressElement.hidden=!1,spinnerElement.hidden=!1):(progressElement.value=null,progressElement.max=null,progressElement.hidden=!0,e||(spinnerElement.hidden=!0)),statusElement.innerHTML=e)}},hideConsole:()=>{outputElement.style.display="none",canvasElement.style.display="block",canvasElement.focus()},showConsole:()=>{canvasElement.style.display="none",outputElement.style.display="block",outputElement.scrollTop=outputElement.scrollHeight,outputElement.focus()},winResized:()=>{console.info("Detected window resize: "+canvasElement.width+"x"+canvasElement.height)},captureMouse:()=>{Module._canLockPointer&&!Module._attemptPointerLock()&&(Module._canLockPointer=!1,console.info("Delayed pointer lock requested."),document.addEventListener("keydown",Module._lockPointerOnKey))},_attemptPointerLock:()=>(null===document.pointerLockElement&&canvasElement.requestPointerLock(),null!==document.pointerLockElement),_lockPointerOnKey:e=>{("Escape"===e.key||Module._attemptPointerLock())&&(document.removeEventListener("keydown",Module._lockPointerOnKey),console.info("Delayed pointer lock complete."),Module._canLockPointer=!0)},totalDependencies:0,monitorRunDependencies:e=>{Module.totalDependencies=Math.max(Module.totalDependencies,e),Module.setStatus(e?"Preparing... ("+(Module.totalDependencies-e)+"/"+Module.totalDependencies+")":"All downloads complete.")},onRuntimeInitialized:()=>{outputElement.style.display="block"},softExit:e=>{console.info("Program exited with code",e)},arguments:["-iwad","doom.wad"]};Module.setStatus("Downloading..."),window.onerror=()=>{Module.setStatus("Exception thrown, see JavaScript console"),spinnerElement.style.display="none",Module.setStatus=e=>{e&&console.error("[post-exception status] "+e)}}</script><script async src=index.js></script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classroom Arcade — DOOM</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #171717;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 { color: #e44b35; }
+
+    .panel {
+      padding: 18px;
+      margin: 16px 0;
+      background: #262626;
+      border: 1px solid #444;
+      border-radius: 10px;
+    }
+
+    button, input {
+      max-width: 100%;
+      margin: 8px;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      background: #c83928;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    #status {
+      min-height: 24px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+
+    #progress {
+      width: min(90%, 500px);
+    }
+
+    #game {
+      width: 100%;
+      margin-top: 16px;
+      background: black;
+      border: 2px solid #555;
+      display: block;
+    }
+
+    #output {
+      width: 100%;
+      height: 120px;
+      margin-top: 12px;
+      padding: 10px;
+      background: #080808;
+      color: #ddd;
+      border: 1px solid #444;
+      text-align: left;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .hint {
+      color: #bbb;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    a { color: #ff9c8d; }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>DOOM</h1>
+  <p>Classroom Arcade · Dwasm Web Player</p>
+
+  <section class="panel" id="launcher">
+    <h2>Choose your DOOM WAD</h2>
+    <p class="hint">
+      Select a WAD file that you own from your device.
+      The file is loaded locally into the game and is not uploaded
+      to this website.
+    </p>
+
+    <input id="wadFile" type="file" accept=".wad,.WAD">
+    <br>
+    <button id="startButton" disabled>Start DOOM</button>
+    <p id="status" role="status">Choose a WAD file to begin.</p>
+    <progress id="progress" value="0" max="100" hidden></progress>
+  </section>
+
+  <canvas id="game" oncontextmenu="event.preventDefault()"></canvas>
+  <pre id="output" aria-label="Game log"></pre>
+
+  <p class="hint">
+    If the game does not start, check the log below for the error.
+  </p>
+</main>
+
+<script>
+  const wadInput = document.getElementById("wadFile");
+  const startButton = document.getElementById("startButton");
+  const statusElement = document.getElementById("status");
+  const outputElement = document.getElementById("output");
+  const progressElement = document.getElementById("progress");
+  const canvas = document.getElementById("game");
+  const launcher = document.getElementById("launcher");
+
+  let selectedWad = null;
+  let engineStarted = false;
+
+  function showStatus(message) {
+    statusElement.textContent = message;
+  }
+
+  function logMessage(message) {
+    outputElement.textContent += String(message) + "\n";
+    outputElement.scrollTop = outputElement.scrollHeight;
+  }
+
+  wadInput.addEventListener("change", () => {
+    const file = wadInput.files && wadInput.files[0];
+
+    selectedWad = file || null;
+    startButton.disabled = !selectedWad || engineStarted;
+
+    if (selectedWad) {
+      showStatus(
+        "Selected: " + selectedWad.name +
+        " (" + (selectedWad.size / 1048576).toFixed(1) + " MB)"
+      );
+    } else {
+      showStatus("Choose a WAD file to begin.");
+    }
+  });
+
+  startButton.addEventListener("click", async () => {
+    if (!selectedWad || engineStarted) return;
+
+    startButton.disabled = true;
+    wadInput.disabled = true;
+    showStatus("Reading WAD file...");
+    logMessage("Selected WAD: " + selectedWad.name);
+
+    try {
+      // Read the chosen file before starting the engine.
+      const wadBytes = new Uint8Array(await selectedWad.arrayBuffer());
+
+      if (wadBytes.length === 0) {
+        throw new Error("The selected WAD file is empty.");
+      }
+
+      // Give Emscripten's preRun callback access to the local bytes.
+      window.__localDoomWadBytes = wadBytes;
+
+      const engineBase = new URL("./", window.location.href).href;
+
+      window.Module = {
+        arguments: ["-iwad", "/doom.wad"],
+        canvas: canvas,
+        print: logMessage,
+        printErr: logMessage,
+
+        setStatus: function(message) {
+          if (message) showStatus(message);
+        },
+
+        totalDependencies: 0,
+
+        monitorRunDependencies: function(left) {
+          if (left > 0) {
+            showStatus("Loading game files (" + left + " remaining)...");
+          } else {
+            showStatus("Starting DOOM...");
+          }
+        },
+
+        locateFile: function(path) {
+          return new URL(path, engineBase).href;
+        },
+
+        preRun: [
+          function() {
+            // FS is supplied by the classic Emscripten engine script.
+            const fs = typeof FS !== "undefined" ? FS : window.FS;
+
+            if (!fs || typeof fs.writeFile !== "function") {
+              throw new Error(
+                "Dwasm's virtual filesystem (FS) is not exposed. " +
+                "The engine build needs a small JavaScript adjustment."
+              );
+            }
+
+            // Make the selected local WAD visible to the DOOM engine.
+            fs.writeFile(
+              "/doom.wad",
+              window.__localDoomWadBytes
+            );
+
+            logMessage("WAD installed at /doom.wad");
+          }
+        ],
+
+        onAbort: function(reason) {
+          logMessage("Engine aborted: " + reason);
+          showStatus("The engine stopped. See the log below.");
+        }
+      };
+
+      engineStarted = true;
+      showStatus("Loading Dwasm...");
+
+      // Load the engine only after the WAD is ready.
+      const script = document.createElement("script");
+      script.src = new URL("index.js", engineBase).href;
+      script.onload = function() {
+        launcher.style.display = "none";
+      };
+      script.onerror = function() {
+        showStatus("Could not load index.js. Check your doom folder.");
+        logMessage("Failed to load " + script.src);
+        startButton.disabled = false;
+        wadInput.disabled = false;
+        engineStarted = false;
+      };
+
+      document.body.appendChild(script);
+
+    } catch (error) {
+      showStatus("Could not prepare the game.");
+      logMessage(error && error.stack ? error.stack : error);
+      startButton.disabled = false;
+      wadInput.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
