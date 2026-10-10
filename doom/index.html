@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,10 +27,11 @@ button {
   color: #fff;
   background: #292929;
   border: 1px solid #555;
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
   font: inherit;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:hover { background: #414141; }
@@ -102,6 +103,7 @@ h1 {
   background: #000;
   object-fit: contain;
   image-rendering: pixelated;
+  touch-action: none;
 }
 
 #gameToolbar {
@@ -146,22 +148,22 @@ h1 {
 .controlCluster {
   position: absolute;
   display: grid;
-  gap: 4px;
+  gap: 5px;
   pointer-events: auto;
 }
 
 #movementPad {
-  left: 6px;
-  bottom: 6px;
-  grid-template-columns: repeat(3, 31px);
-  grid-template-rows: repeat(2, 31px);
+  left: 7px;
+  bottom: 7px;
+  grid-template-columns: repeat(3, clamp(32px, 10vw, 43px));
+  grid-template-rows: repeat(2, clamp(34px, 10vw, 43px));
 }
 
 #actionPad {
-  right: 6px;
-  bottom: 6px;
-  grid-template-columns: 34px 34px;
-  grid-template-rows: repeat(2, 31px);
+  right: 7px;
+  bottom: 7px;
+  grid-template-columns: repeat(3, clamp(36px, 11vw, 46px));
+  grid-template-rows: repeat(2, clamp(36px, 10vw, 44px));
 }
 
 .touchButton {
@@ -169,28 +171,50 @@ h1 {
   height: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 0;
+  padding: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #fff;
-  background: rgba(35, 35, 35, .58);
-  border: 1px solid rgba(255, 255, 255, .65);
-  border-radius: 6px;
-  font-size: 13px;
+  background: rgba(35, 35, 35, .78);
+  border: 1px solid rgba(255, 255, 255, .7);
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: bold;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.touchButton.pressed { background: rgba(180, 45, 30, .85); }
+.touchButton.pressed {
+  background: rgba(180, 45, 30, .95);
+  border-color: white;
+  transform: scale(.96);
+}
 
-#moveUp { grid-column: 2; grid-row: 1; }
-#moveLeft { grid-column: 1; grid-row: 2; }
-#moveDown { grid-column: 2; grid-row: 2; }
+.touchButton.special {
+  background: rgba(77, 54, 108, .88);
+}
+
+.touchButton.confirm {
+  background: rgba(35, 111, 64, .9);
+}
+
+.touchButton.attack {
+  background: rgba(155, 40, 35, .9);
+}
+
+#moveUp    { grid-column: 2; grid-row: 1; }
+#moveLeft  { grid-column: 1; grid-row: 2; }
+#moveDown  { grid-column: 2; grid-row: 2; }
 #moveRight { grid-column: 3; grid-row: 2; }
-#useButton { grid-column: 1; grid-row: 1; font-size: 10px; }
-#fireButton { grid-column: 2; grid-row: 1 / span 2; font-size: 10px; }
-#runButton { grid-column: 1; grid-row: 2; font-size: 10px; }
+
+#useButton   { grid-column: 1; grid-row: 1; }
+#fireButton  { grid-column: 2; grid-row: 1; }
+#runButton   { grid-column: 3; grid-row: 1; }
+#menuButton  { grid-column: 1; grid-row: 2; }
+#enterButton { grid-column: 2; grid-row: 2; }
+#mapButton   { grid-column: 3; grid-row: 2; }
 
 #gameWrapper:fullscreen {
   width: min(100vw, calc(100vh * 4 / 3));
@@ -203,6 +227,10 @@ h1 {
 #gameWrapper:fullscreen #game {
   width: 100%;
   height: 100%;
+}
+
+#gameWrapper:fullscreen #touchControls {
+  position: absolute;
 }
 
 @media (max-width: 700px) {
@@ -253,6 +281,16 @@ h1 {
 
   #gameToolbar { margin: 4px auto; }
   #console { display: none; }
+
+  #movementPad {
+    left: 5px;
+    bottom: 5px;
+  }
+
+  #actionPad {
+    right: 5px;
+    bottom: 5px;
+  }
 }
 </style>
 </head>
@@ -278,21 +316,42 @@ h1 {
 
 <div id="gameWrapper">
   <canvas id="game" width="640" height="480"
-          oncontextmenu="event.preventDefault()"></canvas>
+          oncontextmenu="event.preventDefault()"
+          tabindex="0"></canvas>
 
   <div id="touchControls" class="hidden">
+
     <div id="movementPad" class="controlCluster">
-      <button class="touchButton" id="moveUp" data-key="ArrowUp">▲</button>
-      <button class="touchButton" id="moveLeft" data-key="ArrowLeft">◀</button>
-      <button class="touchButton" id="moveDown" data-key="ArrowDown">▼</button>
-      <button class="touchButton" id="moveRight" data-key="ArrowRight">▶</button>
+      <button class="touchButton" id="moveUp"
+              data-key="ArrowUp" aria-label="Move forward">▲</button>
+      <button class="touchButton" id="moveLeft"
+              data-key="ArrowLeft" aria-label="Turn left">◀</button>
+      <button class="touchButton" id="moveDown"
+              data-key="ArrowDown" aria-label="Move backward">▼</button>
+      <button class="touchButton" id="moveRight"
+              data-key="ArrowRight" aria-label="Turn right">▶</button>
     </div>
 
     <div id="actionPad" class="controlCluster">
-      <button class="touchButton" id="useButton" data-key=" ">USE</button>
-      <button class="touchButton" id="fireButton" data-key="Control">FIRE</button>
-      <button class="touchButton" id="runButton" data-key="Shift">RUN</button>
+      <button class="touchButton" id="useButton"
+              data-key=" " aria-label="Use or open door">USE</button>
+
+      <button class="touchButton attack" id="fireButton"
+              data-key="Control" aria-label="Fire weapon">FIRE</button>
+
+      <button class="touchButton" id="runButton"
+              data-key="Shift" aria-label="Run">RUN</button>
+
+      <button class="touchButton special" id="menuButton"
+              data-key="Escape" aria-label="Open menu">MENU</button>
+
+      <button class="touchButton confirm" id="enterButton"
+              data-key="Enter" aria-label="Confirm or select">ENTER</button>
+
+      <button class="touchButton special" id="mapButton"
+              data-key="Tab" aria-label="Toggle automap">MAP</button>
     </div>
+
   </div>
 </div>
 
@@ -321,6 +380,7 @@ h1 {
   let selectedWad = null;
   let engineStarted = false;
   let loading = false;
+
   const activePointers = new Map();
 
   function setStatus(message) {
@@ -348,10 +408,15 @@ h1 {
 
   function updateControls() {
     touchControls.classList.toggle("hidden", !controlsVisible);
+
     controlsToggle.textContent = controlsVisible
       ? "Hide Controls"
       : "Show Controls";
-    controlsToggle.setAttribute("aria-pressed", String(controlsVisible));
+
+    controlsToggle.setAttribute(
+      "aria-pressed",
+      String(controlsVisible)
+    );
 
     if (!controlsVisible) releaseAllControls();
   }
@@ -361,6 +426,10 @@ h1 {
     updateControls();
   });
 
+  /*
+   * Keyboard mappings for the touch buttons.
+   * Escape = menu, Enter = confirm, Tab = automap.
+   */
   function sendKey(key, type) {
     const keyCodes = {
       ArrowUp: 38,
@@ -369,7 +438,10 @@ h1 {
       ArrowRight: 39,
       Control: 17,
       Shift: 16,
-      " ": 32
+      " ": 32,
+      Escape: 27,
+      Enter: 13,
+      Tab: 9
     };
 
     const codeMap = {
@@ -379,11 +451,14 @@ h1 {
       ArrowRight: "ArrowRight",
       Control: "ControlLeft",
       Shift: "ShiftLeft",
-      " ": "Space"
+      " ": "Space",
+      Escape: "Escape",
+      Enter: "Enter",
+      Tab: "Tab"
     };
 
     const options = {
-      key,
+      key: key === " " ? " " : key,
       code: codeMap[key] || key,
       bubbles: true,
       cancelable: true
@@ -395,19 +470,26 @@ h1 {
       Object.defineProperty(event, "keyCode", {
         get: () => keyCodes[key] || 0
       });
+
       Object.defineProperty(event, "which", {
         get: () => keyCodes[key] || 0
       });
     } catch (_) {}
 
-    document.dispatchEvent(event);
-    window.dispatchEvent(new KeyboardEvent(type, options));
+    /*
+     * Send events through the canvas and document so the existing
+     * browser player has the best chance of receiving them.
+     * Physical keyboard handling remains unchanged.
+     */
+    gameCanvas.dispatchEvent(event);
+    document.dispatchEvent(new KeyboardEvent(type, options));
   }
 
   function pressControl(button, pointerId) {
     if (activePointers.has(pointerId)) return;
 
     const key = button.dataset.key;
+
     const alreadyHeld = [...activePointers.values()]
       .some(item => item.key === key);
 
@@ -439,11 +521,14 @@ h1 {
     }
 
     activePointers.clear();
+
     keys.forEach(key => sendKey(key, "keyup"));
   }
 
   document.querySelectorAll(".touchButton").forEach(button => {
-    button.addEventListener("contextmenu", event => event.preventDefault());
+    button.addEventListener("contextmenu", event => {
+      event.preventDefault();
+    });
 
     button.addEventListener("pointerdown", event => {
       event.preventDefault();
@@ -482,9 +567,13 @@ h1 {
           await gameWrapper.requestFullscreen();
         } else if (gameWrapper.webkitRequestFullscreen) {
           gameWrapper.webkitRequestFullscreen();
+        } else {
+          setStatus("Fullscreen is not supported by this browser.");
         }
       } else if (document.exitFullscreen) {
         await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       }
     } catch (error) {
       setStatus("Fullscreen error: " + error.message);
@@ -504,9 +593,8 @@ h1 {
   });
 
   /*
-   * Experimental fix:
-   * Correct the viewport only when it exceeds the actual drawing buffer.
-   * Do not create a new graphics context here.
+   * Keep the existing viewport correction that was present in
+   * the working version. No new graphics context is created.
    */
   function correctViewport() {
     const glObject = gameCanvas.GLctxObject;
@@ -549,6 +637,7 @@ h1 {
 
       preRun: [function() {
         const module = window.Module;
+
         const fs = module && module.FS
           ? module.FS
           : (typeof FS !== "undefined" ? FS : null);
@@ -567,6 +656,7 @@ h1 {
         engineStarted = true;
         loading = false;
         startButton.disabled = false;
+
         setStatus("DOOM engine initialized.");
         setTimeout(correctViewport, 100);
       },
@@ -574,6 +664,7 @@ h1 {
       onAbort: function(reason) {
         loading = false;
         startButton.disabled = false;
+
         setStatus("Dwasm stopped: " + reason);
         log("Engine aborted: " + reason);
       }
@@ -588,7 +679,11 @@ h1 {
     script.onerror = () => {
       loading = false;
       startButton.disabled = false;
-      setStatus("Could not load index.js. Check that the engine files exist in the doom folder.");
+
+      setStatus(
+        "Could not load index.js. Check that the engine files exist in the doom folder."
+      );
+
       log("ERROR: Failed to load index.js.");
     };
 
@@ -611,27 +706,36 @@ h1 {
 
     loading = true;
     startButton.disabled = true;
+
     setStatus("Loading " + selectedWad.name + "...");
     consoleBox.textContent = "Starting Dwasm...\n";
 
     try {
-      const wadBytes = new Uint8Array(await selectedWad.arrayBuffer());
+      const wadBytes = new Uint8Array(
+        await selectedWad.arrayBuffer()
+      );
+
       loadEngine(wadBytes);
     } catch (error) {
       loading = false;
       startButton.disabled = false;
+
       setStatus("Could not read the selected WAD: " + error.message);
       log("WAD loading error: " + error.message);
     }
   });
 
-  // The engine may reset its viewport during rendering.
-  // This experiment corrects oversized viewport dimensions periodically.
+  updateControls();
+
   setInterval(correctViewport, 250);
-  window.addEventListener("resize", () => setTimeout(correctViewport, 100));
+
+  window.addEventListener("resize", () => {
+    setTimeout(correctViewport, 100);
+  });
 
 })();
 </script>
 
 </body>
 </html>
+```
