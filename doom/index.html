@@ -1,598 +1,642 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Classroom Arcade | DOOM</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1,
+               viewport-fit=cover, user-scalable=no">
+
+<title>DOOM | Classroom Arcade</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 html, body {
   margin: 0;
   min-height: 100%;
+  width: 100%;
   background: #111;
   color: #eee;
-  font-family: Arial, sans-serif;
-  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-body { overscroll-behavior: none; }
-
-header {
-  padding: 16px 10px;
-  background: #1b1b1b;
-  border-bottom: 3px solid #b51f24;
+body {
+  padding: 12px;
+  overflow-x: hidden;
 }
 
-h1 {
-  margin: 0;
-  color: #e52b2b;
-  font-size: clamp(30px, 7vw, 48px);
-  letter-spacing: 3px;
-}
-
-.subtitle { color: #bbb; margin: 8px 0 0; }
-
-#launcher {
-  max-width: 700px;
-  margin: 20px auto;
-  padding: 10px;
-}
-
-.panel {
-  background: #202020;
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 18px;
+button, input {
+  font: inherit;
 }
 
 button {
-  margin: 5px;
-  padding: 12px 16px;
-  border: 0;
+  border: 1px solid #555;
   border-radius: 8px;
-  background: #b51f24;
+  padding: 11px 15px;
+  background: #292929;
   color: white;
-  font-size: 15px;
-  font-weight: bold;
   cursor: pointer;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-button:active { background: #f04444; }
-button:disabled { opacity: .5; }
+button:active {
+  background: #555;
+}
 
-input[type=file] {
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#app {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 4px 0 12px;
+  text-align: center;
+  color: #e53935;
+  letter-spacing: 3px;
+}
+
+#launcher {
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #383838;
+  border-radius: 10px;
+  background: #1a1a1a;
+}
+
+#launcher p {
+  margin: 5px 0 12px;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+#wadPicker {
   display: block;
   width: 100%;
-  max-width: 380px;
-  margin: 16px auto;
-  color: #ddd;
+  margin: 10px 0;
+  padding: 10px;
+  background: #252525;
+  color: white;
+  border-radius: 6px;
+}
+
+#toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+#toolbar button {
+  flex: 1;
+  min-width: 100px;
 }
 
 #status {
-  min-height: 24px;
-  color: #ffd66b;
-  overflow-wrap: anywhere;
-}
-
-.small {
-  color: #aaa;
+  color: #bbb;
   font-size: 13px;
-  line-height: 1.5;
+  overflow-wrap: anywhere;
+  margin-top: 10px;
 }
 
-#gameShell {
-  display: none;
+#gameFrame {
+  position: relative;
   width: 100%;
-  max-width: 960px;
-  margin: 12px auto;
   background: #000;
-  border: 2px solid #555;
+  border: 1px solid #444;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-#canvas {
+#gameCanvas {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 4 / 3;
   background: #000;
-  image-rendering: pixelated;
+  object-fit: contain;
   outline: none;
   touch-action: none;
 }
 
-#gameShell:fullscreen {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  margin: 0;
-  border: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #000;
+#console {
+  display: none;
+  max-height: 150px;
   overflow: auto;
-}
-
-#gameShell:fullscreen #canvas {
-  flex: 0 1 auto;
-  width: 100%;
-  max-height: 65%;
-  height: auto;
-  aspect-ratio: 4 / 3;
-  object-fit: contain;
+  padding: 8px;
+  margin-top: 10px;
+  background: #050505;
+  color: #b7ffb7;
+  border: 1px solid #333;
+  font: 12px monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 #touchControls {
-  display: flex !important;
-  width: 100%;
-  min-height: 145px;
-  padding: 10px 5px;
-  gap: 6px;
-  align-items: center;
-  justify-content: space-around;
-  background: #171717;
-  border-top: 2px solid #444;
-  touch-action: none;
-  -webkit-user-select: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   user-select: none;
+  -webkit-user-select: none;
 }
 
-.controlSide {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.controlPanel {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #1a1a1a;
 }
 
-#joystick {
-  position: relative;
-  width: 124px;
-  height: 124px;
-  flex: 0 0 124px;
-  border-radius: 50%;
-  background: #303030;
-  border: 3px solid #777;
-  touch-action: none;
+.panelTitle {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 9px;
+  letter-spacing: 1px;
 }
 
-#stick {
-  position: absolute;
-  left: 33px;
-  top: 33px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #b51f24;
-  border: 3px solid white;
-  pointer-events: none;
-}
-
-.actionButtons {
+#dpad {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  flex: 1;
-  max-width: 460px;
+  grid-template-rows: repeat(3, 54px);
+  gap: 5px;
 }
 
-.actionButtons button {
-  min-width: 0;
+#dpad button {
+  padding: 0;
+  font-size: 21px;
+  font-weight: bold;
+  touch-action: none;
+}
+
+#forward { grid-column: 2; grid-row: 1; }
+#left    { grid-column: 1; grid-row: 2; }
+#back    { grid-column: 2; grid-row: 2; }
+#right   { grid-column: 3; grid-row: 2; }
+
+#actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+#actions button {
   min-height: 52px;
-  width: 100%;
-  margin: 0;
-  padding: 6px 3px;
+  padding: 8px 4px;
   font-size: 12px;
+  font-weight: bold;
+  touch-action: none;
 }
 
-#fireButton { background: #d12626; }
-#useButton { background: #555; }
-#runButton { background: #76501c; }
-#turnLeftButton, #turnRightButton { background: #343d58; }
-
-footer {
-  padding: 15px;
-  color: #777;
-  font-size: 13px;
+#fire {
+  grid-column: 1 / -1;
+  min-height: 66px !important;
+  background: #9f2020;
+  border-color: #e44;
+  font-size: 17px !important;
 }
 
-@media (max-width: 430px) {
-  #joystick {
-    width: 100px;
-    height: 100px;
-    flex-basis: 100px;
+#run {
+  background: #44401b;
+}
+
+#use {
+  background: #204d25;
+}
+
+.smallNote {
+  color: #888;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 12px;
+}
+
+@media (pointer: coarse), (max-width: 700px) {
+  body {
+    padding: 7px;
   }
 
-  #stick {
-    left: 22px;
-    top: 22px;
+  h1 {
+    font-size: 25px;
   }
 
-  #touchControls { gap: 4px; padding: 7px 3px; }
+  #touchControls {
+    gap: 7px;
+  }
 
-  .actionButtons button {
-    min-height: 46px;
-    font-size: 10px;
+  .controlPanel {
+    padding: 7px;
+  }
+
+  #dpad {
+    grid-template-rows: repeat(3, 49px);
   }
 }
 
-@media (orientation: landscape) {
-  #gameShell:fullscreen {
-    flex-direction: row;
-    align-items: center;
+@media (max-width: 360px) {
+  #touchControls {
+    grid-template-columns: 1fr;
   }
+}
 
-  #gameShell:fullscreen #canvas {
-    width: 72%;
-    max-width: 72%;
-    max-height: 100%;
-  }
+#gameFrame:fullscreen {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
 
-  #gameShell:fullscreen #touchControls {
-    width: 28%;
-    height: 100%;
-    flex-direction: column;
-    padding: 5px;
-    border-top: 0;
-    border-left: 2px solid #444;
-  }
-
-  #gameShell:fullscreen #joystick {
-    width: 100px;
-    height: 100px;
-    flex-basis: 100px;
-  }
-
-  #gameShell:fullscreen #stick {
-    left: 22px;
-    top: 22px;
-  }
-
-  #gameShell:fullscreen .actionButtons {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+#gameFrame:fullscreen #gameCanvas {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
 }
 </style>
 </head>
 
 <body>
-<header>
+<div id="app">
+
   <h1>DOOM</h1>
-  <p class="subtitle">CLASSROOM ARCADE</p>
-</header>
 
-<main id="launcher">
-  <section class="panel">
-    <h2>Choose Your Game</h2>
-    <p>Select a compatible WAD file from your device.</p>
-    <input id="wadPicker" type="file" accept=".wad,.WAD">
-    <p id="selectedFile">No WAD selected.</p>
-    <button id="launchButton" disabled>LAUNCH GAME</button>
-    <p id="status" role="status" aria-live="polite">Choose a WAD file to begin.</p>
-    <p class="small">
-      Your WAD is loaded locally and is not uploaded to GitHub.
-      Use game files you are legally entitled to use.
+  <section id="launcher">
+    <p>
+      Choose a compatible DOOM WAD file from your device, then launch
+      the game. Your WAD stays on your device and is not uploaded.
     </p>
+
+    <input
+      id="wadPicker"
+      type="file"
+      accept=".wad,.WAD,application/octet-stream">
+
+    <div id="toolbar">
+      <button id="playButton" disabled>PLAY DOOM</button>
+      <button id="fullscreenButton">FULLSCREEN</button>
+      <button id="backButton">BACK TO ARCADE</button>
+    </div>
+
+    <div id="status">Choose a WAD file to begin.</div>
   </section>
-</main>
 
-<section id="gameShell">
-  <canvas id="canvas" width="640" height="480" tabindex="0"></canvas>
+  <div id="gameFrame">
+    <canvas id="gameCanvas"
+            tabindex="0"
+            aria-label="DOOM game screen"></canvas>
+  </div>
 
-  <div id="touchControls">
-    <div class="controlSide">
-      <div id="joystick" aria-label="Movement joystick">
-        <div id="stick"></div>
+  <pre id="console"></pre>
+
+  <section id="touchControls">
+
+    <div class="controlPanel">
+      <div class="panelTitle">MOVEMENT</div>
+
+      <div id="dpad">
+        <button id="forward" data-key="ArrowUp"
+                aria-label="Move forward">▲</button>
+
+        <button id="left" data-key="ArrowLeft"
+                aria-label="Turn left">◀</button>
+
+        <button id="back" data-key="ArrowDown"
+                aria-label="Move backward">▼</button>
+
+        <button id="right" data-key="ArrowRight"
+                aria-label="Turn right">▶</button>
       </div>
     </div>
 
-    <div class="controlSide actionButtons">
-      <button id="turnLeftButton">◀ TURN</button>
-      <button id="turnRightButton">TURN ▶</button>
-      <button id="fireButton">FIRE</button>
-      <button id="useButton">USE</button>
-      <button id="runButton">RUN</button>
-    </div>
-  </div>
-</section>
+    <div class="controlPanel">
+      <div class="panelTitle">ACTIONS</div>
 
-<div>
-  <button id="fullscreenButton" disabled>⛶ Fullscreen</button>
-  <button id="backButton" hidden>Back to Launcher</button>
+      <div id="actions">
+        <button id="fire" data-key="Control"
+                aria-label="Fire weapon">FIRE</button>
+
+        <button id="use" data-key="Space">USE</button>
+        <button id="run" data-key="Shift">RUN</button>
+
+        <button id="turnLeft" data-key="ArrowLeft">
+          TURN LEFT
+        </button>
+
+        <button id="turnRight" data-key="ArrowRight">
+          TURN RIGHT
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <p class="smallNote">
+    PC: use your keyboard. iPad: hold the on-screen controls.
+    If a control does not respond, tap the game screen once and try again.
+  </p>
+
 </div>
 
-<footer>Classroom Arcade · Dwasm engine</footer>
-
 <script>
-const picker = document.getElementById("wadPicker");
-const selectedFile = document.getElementById("selectedFile");
-const launchButton = document.getElementById("launchButton");
+"use strict";
+
+const wadPicker = document.getElementById("wadPicker");
+const playButton = document.getElementById("playButton");
 const fullscreenButton = document.getElementById("fullscreenButton");
 const backButton = document.getElementById("backButton");
-const status = document.getElementById("status");
-const gameShell = document.getElementById("gameShell");
-const canvas = document.getElementById("canvas");
+const statusBox = document.getElementById("status");
+const gameFrame = document.getElementById("gameFrame");
+const gameCanvas = document.getElementById("gameCanvas");
+const consoleBox = document.getElementById("console");
 
-let selectedWad = null;
+let wadBytes = null;
+let selectedWadName = "";
 let engineStarted = false;
 let engineLoading = false;
-let scriptAdded = false;
 
-picker.addEventListener("change", () => {
-  selectedWad = picker.files && picker.files[0] ? picker.files[0] : null;
-  launchButton.disabled = !selectedWad;
+const heldKeys = new Set();
 
-  selectedFile.textContent = selectedWad
-    ? "Selected: " + selectedWad.name
-    : "No WAD selected.";
-
-  status.textContent = selectedWad
-    ? "Ready to load " + selectedWad.name + "."
-    : "Choose a WAD file to begin.";
-});
-
-launchButton.addEventListener("click", async () => {
-  if (!selectedWad || engineStarted || engineLoading || scriptAdded) return;
-
-  engineLoading = true;
-  launchButton.disabled = true;
-  picker.disabled = true;
-  status.textContent = "Reading WAD file...";
-
-  try {
-    const wadBytes = new Uint8Array(await selectedWad.arrayBuffer());
-
-    gameShell.style.display = "block";
-    fullscreenButton.disabled = false;
-    backButton.hidden = false;
-    status.textContent = "Starting Dwasm...";
-
-    window.Module = {
-      arguments: ["-iwad", "/doom.wad"],
-
-      preRun: [function () {
-        if (typeof window.Module.FS_createDataFile !== "function") {
-          throw new Error("Dwasm filesystem API is not available.");
-        }
-
-        window.Module.FS_createDataFile(
-          "/", "doom.wad", wadBytes, true, true, true
-        );
-
-        status.textContent = "WAD loaded. Starting DOOM...";
-      }],
-
-      print: text => console.log(text),
-      printErr: text => console.error(text),
-      canvas: canvas,
-
-      onRuntimeInitialized: function () {
-        engineStarted = true;
-        engineLoading = false;
-        status.textContent = "Engine ready! Use the controls below.";
-        canvas.focus();
-      },
-
-      onAbort: function (reason) {
-        engineLoading = false;
-        status.textContent = "Engine stopped: " + reason;
-        console.error(reason);
-      }
-    };
-
-    const script = document.createElement("script");
-    script.src = "index.js";
-    scriptAdded = true;
-
-    script.onerror = function () {
-      engineLoading = false;
-      scriptAdded = false;
-      launchButton.disabled = false;
-      picker.disabled = false;
-      status.textContent = "Could not load index.js. Check your engine files.";
-    };
-
-    document.body.appendChild(script);
-  } catch (error) {
-    engineLoading = false;
-    launchButton.disabled = false;
-    picker.disabled = false;
-    status.textContent = "Error: " + error.message;
-    console.error(error);
-  }
-});
-
-fullscreenButton.addEventListener("click", async () => {
-  try {
-    if (!document.fullscreenElement) {
-      await gameShell.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
-    }
-  } catch (error) {
-    status.textContent = "Fullscreen is unavailable in this browser.";
-  }
-});
-
-backButton.addEventListener("click", () => {
-  if (engineStarted || engineLoading) {
-    status.textContent = "Reload the page to start another game.";
-    return;
-  }
-
-  gameShell.style.display = "none";
-  fullscreenButton.disabled = true;
-});
-
-/*
- * Keyboard compatibility:
- * Send each synthetic event to the canvas, document and window.
- * This helps when an engine listens on a different event target.
- */
-const activeKeys = new Set();
-
-const keyInfo = {
-  ArrowUp:    { key: "ArrowUp", code: "ArrowUp", keyCode: 38 },
-  ArrowDown:  { key: "ArrowDown", code: "ArrowDown", keyCode: 40 },
-  ArrowLeft:  { key: "ArrowLeft", code: "ArrowLeft", keyCode: 37 },
-  ArrowRight: { key: "ArrowRight", code: "ArrowRight", keyCode: 39 },
-  Control:    { key: "Control", code: "ControlLeft", keyCode: 17 },
-  Space:      { key: " ", code: "Space", keyCode: 32 },
-  Shift:      { key: "Shift", code: "ShiftLeft", keyCode: 16 }
-};
-
-function dispatchKey(target, type, info) {
-  target.dispatchEvent(new KeyboardEvent(type, {
-    key: info.key,
-    code: info.code,
-    keyCode: info.keyCode,
-    which: info.keyCode,
-    bubbles: true,
-    cancelable: true,
-    composed: true
-  }));
+function setStatus(message) {
+  statusBox.textContent = message;
 }
 
-function sendKey(name, down) {
-  const info = keyInfo[name];
+function showConsole(message) {
+  consoleBox.style.display = "block";
+  consoleBox.textContent += message + "\n";
+  consoleBox.scrollTop = consoleBox.scrollHeight;
+}
+
+function getKeyInfo(key) {
+  const keys = {
+    ArrowUp:    { code: "ArrowUp", keyCode: 38 },
+    ArrowDown:  { code: "ArrowDown", keyCode: 40 },
+    ArrowLeft:  { code: "ArrowLeft", keyCode: 37 },
+    ArrowRight: { code: "ArrowRight", keyCode: 39 },
+    Control:    { code: "ControlLeft", keyCode: 17 },
+    Space:      { code: "Space", keyCode: 32 },
+    Shift:      { code: "ShiftLeft", keyCode: 16 },
+    Enter:      { code: "Enter", keyCode: 13 },
+    Escape:     { code: "Escape", keyCode: 27 }
+  };
+
+  return keys[key] || null;
+}
+
+/*
+ * Touch-control keyboard fix:
+ * Dispatch the synthetic keyboard event directly on document.
+ */
+function sendKey(key, pressed) {
+  const info = getKeyInfo(key);
   if (!info) return;
 
-  if (down && activeKeys.has(name)) return;
-  if (!down && !activeKeys.has(name)) return;
+  if (pressed && heldKeys.has(key)) return;
 
-  if (down) activeKeys.add(name);
-  else activeKeys.delete(name);
+  if (pressed) {
+    heldKeys.add(key);
+  } else {
+    heldKeys.delete(key);
+  }
 
-  const type = down ? "keydown" : "keyup";
+  const event = new KeyboardEvent(
+    pressed ? "keydown" : "keyup",
+    {
+      key: key,
+      code: info.code,
+      keyCode: info.keyCode,
+      which: info.keyCode,
+      bubbles: true,
+      cancelable: true
+    }
+  );
 
-  /*
-   * Dispatch to window first. Bubbling from canvas also reaches
-   * document/window, so only dispatch to canvas directly if needed.
-   * Use one event path to avoid duplicate key presses.
-   */
-  dispatchKey(window, type, info);
+  document.dispatchEvent(event);
 }
 
 function releaseAllKeys() {
-  for (const name of [...activeKeys]) sendKey(name, false);
+  for (const key of Array.from(heldKeys)) {
+    sendKey(key, false);
+  }
 }
+
+function bindHoldButton(button) {
+  const key = button.dataset.key;
+  if (!key) return;
+
+  button.addEventListener("contextmenu", event => {
+    event.preventDefault();
+  });
+
+  button.addEventListener("pointerdown", event => {
+    event.preventDefault();
+
+    try {
+      button.setPointerCapture(event.pointerId);
+    } catch (_) {}
+
+    sendKey(key, true);
+  });
+
+  const release = event => {
+    if (event) event.preventDefault();
+    sendKey(key, false);
+  };
+
+  button.addEventListener("pointerup", release);
+  button.addEventListener("pointercancel", release);
+  button.addEventListener("lostpointercapture", release);
+}
+
+document.querySelectorAll("[data-key]").forEach(bindHoldButton);
 
 window.addEventListener("blur", releaseAllKeys);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) releaseAllKeys();
 });
 
-/* Virtual joystick */
-const joystick = document.getElementById("joystick");
-const stick = document.getElementById("stick");
+/* Allow normal physical keyboard use. */
+document.addEventListener("keydown", event => {
+  if (event.target === wadPicker) return;
 
-let joystickPointer = null;
-let joystickKeys = new Set();
-
-function updateJoystick(event) {
-  const rect = joystick.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const max = rect.width * 0.31;
-
-  let dx = event.clientX - cx;
-  let dy = event.clientY - cy;
-  const distance = Math.hypot(dx, dy);
-
-  if (distance > max) {
-    dx = dx / distance * max;
-    dy = dy / distance * max;
-  }
-
-  stick.style.left = "calc(50% + " + dx + "px - 26px)";
-  stick.style.top = "calc(50% + " + dy + "px - 26px)";
-
-  const next = new Set();
-  const threshold = rect.width * 0.18;
-
-  if (dy < -threshold) next.add("ArrowUp");
-  if (dy > threshold) next.add("ArrowDown");
-  if (dx < -threshold) next.add("ArrowLeft");
-  if (dx > threshold) next.add("ArrowRight");
-
-  for (const key of joystickKeys) {
-    if (!next.has(key)) sendKey(key, false);
-  }
-
-  for (const key of next) {
-    if (!joystickKeys.has(key)) sendKey(key, true);
-  }
-
-  joystickKeys = next;
-}
-
-function resetJoystick() {
-  for (const key of joystickKeys) sendKey(key, false);
-  joystickKeys.clear();
-  joystickPointer = null;
-  stick.style.left = "calc(50% - 26px)";
-  stick.style.top = "calc(50% - 26px)";
-}
-
-joystick.addEventListener("pointerdown", event => {
-  event.preventDefault();
-  joystickPointer = event.pointerId;
-  joystick.setPointerCapture(event.pointerId);
-  canvas.focus();
-  updateJoystick(event);
-});
-
-joystick.addEventListener("pointermove", event => {
-  if (event.pointerId === joystickPointer) {
+  if ([
+    "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"
+  ].includes(event.code)) {
     event.preventDefault();
-    updateJoystick(event);
   }
-});
+}, { passive: false });
 
-joystick.addEventListener("pointerup", resetJoystick);
-joystick.addEventListener("pointercancel", resetJoystick);
-joystick.addEventListener("lostpointercapture", resetJoystick);
+/* Read the locally selected WAD. */
+wadPicker.addEventListener("change", async () => {
+  releaseAllKeys();
 
-/* Hold-to-act buttons */
-function bindHoldButton(id, key) {
-  const button = document.getElementById(id);
-  let pointer = null;
+  const file = wadPicker.files && wadPicker.files[0];
 
-  button.addEventListener("pointerdown", event => {
-    event.preventDefault();
-    pointer = event.pointerId;
-    button.setPointerCapture(event.pointerId);
-    canvas.focus();
-    sendKey(key, true);
-  });
+  if (!file) {
+    wadBytes = null;
+    selectedWadName = "";
+    playButton.disabled = true;
+    setStatus("Choose a WAD file to begin.");
+    return;
+  }
 
-  function release(event) {
-    if (pointer !== null && event.pointerId === pointer) {
-      sendKey(key, false);
-      pointer = null;
+  try {
+    setStatus("Reading " + file.name + "...");
+
+    wadBytes = new Uint8Array(await file.arrayBuffer());
+    selectedWadName = file.name;
+
+    if (wadBytes.length < 4) {
+      throw new Error("This file is too small to be a valid WAD.");
     }
+
+    const signature = String.fromCharCode(
+      wadBytes[0], wadBytes[1], wadBytes[2], wadBytes[3]
+    );
+
+    if (signature !== "IWAD" && signature !== "PWAD") {
+      throw new Error(
+        "This does not look like a valid WAD file (IWAD/PWAD)."
+      );
+    }
+
+    playButton.disabled = engineStarted || engineLoading;
+
+    setStatus(
+      "Selected: " + selectedWadName +
+      " (" + Math.round(wadBytes.length / 1024) + " KB)"
+    );
+  } catch (error) {
+    wadBytes = null;
+    selectedWadName = "";
+    playButton.disabled = true;
+    setStatus(error.message || "Could not read the selected WAD.");
   }
+});
 
-  button.addEventListener("pointerup", release);
-  button.addEventListener("pointercancel", release);
+/* Start Dwasm only after a WAD has been selected. */
+playButton.addEventListener("click", () => {
+  if (!wadBytes || engineStarted || engineLoading) return;
 
-  button.addEventListener("lostpointercapture", () => {
-    if (pointer !== null) sendKey(key, false);
-    pointer = null;
-  });
-}
+  engineLoading = true;
+  playButton.disabled = true;
 
-bindHoldButton("fireButton", "Control");
-bindHoldButton("useButton", "Space");
-bindHoldButton("runButton", "Shift");
-bindHoldButton("turnLeftButton", "ArrowLeft");
-bindHoldButton("turnRightButton", "ArrowRight");
+  setStatus("Starting Dwasm...");
+  showConsole("Selected WAD: " + selectedWadName);
+  showConsole("Loading Dwasm engine...");
+
+  /*
+   * Keep the existing engine assets:
+   * index.js, index.data, and index.wasm.
+   */
+  window.Module = {
+    arguments: ["-iwad", "/doom.wad"],
+
+    preRun: [
+      function () {
+        if (!window.Module.FS_createDataFile) {
+          throw new Error(
+            "Dwasm filesystem API is unavailable. Check index.js."
+          );
+        }
+
+        window.Module.FS_createDataFile(
+          "/",
+          "doom.wad",
+          wadBytes,
+          true,
+          true,
+          true
+        );
+
+        showConsole("WAD copied into the Dwasm virtual filesystem.");
+      }
+    ],
+
+    canvas: gameCanvas,
+
+    print: function (text) {
+      showConsole(String(text));
+    },
+
+    printErr: function (text) {
+      showConsole(String(text));
+    },
+
+    setStatus: function (text) {
+      if (text) setStatus(text);
+    },
+
+    onRuntimeInitialized: function () {
+      engineStarted = true;
+      engineLoading = false;
+      setStatus("Dwasm engine loaded. Enjoy DOOM!");
+      showConsole("Dwasm engine loaded.");
+      gameCanvas.focus();
+    },
+
+    onAbort: function (reason) {
+      engineLoading = false;
+      setStatus("Dwasm stopped: " + reason);
+      showConsole("Engine abort: " + reason);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = "index.js";
+
+  script.onload = function () {
+    showConsole("Dwasm engine script loaded.");
+  };
+
+  script.onerror = function () {
+    engineLoading = false;
+    playButton.disabled = false;
+    setStatus("Could not load index.js. Check that the engine files exist.");
+    showConsole("ERROR: Failed to load index.js.");
+  };
+
+  document.body.appendChild(script);
+});
+
+/* Fullscreen support, including iPad Safari where available. */
+fullscreenButton.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (gameFrame.requestFullscreen) {
+      await gameFrame.requestFullscreen();
+    } else if (gameCanvas.webkitRequestFullscreen) {
+      gameCanvas.webkitRequestFullscreen();
+    } else {
+      setStatus("Fullscreen is not supported by this browser.");
+    }
+  } catch (error) {
+    setStatus("Fullscreen could not be opened in this browser.");
+  }
+});
+
+/* Return to the main Classroom Arcade page. */
+backButton.addEventListener("click", () => {
+  releaseAllKeys();
+  window.location.href = "../index.html";
+});
+
+/* Release stuck keys when the user leaves the game page. */
+window.addEventListener("pagehide", releaseAllKeys);
 </script>
+
 </body>
 </html>
+```
