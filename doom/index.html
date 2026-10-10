@@ -9,64 +9,28 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; min-height: 100%; background: #111; color: #eee; font-family: Arial, Helvetica, sans-serif; }
 body { padding: 12px; text-align: center; }
-button {
-  padding: 8px 12px; color: #fff; background: #292929;
-  border: 1px solid #555; border-radius: 7px; cursor: pointer;
-  font: inherit; touch-action: manipulation;
-}
+button { padding: 8px 12px; color: #fff; background: #292929; border: 1px solid #555; border-radius: 7px; cursor: pointer; font: inherit; touch-action: manipulation; }
 button:hover { background: #414141; }
 button:disabled { opacity: .5; cursor: wait; }
 header { margin: 0 auto 12px; }
 h1 { margin: 0 0 5px; font-size: 23px; }
 #subtitle { color: #aaa; font-size: 12px; }
-#launcher {
-  width: min(100%, 700px); margin: 0 auto 12px; padding: 10px;
-  background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
-}
+#launcher { width: min(100%, 700px); margin: 0 auto 12px; padding: 10px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px; }
 #launcher label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: bold; }
 #wadPicker { display: block; width: min(100%, 400px); margin: 0 auto 8px; font-size: 12px; }
 .toolbar { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 7px; }
 #startButton { background: #792020; border-color: #a44; }
-#gameWrapper {
-  position: relative; width: min(480px, 100%); aspect-ratio: 4 / 3;
-  height: auto; margin: 0 auto; overflow: hidden; background: #000; border: 1px solid #444;
-}
-#game {
-  display: block; width: 100%; height: 100%; margin: 0; padding: 0;
-  border: 0; background: #000; object-fit: contain;
-  image-rendering: pixelated; touch-action: none;
-}
+#gameWrapper { position: relative; width: min(480px, 100%); aspect-ratio: 4 / 3; height: auto; margin: 0 auto; overflow: hidden; background: #000; border: 1px solid #444; }
+#game { display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: #000; object-fit: contain; image-rendering: pixelated; touch-action: none; }
 #gameToolbar { width: min(480px, 100%); margin: 9px auto; }
 #status { margin-top: 8px; color: #bbb; font-size: 12px; overflow-wrap: anywhere; }
-#console {
-  width: min(480px, 100%); height: 54px; overflow: auto; margin: 10px auto;
-  padding: 7px; color: #bbb; background: #080808; border: 1px solid #333;
-  text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.4 monospace;
-}
-#touchControls {
-  position: absolute; inset: 0; z-index: 5; pointer-events: none;
-  touch-action: none; user-select: none; -webkit-user-select: none;
-}
+#console { width: min(480px, 100%); height: 54px; overflow: auto; margin: 10px auto; padding: 7px; color: #bbb; background: #080808; border: 1px solid #333; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.4 monospace; }
+#touchControls { position: absolute; inset: 0; z-index: 5; pointer-events: none; touch-action: none; user-select: none; -webkit-user-select: none; }
 #touchControls.hidden { display: none; }
 .controlCluster { position: absolute; display: grid; gap: 5px; pointer-events: auto; }
-#movementPad {
-  left: 7px; bottom: 7px;
-  grid-template-columns: repeat(3, clamp(32px, 10vw, 43px));
-  grid-template-rows: repeat(2, clamp(34px, 10vw, 43px));
-}
-#actionPad {
-  right: 7px; bottom: 7px;
-  grid-template-columns: repeat(3, clamp(36px, 11vw, 46px));
-  grid-template-rows: repeat(2, clamp(36px, 10vw, 44px));
-}
-.touchButton {
-  width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 2px;
-  display: flex; justify-content: center; align-items: center;
-  color: #fff; background: rgba(35,35,35,.78);
-  border: 1px solid rgba(255,255,255,.7); border-radius: 8px;
-  font-size: 12px; font-weight: bold; touch-action: none;
-  -webkit-user-select: none; user-select: none;
-}
+#movementPad { left: 7px; bottom: 7px; grid-template-columns: repeat(3, clamp(32px, 10vw, 43px)); grid-template-rows: repeat(2, clamp(34px, 10vw, 43px)); }
+#actionPad { right: 7px; bottom: 7px; grid-template-columns: repeat(3, clamp(36px, 11vw, 46px)); grid-template-rows: repeat(2, clamp(36px, 10vw, 44px)); }
+.touchButton { width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 2px; display: flex; justify-content: center; align-items: center; color: #fff; background: rgba(35,35,35,.78); border: 1px solid rgba(255,255,255,.7); border-radius: 8px; font-size: 12px; font-weight: bold; touch-action: none; -webkit-user-select: none; user-select: none; }
 .touchButton.pressed { background: rgba(180,45,30,.95); border-color: white; transform: scale(.96); }
 .touchButton.special { background: rgba(77,54,108,.88); }
 .touchButton.confirm { background: rgba(35,111,64,.9); }
@@ -81,31 +45,23 @@ h1 { margin: 0 0 5px; font-size: 23px; }
 #menuButton { grid-column: 1; grid-row: 2; }
 #enterButton { grid-column: 2; grid-row: 2; }
 #mapButton { grid-column: 3; grid-row: 2; }
-#gameWrapper:fullscreen {
-  width: min(100vw, calc(100vh * 4 / 3));
-  height: min(100vh, calc(100vw * 3 / 4));
-  aspect-ratio: 4 / 3; margin: auto; border: 0;
-}
+#gameWrapper:fullscreen { width: min(100vw, calc(100vh * 4 / 3)); height: min(100vh, calc(100vw * 3 / 4)); aspect-ratio: 4 / 3; margin: auto; border: 0; }
 #gameWrapper:fullscreen #game { width: 100%; height: 100%; }
 @media (max-width: 700px) {
-  body { padding: 6px; }
-  h1 { font-size: 19px; }
+  body { padding: 6px; } h1 { font-size: 19px; }
   #launcher { margin-bottom: 8px; padding: 8px; }
   #gameWrapper { width: min(360px, 100%); }
-  #gameToolbar { margin: 8px auto; }
-  #console { height: 42px; }
+  #gameToolbar { margin: 8px auto; } #console { height: 42px; }
 }
 @media (orientation: landscape) and (max-height: 600px) {
-  body { padding: 4px; }
-  header { display: none; }
+  body { padding: 4px; } header { display: none; }
   #launcher { width: 100%; padding: 4px; margin-bottom: 4px; }
   #launcher label { display: inline-block; margin: 0 5px; }
   #wadPicker { display: inline-block; width: 170px; margin: 0 4px; }
   #launcher button { padding: 4px 7px; font-size: 12px; }
   #status { margin-top: 3px; }
   #gameWrapper { width: min(360px, calc((100vh - 100px) * 4 / 3)); }
-  #gameToolbar { margin: 4px auto; }
-  #console { display: none; }
+  #gameToolbar { margin: 4px auto; } #console { display: none; }
   #movementPad { left: 5px; bottom: 5px; }
   #actionPad { right: 5px; bottom: 5px; }
 }
@@ -131,9 +87,9 @@ h1 { margin: 0 0 5px; font-size: 23px; }
   <canvas id="game" width="640" height="480" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
   <div id="touchControls" class="hidden">
     <div id="movementPad" class="controlCluster">
-      <button class="touchButton" id="moveUp" data-key="ArrowUp" aria-label="Move forward">▲</button>
+      <button class="touchButton" id="moveUp" data-key="w" aria-label="Move forward">▲</button>
       <button class="touchButton" id="moveLeft" data-key="ArrowLeft" aria-label="Turn left">◀</button>
-      <button class="touchButton" id="moveDown" data-key="ArrowDown" aria-label="Move backward">▼</button>
+      <button class="touchButton" id="moveDown" data-key="s" aria-label="Move backward">▼</button>
       <button class="touchButton" id="moveRight" data-key="ArrowRight" aria-label="Turn right">▶</button>
     </div>
     <div id="actionPad" class="controlCluster">
@@ -171,13 +127,10 @@ h1 { margin: 0 0 5px; font-size: 23px; }
   let loading = false;
   let runtimeReady = false;
   let scriptRequested = false;
-  let wadBytes = null;
 
   const activePointers = new Map();
 
-  function setStatus(message) {
-    statusBox.textContent = message;
-  }
+  function setStatus(message) { statusBox.textContent = message; }
 
   function log(message) {
     consoleBox.textContent += "\n" + String(message);
@@ -204,16 +157,18 @@ h1 { margin: 0 0 5px; font-size: 23px; }
   });
 
   const keyInfo = {
-    ArrowUp: { keyCode: 38, code: "ArrowUp" },
-    ArrowDown: { keyCode: 40, code: "ArrowDown" },
-    ArrowLeft: { keyCode: 37, code: "ArrowLeft" },
-    ArrowRight: { keyCode: 39, code: "ArrowRight" },
-    Control: { keyCode: 17, code: "ControlLeft" },
-    Shift: { keyCode: 16, code: "ShiftLeft" },
-    " ": { keyCode: 32, code: "Space" },
-    Escape: { keyCode: 27, code: "Escape" },
-    Enter: { keyCode: 13, code: "Enter" },
-    Tab: { keyCode: 9, code: "Tab" }
+    w: { keyCode: 87, code: "KeyW", key: "w" },
+    s: { keyCode: 83, code: "KeyS", key: "s" },
+    ArrowUp: { keyCode: 38, code: "ArrowUp", key: "ArrowUp" },
+    ArrowDown: { keyCode: 40, code: "ArrowDown", key: "ArrowDown" },
+    ArrowLeft: { keyCode: 37, code: "ArrowLeft", key: "ArrowLeft" },
+    ArrowRight: { keyCode: 39, code: "ArrowRight", key: "ArrowRight" },
+    Control: { keyCode: 17, code: "ControlLeft", key: "Control" },
+    Shift: { keyCode: 16, code: "ShiftLeft", key: "Shift" },
+    " ": { keyCode: 32, code: "Space", key: " " },
+    Escape: { keyCode: 27, code: "Escape", key: "Escape" },
+    Enter: { keyCode: 13, code: "Enter", key: "Enter" },
+    Tab: { keyCode: 9, code: "Tab", key: "Tab" }
   };
 
   function sendKey(key, type) {
@@ -221,7 +176,7 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     if (!info) return;
 
     const options = {
-      key: key === " " ? " " : key,
+      key: info.key,
       code: info.code,
       bubbles: true,
       cancelable: true,
@@ -250,8 +205,10 @@ h1 { margin: 0 0 5px; font-size: 23px; }
 
   function pressControl(button, pointerId) {
     if (activePointers.has(pointerId)) return;
+
     const key = button.dataset.key;
     const alreadyHeld = [...activePointers.values()].some(item => item.key === key);
+
     activePointers.set(pointerId, { key, button });
     button.classList.add("pressed");
 
@@ -259,15 +216,19 @@ h1 { margin: 0 0 5px; font-size: 23px; }
       activateMenu();
       return;
     }
+
     if (!alreadyHeld) sendKey(key, "keydown");
   }
 
   function releaseControl(pointerId) {
     const item = activePointers.get(pointerId);
     if (!item) return;
+
     activePointers.delete(pointerId);
     item.button.classList.remove("pressed");
+
     if (item.button.id === "menuButton") return;
+
     const stillHeld = [...activePointers.values()].some(active => active.key === item.key);
     if (!stillHeld) sendKey(item.key, "keyup");
   }
@@ -343,17 +304,9 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     window.location.href = "../index.html";
   });
 
-  /*
-   * A WASM runtime cannot safely be restarted by adding index.js again.
-   * Reloading the page is the reliable restart method.
-   */
-  function restartPage() {
-    window.location.reload();
-  }
-
   function loadEngine(bytes) {
     if (scriptRequested) {
-      setStatus("The DOOM engine has already been loaded. Reload the page to restart, then select your WAD again.");
+      setStatus("DOOM is already running or loading. Reload the page to restart.");
       loading = false;
       startButton.disabled = false;
       return;
@@ -364,7 +317,6 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     window.Module = {
       canvas: gameCanvas,
       arguments: ["-iwad", "/doom.wad"],
-
       print(message) { log(message); },
       printErr(message) { log("ERROR: " + message); },
       locateFile(path) { return path; },
@@ -378,7 +330,7 @@ h1 { margin: 0 0 5px; font-size: 23px; }
         }
 
         fs.writeFile("/doom.wad", bytes);
-        log("Selected WAD installed: /doom.wad");
+        log("Selected WAD installed.");
       }],
 
       onRuntimeInitialized() {
@@ -386,7 +338,7 @@ h1 { margin: 0 0 5px; font-size: 23px; }
         loading = false;
         startButton.disabled = false;
         startButton.textContent = "Restart DOOM";
-        setStatus("DOOM engine initialized. If the game is not visible, check the console below.");
+        setStatus("DOOM engine initialized.");
         setTimeout(correctViewport, 100);
       },
 
@@ -401,31 +353,28 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     const script = document.createElement("script");
     script.src = "./index.js";
     script.async = true;
-
     script.onload = () => {
       log("index.js loaded.");
       setTimeout(correctViewport, 100);
     };
-
     script.onerror = () => {
       scriptRequested = false;
       loading = false;
       startButton.disabled = false;
-      setStatus("Could not load index.js. Check that index.js, index.wasm and index.data are in the doom folder.");
+      setStatus("Could not load index.js. Check the DOOM engine files.");
       log("ERROR: Failed to load ./index.js");
     };
-
     document.body.appendChild(script);
   }
 
   startButton.addEventListener("click", async () => {
     if (loading) {
-      setStatus("DOOM is still loading. Check the console for errors.");
+      setStatus("DOOM is still loading. Check the console.");
       return;
     }
 
     if (runtimeReady || scriptRequested) {
-      setStatus("To restart DOOM, reload the page, then choose your WAD and press Load / Restart DOOM.");
+      setStatus("To restart, reload the page and select your WAD again.");
       return;
     }
 
@@ -441,26 +390,20 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     consoleBox.textContent = "Starting Dwasm...\n";
 
     try {
-      wadBytes = new Uint8Array(await selectedWad.arrayBuffer());
+      const bytes = new Uint8Array(await selectedWad.arrayBuffer());
+      if (bytes.length < 12) throw new Error("The selected file is too small to be a valid WAD.");
 
-      if (wadBytes.length < 12) {
-        throw new Error("The selected file is too small to be a valid WAD.");
-      }
-
-      const signature = String.fromCharCode(
-        wadBytes[0], wadBytes[1], wadBytes[2], wadBytes[3]
-      );
-
+      const signature = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
       if (signature !== "IWAD" && signature !== "PWAD") {
-        throw new Error("This file does not have a valid IWAD/PWAD header. Choose a .wad file.");
+        throw new Error("This file does not have a valid IWAD/PWAD header.");
       }
 
       if (signature === "PWAD") {
-        log("Warning: This is a PWAD add-on. The engine may also require an IWAD such as DOOM.WAD or DOOM2.WAD.");
+        log("This is a PWAD add-on. A full IWAD may also be required.");
       }
 
-      setStatus("Loading " + selectedWad.name + " into DOOM...");
-      loadEngine(wadBytes);
+      setStatus("Loading " + selectedWad.name + "...");
+      loadEngine(bytes);
     } catch (error) {
       loading = false;
       startButton.disabled = false;
