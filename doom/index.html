@@ -15,4 +15,301 @@
       margin: 0;
       padding: 20px;
       background: #171717;
-      color: #eeee
+      color: #eeeeee;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #e44b35;
+    }
+
+    .panel {
+      padding: 20px;
+      margin: 16px 0;
+      background: #262626;
+      border: 1px solid #444;
+      border-radius: 10px;
+    }
+
+    button,
+    input {
+      max-width: 100%;
+      margin: 8px;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      background: #c83928;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status {
+      min-height: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    #game {
+      display: block;
+      width: 100%;
+      min-height: 300px;
+      margin-top: 16px;
+      background: black;
+      border: 2px solid #555;
+    }
+
+    #output {
+      width: 100%;
+      height: 180px;
+      overflow: auto;
+      padding: 12px;
+      background: #080808;
+      color: #ddd;
+      border: 1px solid #444;
+      text-align: left;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .hint {
+      color: #bbb;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>DOOM</h1>
+  <p>Classroom Arcade | Dwasm Web Player</p>
+
+  <section class="panel" id="launcher">
+    <h2>Choose your DOOM WAD</h2>
+
+    <p class="hint">
+      Select a compatible WAD file from your device.
+      The file is read locally by your browser and is not uploaded
+      by this launcher.
+    </p>
+
+    <input
+      id="wadFile"
+      type="file"
+      accept=".wad,.WAD"
+    >
+
+    <br>
+
+    <button id="startButton" disabled>
+      Start DOOM
+    </button>
+
+    <p id="status" role="status">
+      Choose a WAD file to begin.
+    </p>
+  </section>
+
+  <canvas id="game" oncontextmenu="event.preventDefault()"></canvas>
+
+  <h3>Game Log</h3>
+  <pre id="output"></pre>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const wadInput = document.getElementById("wadFile");
+  const startButton = document.getElementById("startButton");
+  const statusElement = document.getElementById("status");
+  const outputElement = document.getElementById("output");
+  const canvas = document.getElementById("game");
+  const launcher = document.getElementById("launcher");
+
+  let selectedWad = null;
+  let engineStarted = false;
+
+  function log(message) {
+    outputElement.textContent += String(message) + "\n";
+    outputElement.scrollTop = outputElement.scrollHeight;
+  }
+
+  function setStatus(message) {
+    statusElement.textContent = message;
+  }
+
+  wadInput.addEventListener("change", function () {
+    selectedWad = wadInput.files && wadInput.files[0];
+
+    startButton.disabled = !selectedWad || engineStarted;
+
+    if (selectedWad) {
+      setStatus(
+        "Selected: " + selectedWad.name +
+        " (" + (selectedWad.size / 1048576).toFixed(2) + " MB)"
+      );
+    } else {
+      setStatus("Choose a WAD file to begin.");
+    }
+  });
+
+  startButton.addEventListener("click", async function () {
+    if (!selectedWad || engineStarted) {
+      return;
+    }
+
+    startButton.disabled = true;
+    wadInput.disabled = true;
+
+    try {
+      setStatus("Reading your WAD file...");
+      log("Selected WAD: " + selectedWad.name);
+
+      const wadBytes = new Uint8Array(
+        await selectedWad.arrayBuffer()
+      );
+
+      if (wadBytes.length < 12) {
+        throw new Error("This file is too small to be a valid WAD.");
+      }
+
+      const signature = String.fromCharCode(
+        wadBytes[0],
+        wadBytes[1],
+        wadBytes[2],
+        wadBytes[3]
+      );
+
+      if (signature !== "IWAD" && signature !== "PWAD") {
+        throw new Error(
+          "This does not appear to be a valid WAD file. " +
+          "The file must begin with IWAD or PWAD."
+        );
+      }
+
+      /*
+       * Save the bytes for the engine's preRun callback.
+       * The WAD remains in browser memory; it is not uploaded.
+       */
+      window.localDoomWadBytes = wadBytes;
+
+      const engineBase = new URL("./", window.location.href);
+
+      /*
+       * Configure Emscripten before loading index.js.
+       * The preRun callback runs before the engine's main function.
+       */
+      window.Module = {
+        arguments: ["-iwad", "/doom.wad"],
+        canvas: canvas,
+
+        print: function (message) {
+          log(message);
+        },
+
+        printErr: function (message) {
+          log(message);
+        },
+
+        setStatus: function (message) {
+          if (message) {
+            setStatus(message);
+          }
+        },
+
+        locateFile: function (path) {
+          return new URL(path, engineBase).href;
+        },
+
+        preRun: [
+          function () {
+            /*
+             * This works only if the compiled Dwasm build exposes
+             * FS to this callback. The error is logged if it doesn't.
+             */
+            const fs = typeof FS !== "undefined"
+              ? FS
+              : window.FS;
+
+            if (!fs || typeof fs.writeFile !== "function") {
+              throw new Error(
+                "The Dwasm filesystem is not accessible to the HTML. " +
+                "index.js needs a small change to expose FS."
+              );
+            }
+
+            fs.writeFile(
+              "/doom.wad",
+              window.localDoomWadBytes
+            );
+
+            log("WAD installed at /doom.wad");
+          }
+        ],
+
+        onAbort: function (reason) {
+          log("Engine aborted: " + reason);
+          setStatus("The engine stopped. Check the game log.");
+        },
+
+        onRuntimeInitialized: function () {
+          setStatus("DOOM engine initialized.");
+          log("Engine initialized.");
+        }
+      };
+
+      engineStarted = true;
+      setStatus("Loading Dwasm engine...");
+
+      /*
+       * Load the existing engine after the user selects the WAD.
+       * Keep index.js, index.data and index.wasm together in /doom/.
+       */
+      const script = document.createElement("script");
+      script.src = new URL("index.js", engineBase).href;
+
+      script.onload = function () {
+        log("index.js loaded.");
+        launcher.style.display = "none";
+      };
+
+      script.onerror = function () {
+        log("ERROR: Could not load index.js.");
+        setStatus("Engine loading failed. Check the file paths.");
+        engineStarted = false;
+        startButton.disabled = false;
+        wadInput.disabled = false;
+      };
+
+      document.body.appendChild(script);
+
+    } catch (error) {
+      log("ERROR: " + (error.stack || error));
+      setStatus("Could not prepare the game.");
+      startButton.disabled = false;
+      wadInput.disabled = false;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
+```
