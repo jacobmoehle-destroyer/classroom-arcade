@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Classroom Arcade | DOOM</title>
 
 <style>
@@ -21,7 +21,7 @@ html, body {
 body { overscroll-behavior: none; }
 
 header {
-  padding: 18px 10px;
+  padding: 16px 10px;
   background: #1b1b1b;
   border-bottom: 3px solid #b51f24;
 }
@@ -33,11 +33,11 @@ h1 {
   letter-spacing: 3px;
 }
 
-.subtitle { color: #bbb; margin-bottom: 0; }
+.subtitle { color: #bbb; margin: 8px 0 0; }
 
 #launcher {
   max-width: 700px;
-  margin: 25px auto;
+  margin: 20px auto;
   padding: 10px;
 }
 
@@ -50,18 +50,19 @@ h1 {
 }
 
 button {
-  margin: 6px;
-  padding: 13px 18px;
+  margin: 5px;
+  padding: 12px 16px;
   border: 0;
   border-radius: 8px;
   background: #b51f24;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:active { background: #f04444; }
@@ -81,14 +82,20 @@ input[type=file] {
   overflow-wrap: anywhere;
 }
 
-.small { color: #aaa; font-size: 13px; line-height: 1.5; }
+.small {
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.5;
+}
 
 #gameShell {
   display: none;
-  width: min(96vw, 960px);
+  width: 100%;
+  max-width: 960px;
   margin: 12px auto;
   background: #000;
   border: 2px solid #555;
+  overflow: hidden;
 }
 
 #canvas {
@@ -105,31 +112,36 @@ input[type=file] {
 #gameShell:fullscreen {
   width: 100%;
   height: 100%;
+  max-width: none;
   margin: 0;
   border: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   background: #000;
+  overflow: auto;
 }
 
 #gameShell:fullscreen #canvas {
+  flex: 0 1 auto;
   width: 100%;
-  max-height: 72%;
+  max-height: 65%;
   height: auto;
   aspect-ratio: 4 / 3;
   object-fit: contain;
 }
 
-/* Touch controls */
+/* TOUCH CONTROLS: ALWAYS DISPLAYED */
 #touchControls {
-  display: none;
+  display: flex !important;
   width: 100%;
-  padding: 10px;
-  gap: 10px;
+  min-height: 145px;
+  padding: 10px 5px;
+  gap: 6px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   background: #171717;
+  border-top: 2px solid #444;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
@@ -139,76 +151,116 @@ input[type=file] {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
 }
 
 #joystick {
   position: relative;
-  width: 132px;
-  height: 132px;
-  flex: 0 0 132px;
+  width: 124px;
+  height: 124px;
+  flex: 0 0 124px;
   border-radius: 50%;
   background: #303030;
-  border: 3px solid #666;
+  border: 3px solid #777;
   touch-action: none;
 }
 
 #stick {
   position: absolute;
-  left: 37px;
-  top: 37px;
+  left: 33px;
+  top: 33px;
   width: 52px;
   height: 52px;
   border-radius: 50%;
   background: #b51f24;
-  border: 3px solid #eee;
+  border: 3px solid white;
   pointer-events: none;
 }
 
 .actionButtons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  flex: 1;
+  max-width: 460px;
 }
 
 .actionButtons button {
-  min-width: 68px;
-  min-height: 56px;
-  margin: 2px;
-  padding: 8px;
-  font-size: 13px;
+  min-width: 0;
+  min-height: 52px;
+  width: 100%;
+  margin: 0;
+  padding: 6px 3px;
+  font-size: 12px;
 }
 
 #fireButton { background: #d12626; }
 #useButton { background: #555; }
 #runButton { background: #76501c; }
+#turnLeftButton, #turnRightButton { background: #343d58; }
 
-@media (pointer: coarse) {
-  #touchControls { display: flex; }
+footer {
+  padding: 15px;
+  color: #777;
+  font-size: 13px;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 430px) {
   #joystick {
-    width: 112px;
-    height: 112px;
-    flex-basis: 112px;
+    width: 100px;
+    height: 100px;
+    flex-basis: 100px;
   }
 
   #stick {
-    left: 30px;
-    top: 30px;
+    left: 22px;
+    top: 22px;
   }
+
+  #touchControls { gap: 4px; padding: 7px 3px; }
 
   .actionButtons button {
-    min-width: 58px;
-    min-height: 50px;
-    font-size: 12px;
+    min-height: 46px;
+    font-size: 10px;
   }
-
-  #touchControls { gap: 3px; padding: 5px; }
 }
 
-footer { padding: 15px; color: #777; font-size: 13px; }
+/* Landscape fullscreen on iPad */
+@media (orientation: landscape) {
+  #gameShell:fullscreen {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  #gameShell:fullscreen #canvas {
+    width: 72%;
+    max-width: 72%;
+    max-height: 100%;
+  }
+
+  #gameShell:fullscreen #touchControls {
+    width: 28%;
+    height: 100%;
+    flex-direction: column;
+    padding: 5px;
+    border-top: 0;
+    border-left: 2px solid #444;
+  }
+
+  #gameShell:fullscreen #joystick {
+    width: 100px;
+    height: 100px;
+    flex-basis: 100px;
+  }
+
+  #gameShell:fullscreen #stick {
+    left: 22px;
+    top: 22px;
+  }
+
+  #gameShell:fullscreen .actionButtons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 </style>
 </head>
 
@@ -224,6 +276,7 @@ footer { padding: 15px; color: #777; font-size: 13px; }
     <p>Select a compatible WAD file from your device.</p>
 
     <input id="wadPicker" type="file" accept=".wad,.WAD">
+
     <p id="selectedFile">No WAD selected.</p>
 
     <button id="launchButton" disabled>LAUNCH GAME</button>
@@ -250,11 +303,11 @@ footer { padding: 15px; color: #777; font-size: 13px; }
     </div>
 
     <div class="controlSide actionButtons">
-      <button id="useButton">USE</button>
-      <button id="fireButton">FIRE</button>
-      <button id="runButton">RUN</button>
       <button id="turnLeftButton">◀ TURN</button>
       <button id="turnRightButton">TURN ▶</button>
+      <button id="fireButton">FIRE</button>
+      <button id="useButton">USE</button>
+      <button id="runButton">RUN</button>
     </div>
   </div>
 </section>
@@ -283,8 +336,7 @@ let scriptAdded = false;
 
 picker.addEventListener("change", () => {
   selectedWad = picker.files && picker.files[0]
-    ? picker.files[0]
-    : null;
+    ? picker.files[0] : null;
 
   launchButton.disabled = !selectedWad;
 
@@ -343,7 +395,7 @@ launchButton.addEventListener("click", async () => {
       onRuntimeInitialized: function () {
         engineStarted = true;
         engineLoading = false;
-        status.textContent = "Engine ready! Touch controls are ready.";
+        status.textContent = "Engine ready! Use the controls below.";
         canvas.focus();
       },
 
@@ -398,7 +450,7 @@ backButton.addEventListener("click", () => {
   fullscreenButton.disabled = true;
 });
 
-/* Send keyboard-style input to the game canvas. */
+/* Keyboard events for desktop controls */
 const activeKeys = new Set();
 
 const keyInfo = {
@@ -440,7 +492,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) releaseAllKeys();
 });
 
-/* Virtual joystick: forward/back and turn left/right. */
+/* Virtual joystick */
 const joystick = document.getElementById("joystick");
 const stick = document.getElementById("stick");
 
@@ -455,15 +507,15 @@ function updateJoystick(event) {
 
   let dx = event.clientX - cx;
   let dy = event.clientY - cy;
-
   const distance = Math.hypot(dx, dy);
+
   if (distance > max) {
     dx = dx / distance * max;
     dy = dy / distance * max;
   }
 
-  stick.style.left = `calc(50% + ${dx}px - 26px)`;
-  stick.style.top = `calc(50% + ${dy}px - 26px)`;
+  stick.style.left = "calc(50% + " + dx + "px - 26px)";
+  stick.style.top = "calc(50% + " + dy + "px - 26px)";
 
   const next = new Set();
   const threshold = rect.width * 0.18;
@@ -476,6 +528,7 @@ function updateJoystick(event) {
   for (const key of joystickKeys) {
     if (!next.has(key)) sendKey(key, false);
   }
+
   for (const key of next) {
     if (!joystickKeys.has(key)) sendKey(key, true);
   }
@@ -495,6 +548,7 @@ joystick.addEventListener("pointerdown", event => {
   event.preventDefault();
   joystickPointer = event.pointerId;
   joystick.setPointerCapture(event.pointerId);
+  canvas.focus();
   updateJoystick(event);
 });
 
@@ -509,7 +563,7 @@ joystick.addEventListener("pointerup", resetJoystick);
 joystick.addEventListener("pointercancel", resetJoystick);
 joystick.addEventListener("lostpointercapture", resetJoystick);
 
-/* Hold-to-act buttons. */
+/* Hold-to-act buttons */
 function bindHoldButton(id, key) {
   const button = document.getElementById(id);
   let pointer = null;
