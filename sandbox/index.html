@@ -5,251 +5,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Classroom Sandbox</title>
-
 <style>
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:system-ui,Arial,sans-serif;touch-action:none}
+body{position:relative}
+button{border:2px solid #ffffff66;border-radius:12px;background:#17202dee;color:white;font-weight:800;font-size:14px;padding:10px 12px;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button:active,button.selected{background:#27864d}
+#world{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;touch-action:none}
+#hud{position:fixed;inset:0;z-index:5;pointer-events:none;color:white;text-shadow:1px 2px 3px #000}
+#top{position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;pointer-events:auto}
+#brand{background:#17202dee;border-radius:10px;padding:9px;font-size:13px;font-weight:900}
+#top button{font-size:11px;padding:9px}
+#status{position:absolute;top:65px;left:9px;max-width:75%;background:#17202ddd;border-radius:8px;padding:6px 9px;font-size:12px}
+#palette{position:absolute;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:4px;max-width:98vw;overflow-x:auto;padding:5px;border-radius:12px;background:#101820dd;pointer-events:auto;touch-action:pan-x;z-index:6}
+.block-choice{min-width:48px;padding:6px 4px;font-size:10px;flex-shrink:0}
+.swatch{width:23px;height:23px;display:block;margin:0 auto 4px;border:1px solid #ffffffaa;border-radius:4px}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
+#help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
+#movement{position:fixed;z-index:10;left:12px;bottom:110px;width:140px;height:130px;pointer-events:auto;touch-action:none}
+.move{position:absolute;width:44px;height:44px;padding:0;font-size:20px;border-radius:12px;pointer-events:auto;touch-action:none}
+#forward{left:48px;top:0}
+#back{left:48px;bottom:0}
+#left{left:0;top:43px}
+#right{right:0;top:43px}
+#actions{position:fixed;z-index:10;right:10px;bottom:105px;display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+#actions button{width:72px;height:50px;padding:4px;font-size:11px;touch-action:manipulation}
+#jump{position:fixed;z-index:11;right:17px;bottom:218px;width:76px;height:68px;border-radius:50%;background:#267c45ee;pointer-events:auto;touch-action:manipulation}
+#lookHint{position:fixed;z-index:5;bottom:65px;left:50%;transform:translateX(-50%);background:#17202ddd;padding:5px 9px;border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none}
+@media(max-width:650px){
+#brand{font-size:11px}#top{gap:4px}#top button{padding:8px 6px;font-size:10px}
+#help{top:105px;max-width:145px;font-size:10px}#status{top:62px;font-size:11px}
+#movement{left:6px;bottom:102px;transform:scale(.9);transform-origin:bottom left}
+#actions{right:6px;bottom:102px}#actions button{width:65px;height:46px}
+#jump{right:10px;bottom:210px;width:68px;height:62px}
+#palette{gap:2px}.block-choice{min-width:44px;font-size:9px}
 }
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #87ceeb;
-  font-family: system-ui, Arial, sans-serif;
-  touch-action: none;
-}
-
-body { position: relative; }
-
-button {
-  border: 2px solid #ffffff66;
-  border-radius: 12px;
-  background: #17202dee;
-  color: white;
-  font-weight: 800;
-  font-size: 14px;
-  padding: 10px 12px;
-  cursor: pointer;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-button:active, button.selected {
-  background: #27864d;
-}
-
-#world {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  display: block;
-  touch-action: none;
-}
-
-#hud {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  color: white;
-  text-shadow: 1px 2px 3px #000;
-}
-
-#top {
-  position: absolute;
-  top: max(8px, env(safe-area-inset-top));
-  left: 8px;
-  right: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  pointer-events: auto;
-}
-
-#brand {
-  background: #17202dee;
-  border-radius: 10px;
-  padding: 9px;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-#top button {
-  font-size: 11px;
-  padding: 9px;
-}
-
-#status {
-  position: absolute;
-  top: 65px;
-  left: 9px;
-  max-width: 75%;
-  background: #17202ddd;
-  border-radius: 8px;
-  padding: 6px 9px;
-  font-size: 12px;
-}
-
-#palette {
-  position: absolute;
-  left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  max-width: 98vw;
-  overflow-x: auto;
-  padding: 5px;
-  border-radius: 12px;
-  background: #101820dd;
-  pointer-events: auto;
-  touch-action: pan-x;
-  z-index: 6;
-}
-
-.block-choice {
-  min-width: 48px;
-  padding: 6px 4px;
-  font-size: 10px;
-  flex-shrink: 0;
-}
-
-.swatch {
-  width: 23px;
-  height: 23px;
-  display: block;
-  margin: 0 auto 4px;
-  border: 1px solid #ffffffaa;
-  border-radius: 4px;
-}
-
-#crosshair {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 26px;
-  font-weight: 900;
-  pointer-events: none;
-}
-
-#help {
-  position: absolute;
-  right: 9px;
-  top: 75px;
-  max-width: 190px;
-  background: #17202ddd;
-  padding: 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-#movement {
-  position: fixed;
-  z-index: 10;
-  left: 12px;
-  bottom: 110px;
-  width: 140px;
-  height: 130px;
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.move {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  font-size: 20px;
-  border-radius: 12px;
-  pointer-events: auto;
-  touch-action: none;
-}
-
-#forward { left: 48px; top: 0; }
-#back { left: 48px; bottom: 0; }
-#left { left: 0; top: 43px; }
-#right { right: 0; top: 43px; }
-
-#actions {
-  position: fixed;
-  z-index: 10;
-  right: 10px;
-  bottom: 105px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: auto;
-}
-
-#actions button {
-  width: 72px;
-  height: 50px;
-  padding: 4px;
-  font-size: 11px;
-  touch-action: manipulation;
-}
-
-#jump {
-  position: fixed;
-  z-index: 11;
-  right: 17px;
-  bottom: 218px;
-  width: 76px;
-  height: 68px;
-  border-radius: 50%;
-  background: #267c45ee;
-  pointer-events: auto;
-  touch-action: manipulation;
-}
-
-#lookHint {
-  position: fixed;
-  z-index: 5;
-  bottom: 65px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #17202ddd;
-  padding: 5px 9px;
-  border-radius: 8px;
-  font-size: 11px;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-@media (max-width: 650px) {
-  #brand { font-size: 11px; }
-  #top { gap: 4px; }
-  #top button { padding: 8px 6px; font-size: 10px; }
-  #help { top: 105px; max-width: 145px; font-size: 10px; }
-  #status { top: 62px; font-size: 11px; }
-  #movement { left: 6px; bottom: 102px; transform: scale(.9); transform-origin: bottom left; }
-  #actions { right: 6px; bottom: 102px; }
-  #actions button { width: 65px; height: 46px; }
-  #jump { right: 10px; bottom: 210px; width: 68px; height: 62px; }
-  #palette { gap: 2px; }
-  .block-choice { min-width: 44px; font-size: 9px; }
-}
-
-@media (orientation: landscape) and (max-height: 500px) {
-  #help { display: none; }
-  #movement { bottom: 62px; }
-  #actions { bottom: 62px; }
-  #jump { bottom: 158px; }
-  #palette { bottom: 3px; }
-  #lookHint { display: none; }
+@media(orientation:landscape) and (max-height:500px){
+#help{display:none}#movement{bottom:62px}#actions{bottom:62px}#jump{bottom:158px}
+#palette{bottom:3px}#lookHint{display:none}
 }
 </style>
 </head>
-
 <body>
 <div id="hud">
   <div id="top">
@@ -259,23 +55,16 @@ button:active, button.selected {
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
-
   <div id="status">Loading world...</div>
   <div id="crosshair">+</div>
-
   <div id="help">
     <b>COMPUTER</b><br>
-    WASD: move<br>
-    Space: jump<br>
-    Mouse: look<br>
-    Left click: break<br>
-    Right click: place<br>
+    WASD: move<br>Space: jump<br>Mouse: look<br>
+    Left click: break<br>Right click: place<br>
     <b>TOUCH</b><br>
-    Left pad: move<br>
-    Drag world: look<br>
+    Left pad: move<br>Drag world: look<br>
     Right buttons: jump/build
   </div>
-
   <div id="palette"></div>
 </div>
 
@@ -285,14 +74,11 @@ button:active, button.selected {
   <button class="move" id="left">◀</button>
   <button class="move" id="right">▶</button>
 </div>
-
 <button id="jump">JUMP</button>
-
 <div id="actions">
   <button id="breakBtn">⛏ BREAK</button>
   <button id="placeBtn">🧱 PLACE</button>
 </div>
-
 <div id="lookHint">Drag the world to look around</div>
 
 <script src="./three.min.js"></script>
@@ -301,7 +87,6 @@ button:active, button.selected {
 "use strict";
 
 const status = document.getElementById("status");
-
 if (!window.THREE) {
   status.textContent = "three.min.js is missing. Check the sandbox folder.";
   return;
@@ -309,627 +94,372 @@ if (!window.THREE) {
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb, 25, 65);
-
-const camera = new THREE.PerspectiveCamera(
-  75, innerWidth / innerHeight, 0.1, 120
-);
-
-const renderer = new THREE.WebGLRenderer({ antialias: false });
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-renderer.setSize(innerWidth, innerHeight);
+scene.fog = new THREE.Fog(0x87ceeb,25,65);
+const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,120);
+const renderer = new THREE.WebGLRenderer({antialias:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.domElement.id = "world";
-document.body.insertBefore(renderer.domElement, document.getElementById("hud"));
+document.body.insertBefore(renderer.domElement,document.getElementById("hud"));
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x65704c, 2));
-
-const sun = new THREE.DirectionalLight(0xffffff, 2);
-sun.position.set(-15, 30, 12);
+scene.add(new THREE.HemisphereLight(0xffffff,0x65704c,2));
+const sun = new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-15,30,12);
 scene.add(sun);
 
-const names = {
-  grass: "Grass", dirt: "Dirt", stone: "Stone",
-  sand: "Sand", wood: "Wood", leaves: "Leaves"
-};
+const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves"};
+const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d};
+const materials={};
 
-const colors = {
-  grass: 0x62a844, dirt: 0x87502c, stone: 0x888b91,
-  sand: 0xd8c27c, wood: 0x93602f, leaves: 0x388a3d
-};
-
-const materials = {};
-
-function createTexture(type) {
-  const c = document.createElement("canvas");
-  c.width = c.height = 32;
-  const ctx = c.getContext("2d");
-  ctx.fillStyle = "#" + colors[type].toString(16).padStart(6, "0");
-  ctx.fillRect(0, 0, 32, 32);
-
-  let seed = type.length * 719 + colors[type];
-  function rand() {
-    seed = (seed * 1664525 + 1013904223) >>> 0;
-    return seed / 4294967296;
+function createTexture(type){
+  const c=document.createElement("canvas");c.width=c.height=32;
+  const ctx=c.getContext("2d");
+  ctx.fillStyle="#"+colors[type].toString(16).padStart(6,"0");
+  ctx.fillRect(0,0,32,32);
+  let seed=type.length*719+colors[type];
+  function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+  for(let i=0;i<100;i++){
+    ctx.fillStyle=rand()>.5?"rgba(255,255,255,.15)":"rgba(0,0,0,.15)";
+    ctx.fillRect(Math.floor(rand()*32),Math.floor(rand()*32),2+Math.floor(rand()*5),2+Math.floor(rand()*5));
   }
-
-  for (let i = 0; i < 100; i++) {
-    ctx.fillStyle = rand() > .5
-      ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.15)";
-    ctx.fillRect(
-      Math.floor(rand() * 32), Math.floor(rand() * 32),
-      2 + Math.floor(rand() * 5), 2 + Math.floor(rand() * 5)
-    );
+  if(type==="grass"){
+    ctx.fillStyle="#87502c";ctx.fillRect(0,25,32,7);
+    ctx.fillStyle="#70b84c";
+    for(let i=0;i<8;i++)ctx.fillRect(Math.floor(rand()*32),24,2,4);
   }
-
-  if (type === "grass") {
-    ctx.fillStyle = "#87502c";
-    ctx.fillRect(0, 25, 32, 7);
-    ctx.fillStyle = "#70b84c";
-    for (let i = 0; i < 8; i++) {
-      ctx.fillRect(Math.floor(rand() * 32), 24, 2, 4);
+  if(type==="wood"){
+    ctx.fillStyle="#684323";
+    for(let x=4;x<32;x+=8)ctx.fillRect(x,0,2,32);
+  }
+  if(type==="leaves"){
+    for(let i=0;i<25;i++){
+      ctx.fillStyle=i%2?"#286d30":"#65a947";
+      ctx.fillRect(Math.floor(rand()*32),Math.floor(rand()*32),4,4);
     }
   }
-
-  if (type === "wood") {
-    ctx.fillStyle = "#684323";
-    for (let x = 4; x < 32; x += 8) ctx.fillRect(x, 0, 2, 32);
-  }
-
-  if (type === "leaves") {
-    for (let i = 0; i < 25; i++) {
-      ctx.fillStyle = i % 2 ? "#286d30" : "#65a947";
-      ctx.fillRect(Math.floor(rand() * 32), Math.floor(rand() * 32), 4, 4);
-    }
-  }
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.magFilter = THREE.NearestFilter;
-  tex.minFilter = THREE.NearestFilter;
-  tex.colorSpace = THREE.SRGBColorSpace;
+  const tex=new THREE.CanvasTexture(c);
+  tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
+  tex.colorSpace=THREE.SRGBColorSpace;
   return tex;
 }
-
-for (const type of Object.keys(names)) {
-  materials[type] = new THREE.MeshLambertMaterial({
-    map: createTexture(type)
-  });
+for(const type of Object.keys(names)){
+  materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type)});
 }
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const blocks = new Map();
-const meshes = new Map();
-const blockKey = (x, y, z) => `${x},${y},${z}`;
+const geometry=new THREE.BoxGeometry(1,1,1);
+const blocks=new Map(),meshes=new Map();
+const blockKey=(x,y,z)=>`${x},${y},${z}`;
+function getBlock(x,y,z){return blocks.get(blockKey(x,y,z));}
 
-function getBlock(x, y, z) {
-  return blocks.get(blockKey(x, y, z));
-}
-
-function addBlock(x, y, z, type) {
-  x = Math.round(x);
-  y = Math.round(y);
-  z = Math.round(z);
-  const k = blockKey(x, y, z);
-  if (blocks.has(k)) return false;
-
-  const mesh = new THREE.Mesh(geometry, materials[type] || materials.grass);
-  mesh.position.set(x, y, z);
-  mesh.userData = { x, y, z, type };
-  scene.add(mesh);
-  blocks.set(k, type);
-  meshes.set(k, mesh);
+function addBlock(x,y,z,type){
+  x=Math.round(x);y=Math.round(y);z=Math.round(z);
+  const k=blockKey(x,y,z);
+  if(blocks.has(k))return false;
+  const mesh=new THREE.Mesh(geometry,materials[type]||materials.grass);
+  mesh.position.set(x,y,z);mesh.userData={x,y,z,type};
+  scene.add(mesh);blocks.set(k,type);meshes.set(k,mesh);
   return true;
 }
-
-function removeBlock(x, y, z) {
-  const k = blockKey(x, y, z);
-  const mesh = meshes.get(k);
-  if (!mesh) return false;
-  scene.remove(mesh);
-  blocks.delete(k);
-  meshes.delete(k);
+function removeBlock(x,y,z){
+  const k=blockKey(x,y,z),mesh=meshes.get(k);
+  if(!mesh)return false;
+  scene.remove(mesh);blocks.delete(k);meshes.delete(k);
   return true;
 }
-
-function terrainHeight(x, z) {
-  return Math.floor(
-    1.4 + Math.sin(x * .35) * 1.2 +
-    Math.cos(z * .28) * 1.1 +
-    Math.sin((x + z) * .19) * .7
-  );
+function terrainHeight(x,z){
+  return Math.floor(1.4+Math.sin(x*.35)*1.2+Math.cos(z*.28)*1.1+Math.sin((x+z)*.19)*.7);
 }
-
-for (let x = -14; x <= 14; x++) {
-  for (let z = -14; z <= 14; z++) {
-    const top = terrainHeight(x, z);
-    for (let y = -3; y <= top; y++) {
-      const type = y === top
-        ? (top <= 0 ? "sand" : "grass")
-        : y >= top - 2 ? "dirt" : "stone";
-      addBlock(x, y, z, type);
+for(let x=-14;x<=14;x++){
+  for(let z=-14;z<=14;z++){
+    const top=terrainHeight(x,z);
+    for(let y=-3;y<=top;y++){
+      const type=y===top?(top<=0?"sand":"grass"):y>=top-2?"dirt":"stone";
+      addBlock(x,y,z,type);
     }
   }
 }
-
-function makeTree(x, z) {
-  const g = terrainHeight(x, z);
-  for (let y = 1; y <= 3; y++) addBlock(x, g + y, z, "wood");
-
-  for (let dx = -2; dx <= 2; dx++) {
-    for (let dz = -2; dz <= 2; dz++) {
-      for (let dy = 2; dy <= 4; dy++) {
-        if (Math.abs(dx) + Math.abs(dz) + Math.abs(dy - 3) <= 4) {
-          addBlock(x + dx, g + dy, z + dz, "leaves");
-        }
-      }
-    }
+function makeTree(x,z){
+  const g=terrainHeight(x,z);
+  for(let y=1;y<=3;y++)addBlock(x,g+y,z,"wood");
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=2;dy<=4;dy++){
+    if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-3)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
 }
+makeTree(-7,-4);makeTree(6,-7);makeTree(8,6);makeTree(-8,8);
 
-makeTree(-7, -4);
-makeTree(6, -7);
-makeTree(8, 6);
-makeTree(-8, 8);
-
-const player = {
-  x: 0, y: 8, z: 0,
-  vx: 0, vy: 0, vz: 0,
-  yaw: 0, pitch: 0,
-  grounded: false,
-  height: 1.8,
-  radius: .29
-};
-
-const avatar = new THREE.Group();
-scene.add(avatar);
-
-const skin = new THREE.MeshLambertMaterial({ color: 0xe1b28a });
-const shirt = new THREE.MeshLambertMaterial({ color: 0x2877cf });
-const pants = new THREE.MeshLambertMaterial({ color: 0x333c58 });
-const hair = new THREE.MeshLambertMaterial({ color: 0x493020 });
-const shoes = new THREE.MeshLambertMaterial({ color: 0x292929 });
-
-function part(w, h, d, material, x, y, z) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-  m.position.set(x, y, z);
-  avatar.add(m);
-  return m;
+const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
+const avatar=new THREE.Group();scene.add(avatar);
+const skin=new THREE.MeshLambertMaterial({color:0xe1b28a});
+const shirt=new THREE.MeshLambertMaterial({color:0x2877cf});
+const pants=new THREE.MeshLambertMaterial({color:0x333c58});
+const hair=new THREE.MeshLambertMaterial({color:0x493020});
+const shoes=new THREE.MeshLambertMaterial({color:0x292929});
+function part(w,h,d,mat,x,y,z){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(x,y,z);avatar.add(m);return m;
 }
+part(.62,.65,.34,shirt,0,1.12,0);
+part(.38,.4,.36,skin,0,1.68,0);
+part(.4,.12,.38,hair,0,1.88,0);
+const armL=part(.2,.62,.22,shirt,-.42,1.13,0);
+const armR=part(.2,.62,.22,shirt,.42,1.13,0);
+const legL=part(.25,.56,.26,pants,-.17,.56,0);
+const legR=part(.25,.56,.26,pants,.17,.56,0);
+part(.27,.15,.35,shoes,-.17,.14,-.04);
+part(.27,.15,.35,shoes,.17,.14,-.04);
 
-part(.62, .65, .34, shirt, 0, 1.12, 0);
-part(.38, .4, .36, skin, 0, 1.68, 0);
-part(.4, .12, .38, hair, 0, 1.88, 0);
-const armL = part(.2, .62, .22, shirt, -.42, 1.13, 0);
-const armR = part(.2, .62, .22, shirt, .42, 1.13, 0);
-const legL = part(.25, .56, .26, pants, -.17, .56, 0);
-const legR = part(.25, .56, .26, pants, .17, .56, 0);
-part(.27, .15, .35, shoes, -.17, .14, -.04);
-part(.27, .15, .35, shoes, .17, .14, -.04);
-
-// Collision uses the same voxel blocks that you can place and destroy.
-function collides(px, py, pz) {
-  const r = player.radius;
-  const minX = Math.floor(px - r + .5);
-  const maxX = Math.floor(px + r + .5);
-  const minY = Math.floor(py + .0001 + .5);
-  const maxY = Math.floor(py + player.height - .0001 + .5);
-  const minZ = Math.floor(pz - r + .5);
-  const maxZ = Math.floor(pz + r + .5);
-
-  for (let x = minX; x <= maxX; x++) {
-    for (let y = minY; y <= maxY; y++) {
-      for (let z = minZ; z <= maxZ; z++) {
-        if (!getBlock(x, y, z)) continue;
-
-        if (px + r > x - .5 && px - r < x + .5 &&
-            py < y + .5 && py + player.height > y - .5 &&
-            pz + r > z - .5 && pz - r < z + .5) {
-          return true;
-        }
-      }
-    }
+function collides(px,py,pz){
+  const r=player.radius;
+  const minX=Math.floor(px-r+.5),maxX=Math.floor(px+r+.5);
+  const minY=Math.floor(py+.0001+.5),maxY=Math.floor(py+player.height-.0001+.5);
+  const minZ=Math.floor(pz-r+.5),maxZ=Math.floor(pz+r+.5);
+  for(let x=minX;x<=maxX;x++)for(let y=minY;y<=maxY;y++)for(let z=minZ;z<=maxZ;z++){
+    if(!getBlock(x,y,z))continue;
+    if(px+r>x-.5&&px-r<x+.5&&py<y+.5&&py+player.height>y-.5&&pz+r>z-.5&&pz-r<z+.5)return true;
   }
   return false;
 }
-
-function respawn() {
-  player.x = 0;
-  player.z = 0;
-  player.y = terrainHeight(0, 0) + .501;
-  player.vx = player.vy = player.vz = 0;
-  player.grounded = false;
-  player.yaw = 0;
-  player.pitch = 0;
+function respawn(){
+  player.x=0;player.z=0;player.y=terrainHeight(0,0)+.501;
+  player.vx=player.vy=player.vz=0;player.grounded=false;player.yaw=0;player.pitch=0;
 }
 respawn();
 
-const keys = new Set();
-const touch = { forward: false, back: false, left: false, right: false };
-
-window.addEventListener("keydown", e => {
-  const k = e.key.toLowerCase();
-  keys.add(k);
-
-  if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
-    e.preventDefault();
-  }
-
-  if (k === " " && !e.repeat) jump();
-  if (k === "f") breakBlock();
-  if (k === "g") placeBlock();
-  if (k === "v") toggleCamera();
+const keys=new Set();
+const touch={forward:false,back:false,left:false,right:false};
+window.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();keys.add(k);
+  if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
+  if(k===" "&&!e.repeat)jump();
+  if(k==="f")breakBlock();
+  if(k==="g")placeBlock();
+  if(k==="v")toggleCamera();
+});
+window.addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+window.addEventListener("blur",()=>{
+  keys.clear();for(const k of Object.keys(touch))touch[k]=false;
 });
 
-window.addEventListener("keyup", e => keys.delete(e.key.toLowerCase()));
-window.addEventListener("blur", () => {
-  keys.clear();
-  for (const k of Object.keys(touch)) touch[k] = false;
-});
-
-function bindMovement(id, direction) {
-  const el = document.getElementById(id);
-  const start = e => {
-    e.preventDefault();
-    touch[direction] = true;
-    el.setPointerCapture?.(e.pointerId);
+function bindMovement(id,direction){
+  const el=document.getElementById(id);
+  const start=e=>{
+    e.preventDefault();touch[direction]=true;
+    try{el.setPointerCapture(e.pointerId);}catch(_){}
   };
-  const stop = e => {
-    e.preventDefault();
-    touch[direction] = false;
-  };
-
-  el.addEventListener("pointerdown", start);
-  el.addEventListener("pointerup", stop);
-  el.addEventListener("pointercancel", stop);
-  el.addEventListener("lostpointercapture", stop);
+  const stop=e=>{e.preventDefault();touch[direction]=false;};
+  el.addEventListener("pointerdown",start);
+  el.addEventListener("pointerup",stop);
+  el.addEventListener("pointercancel",stop);
+  el.addEventListener("lostpointercapture",stop);
 }
+bindMovement("forward","forward");
+bindMovement("back","back");
+bindMovement("left","left");
+bindMovement("right","right");
 
-bindMovement("forward", "forward");
-bindMovement("back", "back");
-bindMovement("left", "left");
-bindMovement("right", "right");
-
-let soundOn = true;
-let audio = null;
-
-function beep(freq, duration, wave = "square", volume = .04) {
-  if (!soundOn) return;
-  try {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    if (!audio) audio = new AC();
-    if (audio.state === "suspended") audio.resume();
-
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.type = wave;
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(volume, audio.currentTime);
-    gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.start();
-    osc.stop(audio.currentTime + duration);
-  } catch (_) {}
+let soundOn=true,audio=null;
+function beep(freq,duration,wave="square",volume=.04){
+  if(!soundOn)return;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    if(!audio)audio=new AC();
+    if(audio.state==="suspended")audio.resume();
+    const osc=audio.createOscillator(),gain=audio.createGain();
+    osc.type=wave;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(volume,audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
+    osc.connect(gain);gain.connect(audio.destination);
+    osc.start();osc.stop(audio.currentTime+duration);
+  }catch(_){}
 }
-
-function jump() {
-  if (player.grounded) {
-    player.vy = 8.2;
-    player.grounded = false;
-    beep(280, .12, "triangle");
-  }
+function jump(){
+  if(player.grounded){player.vy=8.2;player.grounded=false;beep(280,.12,"triangle");}
 }
+document.getElementById("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump();});
 
-document.getElementById("jump").addEventListener("pointerdown", e => {
-  e.preventDefault();
-  jump();
-});
-
-let thirdPerson = false;
-let dragging = false;
-let lastX = 0, lastY = 0;
-
-renderer.domElement.addEventListener("contextmenu", e => e.preventDefault());
-
-renderer.domElement.addEventListener("pointerdown", e => {
-  if (e.pointerType === "mouse") {
-    if (e.button === 0) breakBlock();
-    if (e.button === 2) placeBlock();
+let thirdPerson=false,dragging=false,lastX=0,lastY=0;
+renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
+renderer.domElement.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"){
+    if(e.button===0)breakBlock();
+    if(e.button===2)placeBlock();
     return;
   }
-
-  // Only drags on the actual world canvas rotate the view.
-  dragging = true;
-  lastX = e.clientX;
-  lastY = e.clientY;
-  renderer.domElement.setPointerCapture?.(e.pointerId);
+  dragging=true;lastX=e.clientX;lastY=e.clientY;
+  try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){}
 });
-
-renderer.domElement.addEventListener("pointermove", e => {
-  if (e.pointerType === "mouse" &&
-      document.pointerLockElement === renderer.domElement) {
-    player.yaw -= e.movementX * .0025;
-    player.pitch = THREE.MathUtils.clamp(
-      player.pitch - e.movementY * .0025, -1.35, 1.35
-    );
+renderer.domElement.addEventListener("pointermove",e=>{
+  if(e.pointerType==="mouse"&&document.pointerLockElement===renderer.domElement){
+    player.yaw-=e.movementX*.0025;
+    player.pitch=THREE.MathUtils.clamp(player.pitch-e.movementY*.0025,-1.35,1.35);
     return;
   }
-
-  if (!dragging || e.pointerType === "mouse") return;
-
-  const dx = e.clientX - lastX;
-  const dy = e.clientY - lastY;
-  lastX = e.clientX;
-  lastY = e.clientY;
-
-  player.yaw -= dx * .006;
-  player.pitch = THREE.MathUtils.clamp(
-    player.pitch - dy * .005, -1.25, 1.25
-  );
+  if(!dragging||e.pointerType==="mouse")return;
+  const dx=e.clientX-lastX,dy=e.clientY-lastY;
+  lastX=e.clientX;lastY=e.clientY;
+  player.yaw-=dx*.006;
+  player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.005,-1.25,1.25);
 });
-
-renderer.domElement.addEventListener("pointerup", () => dragging = false);
-renderer.domElement.addEventListener("pointercancel", () => dragging = false);
-
-renderer.domElement.addEventListener("click", () => {
-  if (matchMedia("(pointer:fine)").matches &&
-      !thirdPerson && document.pointerLockElement !== renderer.domElement) {
+renderer.domElement.addEventListener("pointerup",()=>dragging=false);
+renderer.domElement.addEventListener("pointercancel",()=>dragging=false);
+renderer.domElement.addEventListener("click",()=>{
+  if(matchMedia("(pointer:fine)").matches&&!thirdPerson&&document.pointerLockElement!==renderer.domElement){
     renderer.domElement.requestPointerLock?.();
   }
 });
 
-const raycaster = new THREE.Raycaster();
-const center = new THREE.Vector2(0, 0);
-
-function getTarget() {
-  raycaster.setFromCamera(center, camera);
-  raycaster.far = 6;
-  const hits = raycaster.intersectObjects([...meshes.values()], false);
-  return hits.length ? hits[0] : null;
+const raycaster=new THREE.Raycaster(),center=new THREE.Vector2(0,0);
+function getTarget(){
+  raycaster.setFromCamera(center,camera);raycaster.far=6;
+  const hits=raycaster.intersectObjects([...meshes.values()],false);
+  return hits.length?hits[0]:null;
 }
-
-function breakBlock() {
-  const hit = getTarget();
-  if (!hit) {
-    status.textContent = "Aim at a block within reach.";
-    return;
-  }
-
-  const p = hit.object.userData;
-  removeBlock(p.x, p.y, p.z);
-  beep(115, .09);
-  status.textContent = "Broke " + names[p.type] + ".";
+function breakBlock(){
+  const hit=getTarget();
+  if(!hit){status.textContent="Aim at a block within reach.";return;}
+  const p=hit.object.userData;
+  removeBlock(p.x,p.y,p.z);beep(115,.09);
+  status.textContent="Broke "+names[p.type]+".";
 }
-
-let selected = "grass";
-
-function placeBlock() {
-  const hit = getTarget();
-  if (!hit || !hit.face) {
-    status.textContent = "Aim at a block within reach.";
-    return;
-  }
-
-  const p = hit.object.userData;
-  const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
-  const x = Math.round(p.x + n.x);
-  const y = Math.round(p.y + n.y);
-  const z = Math.round(p.z + n.z);
-
-  // Prevent placing blocks through the player's body.
-  const overlapsPlayer =
-    x + .5 > player.x - player.radius &&
-    x - .5 < player.x + player.radius &&
-    z + .5 > player.z - player.radius &&
-    z - .5 < player.z + player.radius &&
-    y + .5 > player.y &&
-    y - .5 < player.y + player.height;
-
-  if (overlapsPlayer) {
-    status.textContent = "Move away to place that block.";
-    return;
-  }
-
-  if (addBlock(x, y, z, selected)) {
-    beep(420, .07, "triangle");
-    status.textContent = "Placed " + names[selected] + ".";
-  }
+let selected="grass";
+function placeBlock(){
+  const hit=getTarget();
+  if(!hit||!hit.face){status.textContent="Aim at a block within reach.";return;}
+  const p=hit.object.userData;
+  const n=hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+  const x=Math.round(p.x+n.x),y=Math.round(p.y+n.y),z=Math.round(p.z+n.z);
+  const overlapsPlayer=x+.5>player.x-player.radius&&x-.5<player.x+player.radius&&
+    z+.5>player.z-player.radius&&z-.5<player.z+player.radius&&
+    y+.5>player.y&&y-.5<player.y+player.height;
+  if(overlapsPlayer){status.textContent="Move away to place that block.";return;}
+  if(addBlock(x,y,z,selected)){beep(420,.07,"triangle");status.textContent="Placed "+names[selected]+".";}
 }
+document.getElementById("breakBtn").addEventListener("pointerdown",e=>{e.preventDefault();breakBlock();});
+document.getElementById("placeBtn").addEventListener("pointerdown",e=>{e.preventDefault();placeBlock();});
 
-document.getElementById("breakBtn").addEventListener("pointerdown", e => {
-  e.preventDefault();
-  breakBlock();
-});
-
-document.getElementById("placeBtn").addEventListener("pointerdown", e => {
-  e.preventDefault();
-  placeBlock();
-});
-
-const palette = document.getElementById("palette");
-
-for (const type of Object.keys(names)) {
-  const btn = document.createElement("button");
-  btn.className = "block-choice" + (type === selected ? " selected" : "");
-
-  const swatch = document.createElement("span");
-  swatch.className = "swatch";
-  swatch.style.backgroundColor =
-    "#" + colors[type].toString(16).padStart(6, "0");
-
-  const label = document.createElement("span");
-  label.textContent = names[type];
-
-  btn.append(swatch, label);
-
-  btn.addEventListener("click", () => {
-    selected = type;
-    palette.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
+const palette=document.getElementById("palette");
+for(const type of Object.keys(names)){
+  const btn=document.createElement("button");
+  btn.className="block-choice"+(type===selected?" selected":"");
+  const swatch=document.createElement("span");swatch.className="swatch";
+  swatch.style.backgroundColor="#"+colors[type].toString(16).padStart(6,"0");
+  const label=document.createElement("span");label.textContent=names[type];
+  btn.append(swatch,label);
+  btn.addEventListener("click",()=>{
+    selected=type;
+    palette.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
     btn.classList.add("selected");
-    status.textContent = "Selected " + names[type] + ".";
-    beep(520, .04, "sine", .025);
+    status.textContent="Selected "+names[type]+".";
+    beep(520,.04,"sine",.025);
   });
-
   palette.appendChild(btn);
 }
+function toggleCamera(){
+  thirdPerson=!thirdPerson;
+  document.getElementById("cameraBtn").textContent=thirdPerson?"🎥 Third Person":"🎥 First Person";
+  status.textContent=thirdPerson?"Third-person camera enabled.":"First-person camera enabled.";
+}
+document.getElementById("cameraBtn").addEventListener("click",toggleCamera);
+document.getElementById("soundBtn").addEventListener("click",()=>{
+  soundOn=!soundOn;
+  document.getElementById("soundBtn").textContent=soundOn?"🔊 Sound: On":"🔇 Sound: Off";
+  if(soundOn)beep(520,.08,"sine");
+});
+document.getElementById("fullscreenBtn").addEventListener("click",async()=>{
+  try{
+    if(!document.fullscreenElement)await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  }catch(_){status.textContent="Fullscreen is unavailable in this browser.";}
+});
+document.getElementById("resetBtn").addEventListener("click",()=>{respawn();status.textContent="Respawned!";});
 
-function toggleCamera() {
-  thirdPerson = !thirdPerson;
-  document.getElementById("cameraBtn").textContent =
-    thirdPerson ? "🎥 Third Person" : "🎥 First Person";
-  status.textContent = thirdPerson
-    ? "Third-person camera enabled."
-    : "First-person camera enabled.";
+function updatePlayer(dt){
+  let f=0,s=0;
+
+  // FIXED: forward now moves forward; backward moves backward.
+  if(keys.has("w")||keys.has("arrowup")||touch.forward)f--;
+  if(keys.has("s")||keys.has("arrowdown")||touch.back)f++;
+
+  if(keys.has("a")||keys.has("arrowleft")||touch.left)s--;
+  if(keys.has("d")||keys.has("arrowright")||touch.right)s++;
+
+  const len=Math.hypot(f,s);
+  if(len>0){f/=len;s/=len;}
+  const speed=keys.has("shift")?7.2:5.2;
+  const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
+  player.vx=(s*cos-f*sin)*speed;
+  player.vz=(s*sin+f*cos)*speed;
+
+  const steps=Math.max(1,Math.ceil(Math.max(Math.abs(player.vx*dt),Math.abs(player.vz*dt))/.1));
+  const dx=player.vx*dt/steps,dz=player.vz*dt/steps;
+  for(let i=0;i<steps;i++){
+    if(!collides(player.x+dx,player.y,player.z))player.x+=dx;
+    if(!collides(player.x,player.y,player.z+dz))player.z+=dz;
+  }
+
+  player.vy-=22*dt;
+  const vSteps=Math.max(1,Math.ceil(Math.abs(player.vy*dt)/.1));
+  const dy=player.vy*dt/vSteps;
+  player.grounded=false;
+  for(let i=0;i<vSteps;i++){
+    if(!collides(player.x,player.y+dy,player.z))player.y+=dy;
+    else{if(dy<0)player.grounded=true;player.vy=0;break;}
+  }
+  if(player.y < -30)respawn();
+
+  avatar.position.set(player.x,player.y,player.z);
+  avatar.rotation.y=player.yaw;
+  avatar.visible=thirdPerson;
+  const walking=len>.01,t=performance.now()*.009;
+  legL.rotation.x=walking?Math.sin(t)*.65:0;
+  legR.rotation.x=walking?-Math.sin(t)*.65:0;
+  armL.rotation.x=walking?-Math.sin(t)*.55:0;
+  armR.rotation.x=walking?Math.sin(t)*.55:0;
 }
 
-document.getElementById("cameraBtn").addEventListener("click", toggleCamera);
-
-document.getElementById("soundBtn").addEventListener("click", () => {
-  soundOn = !soundOn;
-  document.getElementById("soundBtn").textContent =
-    soundOn ? "🔊 Sound: On" : "🔇 Sound: Off";
-  if (soundOn) beep(520, .08, "sine");
-});
-
-document.getElementById("fullscreenBtn").addEventListener("click", async () => {
-  try {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
-    }
-  } catch (_) {
-    status.textContent = "Fullscreen is unavailable in this browser.";
-  }
-});
-
-document.getElementById("resetBtn").addEventListener("click", () => {
-  respawn();
-  status.textContent = "Respawned!";
-});
-
-function updatePlayer(dt) {
-  let f = 0, s = 0;
-
-  if (keys.has("w") || keys.has("arrowup") || touch.forward) f++;
-  if (keys.has("s") || keys.has("arrowdown") || touch.back) f--;
-  if (keys.has("a") || keys.has("arrowleft") || touch.left) s--;
-  if (keys.has("d") || keys.has("arrowright") || touch.right) s++;
-
-  const len = Math.hypot(f, s);
-  if (len > 0) { f /= len; s /= len; }
-
-  const speed = keys.has("shift") ? 7.2 : 5.2;
-  const sin = Math.sin(player.yaw);
-  const cos = Math.cos(player.yaw);
-
-  player.vx = (s * cos - f * sin) * speed;
-  player.vz = (s * sin + f * cos) * speed;
-
-  // Small horizontal steps stop the player crossing thin walls.
-  const steps = Math.max(1, Math.ceil(
-    Math.max(Math.abs(player.vx * dt), Math.abs(player.vz * dt)) / .1
-  ));
-
-  const dx = player.vx * dt / steps;
-  const dz = player.vz * dt / steps;
-
-  for (let i = 0; i < steps; i++) {
-    if (!collides(player.x + dx, player.y, player.z)) player.x += dx;
-    if (!collides(player.x, player.y, player.z + dz)) player.z += dz;
-  }
-
-  player.vy -= 22 * dt;
-  const vSteps = Math.max(1, Math.ceil(Math.abs(player.vy * dt) / .1));
-  const dy = player.vy * dt / vSteps;
-  player.grounded = false;
-
-  for (let i = 0; i < vSteps; i++) {
-    if (!collides(player.x, player.y + dy, player.z)) {
-      player.y += dy;
-    } else {
-      if (dy < 0) player.grounded = true;
-      player.vy = 0;
-      break;
-    }
-  }
-
-  if (player.y < -30) respawn();
-
-  avatar.position.set(player.x, player.y, player.z);
-  avatar.rotation.y = player.yaw;
-  avatar.visible = thirdPerson;
-
-  const walking = len > .01;
-  const t = performance.now() * .009;
-  legL.rotation.x = walking ? Math.sin(t) * .65 : 0;
-  legR.rotation.x = walking ? -Math.sin(t) * .65 : 0;
-  armL.rotation.x = walking ? -Math.sin(t) * .55 : 0;
-  armR.rotation.x = walking ? Math.sin(t) * .55 : 0;
-}
-
-function updateCamera() {
-  const eye = new THREE.Vector3(player.x, player.y + 1.58, player.z);
-
-  const direction = new THREE.Vector3(
-    -Math.sin(player.yaw) * Math.cos(player.pitch),
+function updateCamera(){
+  const eye=new THREE.Vector3(player.x,player.y+1.58,player.z);
+  const direction=new THREE.Vector3(
+    -Math.sin(player.yaw)*Math.cos(player.pitch),
     Math.sin(player.pitch),
-    -Math.cos(player.yaw) * Math.cos(player.pitch)
+    -Math.cos(player.yaw)*Math.cos(player.pitch)
   );
-
-  if (!thirdPerson) {
+  if(!thirdPerson){
     camera.position.copy(eye);
     camera.lookAt(eye.clone().add(direction));
     return;
   }
-
-  const target = new THREE.Vector3(player.x, player.y + 1.25, player.z);
-  const behind = new THREE.Vector3(
-    Math.sin(player.yaw) * 4.5,
-    1.5 - Math.sin(player.pitch) * 1.3,
-    Math.cos(player.yaw) * 4.5
+  const target=new THREE.Vector3(player.x,player.y+1.25,player.z);
+  const behind=new THREE.Vector3(
+    Math.sin(player.yaw)*4.5,
+    1.5-Math.sin(player.pitch)*1.3,
+    Math.cos(player.yaw)*4.5
   );
-
-  const desired = target.clone().add(behind);
-  const rayDirection = desired.clone().sub(target).normalize();
-
-  raycaster.set(target, rayDirection);
-  raycaster.far = 4.5;
-  const hits = raycaster.intersectObjects([...meshes.values()], false);
-
-  if (hits.length && hits[0].distance < 4.5) {
-    desired.copy(target).add(
-      rayDirection.multiplyScalar(Math.max(.5, hits[0].distance - .25))
-    );
+  const desired=target.clone().add(behind);
+  const rayDirection=desired.clone().sub(target).normalize();
+  raycaster.set(target,rayDirection);raycaster.far=4.5;
+  const hits=raycaster.intersectObjects([...meshes.values()],false);
+  if(hits.length&&hits[0].distance<4.5){
+    desired.copy(target).add(rayDirection.multiplyScalar(Math.max(.5,hits[0].distance-.25)));
   }
-
-  camera.position.copy(desired);
-  camera.lookAt(target);
+  camera.position.copy(desired);camera.lookAt(target);
 }
 
-let previous = performance.now();
-
-function animate(now) {
+let previous=performance.now();
+function animate(now){
   requestAnimationFrame(animate);
-
-  const dt = Math.min((now - previous) / 1000, .035);
-  previous = now;
-
-  updatePlayer(dt);
-  updateCamera();
-  renderer.render(scene, camera);
+  const dt=Math.min((now-previous)/1000,.035);previous=now;
+  updatePlayer(dt);updateCamera();renderer.render(scene,camera);
 }
-
-window.addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
+window.addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
 });
-
 requestAnimationFrame(animate);
-status.textContent = "World ready! Build, dig, jump, and explore.";
-
+status.textContent="World ready! Build, dig, jump, and explore.";
 })();
 </script>
 </body>
