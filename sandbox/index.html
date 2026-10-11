@@ -22,15 +22,12 @@ button:active,button.selected{background:#27864d}
 .swatch{width:23px;height:23px;display:block;margin:0 auto 4px;border:1px solid #ffffffaa;border-radius:4px}
 #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
 #help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
-#movement{position:fixed;z-index:10;left:12px;bottom:110px;width:140px;height:130px;pointer-events:auto;touch-action:none}
-.move{position:absolute;width:44px;height:44px;padding:0;font-size:20px;border-radius:12px;pointer-events:auto;touch-action:none}
-#forward{left:48px;top:0}
-#back{left:48px;bottom:0}
-#left{left:0;top:43px}
-#right{right:0;top:43px}
-#actions{position:fixed;z-index:10;right:10px;bottom:105px;display:flex;flex-direction:column;gap:8px;pointer-events:auto}
-#actions button{width:72px;height:50px;padding:4px;font-size:11px;touch-action:manipulation}
-#jump{position:fixed;z-index:11;right:17px;bottom:218px;width:76px;height:68px;border-radius:50%;background:#267c45ee;pointer-events:auto;touch-action:manipulation}
+#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:118px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+#stick{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
+#movement:after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%);border-radius:50%;background:#ffffff55;pointer-events:none}
+#actions{position:fixed;z-index:10;right:max(14px,env(safe-area-inset-right));bottom:118px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
+#actions button{width:76px;height:52px;padding:4px;font-size:11px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:238px;width:78px;height:70px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
 #lookHint{position:fixed;z-index:5;bottom:65px;left:50%;transform:translateX(-50%);background:#17202ddd;padding:5px 9px;border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none}
 @media(max-width:650px){
 #brand{font-size:11px}#top{gap:4px}#top button{padding:8px 6px;font-size:10px}
@@ -68,11 +65,8 @@ button:active,button.selected{background:#27864d}
   <div id="palette"></div>
 </div>
 
-<div id="movement">
-  <button class="move" id="forward">▲</button>
-  <button class="move" id="back">▼</button>
-  <button class="move" id="left">◀</button>
-  <button class="move" id="right">▶</button>
+<div id="movement" aria-label="Movement joystick">
+  <div id="stick"></div>
 </div>
 <button id="jump">JUMP</button>
 <div id="actions">
@@ -227,7 +221,42 @@ function respawn(){
 respawn();
 
 const keys=new Set();
-const touch={forward:false,back:false,left:false,right:false};
+const touch={forward:0,back:0,left:0,right:0};
+const joystick={active:false,pointerId:null,x:0,y:0};
+const movementPad=document.getElementById("movement");
+const stick=document.getElementById("stick");
+function resetJoystick(){
+  joystick.active=false;joystick.pointerId=null;
+  touch.forward=touch.back=touch.left=touch.right=0;
+  stick.style.left="50%";stick.style.top="50%";
+}
+function updateJoystick(e){
+  const rect=movementPad.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const max=rect.width*.34;
+  let dx=e.clientX-cx,dy=e.clientY-cy;
+  const distance=Math.hypot(dx,dy);
+  if(distance>max){dx=dx/distance*max;dy=dy/distance*max;}
+  stick.style.left=`calc(50% + ${dx}px)`;
+  stick.style.top=`calc(50% + ${dy}px)`;
+  const nx=dx/max,ny=dy/max;
+  touch.left=Math.max(0,-nx);touch.right=Math.max(0,nx);
+  touch.forward=Math.max(0,-ny);touch.back=Math.max(0,ny);
+}
+movementPad.addEventListener("pointerdown",e=>{
+  e.preventDefault();joystick.active=true;joystick.pointerId=e.pointerId;
+  try{movementPad.setPointerCapture(e.pointerId);}catch(_){}
+  updateJoystick(e);
+});
+movementPad.addEventListener("pointermove",e=>{
+  if(joystick.active&&e.pointerId===joystick.pointerId){e.preventDefault();updateJoystick(e);}
+});
+function endJoystick(e){
+  if(joystick.active&&(e.pointerId===undefined||e.pointerId===joystick.pointerId))resetJoystick();
+}
+movementPad.addEventListener("pointerup",endJoystick);
+movementPad.addEventListener("pointercancel",endJoystick);
+movementPad.addEventListener("lostpointercapture",endJoystick);
 window.addEventListener("keydown",e=>{
   const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
@@ -238,25 +267,8 @@ window.addEventListener("keydown",e=>{
 });
 window.addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener("blur",()=>{
-  keys.clear();for(const k of Object.keys(touch))touch[k]=false;
+  keys.clear();resetJoystick();
 });
-
-function bindMovement(id,direction){
-  const el=document.getElementById(id);
-  const start=e=>{
-    e.preventDefault();touch[direction]=true;
-    try{el.setPointerCapture(e.pointerId);}catch(_){}
-  };
-  const stop=e=>{e.preventDefault();touch[direction]=false;};
-  el.addEventListener("pointerdown",start);
-  el.addEventListener("pointerup",stop);
-  el.addEventListener("pointercancel",stop);
-  el.addEventListener("lostpointercapture",stop);
-}
-bindMovement("forward","forward");
-bindMovement("back","back");
-bindMovement("left","left");
-bindMovement("right","right");
 
 let soundOn=true,audio=null;
 function beep(freq,duration,wave="square",volume=.04){
@@ -299,8 +311,8 @@ renderer.domElement.addEventListener("pointermove",e=>{
   if(!dragging||e.pointerType==="mouse")return;
   const dx=e.clientX-lastX,dy=e.clientY-lastY;
   lastX=e.clientX;lastY=e.clientY;
-  player.yaw-=dx*.006;
-  player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.005,-1.25,1.25);
+  player.yaw-=dx*.0045;
+  player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.004,-1.2,1.2);
 });
 renderer.domElement.addEventListener("pointerup",()=>dragging=false);
 renderer.domElement.addEventListener("pointercancel",()=>dragging=false);
@@ -378,12 +390,12 @@ document.getElementById("resetBtn").addEventListener("click",()=>{respawn();stat
 function updatePlayer(dt){
   let f=0,s=0;
 
-  // FIXED: forward now moves forward; backward moves backward.
-  if(keys.has("w")||keys.has("arrowup")||touch.forward)f--;
-  if(keys.has("s")||keys.has("arrowdown")||touch.back)f++;
-
-  if(keys.has("a")||keys.has("arrowleft")||touch.left)s--;
-  if(keys.has("d")||keys.has("arrowright")||touch.right)s++;
+  // Keyboard movement plus smooth analog joystick movement.
+  if(keys.has("w")||keys.has("arrowup"))f--;
+  if(keys.has("s")||keys.has("arrowdown"))f++;
+  if(keys.has("a")||keys.has("arrowleft"))s--;
+  if(keys.has("d")||keys.has("arrowright"))s++;
+  f-=touch.forward;f+=touch.back;s-=touch.left;s+=touch.right;
 
   const len=Math.hypot(f,s);
   if(len>0){f/=len;s/=len;}
