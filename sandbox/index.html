@@ -50,6 +50,8 @@ button:active,button.selected{background:#27864d}
     <button id="cameraBtn">🎥 First Person</button>
     <button id="soundBtn">🔊 Sound: On</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
+    <button id="saveBtn">💾 Save</button>
+    <button id="menuBtn">☰ Menu</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
   <div id="status">Loading world...</div>
@@ -74,6 +76,25 @@ button:active,button.selected{background:#27864d}
   <button id="placeBtn">🧱 PLACE</button>
 </div>
 <div id="lookHint">Drag the world to look up, down, and around</div>
+<div id="menuOverlay" style="display:none;position:fixed;inset:0;z-index:30;background:#08111beF;color:white;overflow:auto;padding:20px;font-family:system-ui,Arial,sans-serif;touch-action:auto">
+  <div style="max-width:520px;margin:5vh auto;background:#17202d;border:1px solid #ffffff33;border-radius:18px;padding:20px;box-shadow:0 12px 40px #0008">
+    <h1 style="margin:0 0 6px;font-size:26px">🧱 Classroom Sandbox</h1>
+    <p style="margin:0 0 18px;color:#cbd5e1">World controls and settings</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button id="resumeBtn">▶ Resume</button><button id="saveMenuBtn">💾 Save World</button>
+      <button id="loadBtn">📂 Load Save</button><button id="newWorldBtn">🌍 New World</button>
+    </div>
+    <hr style="border-color:#ffffff22;margin:18px 0">
+    <h2 style="font-size:18px">Graphics</h2>
+    <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
+    <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
+    <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
+    <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option></select>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device.</p>
+    <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
+    <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
+  </div>
+</div>
 
 <script src="./three.min.js"></script>
 <script>
@@ -176,8 +197,12 @@ function removeBlock(x,y,z){
 }
 // Seeded, effectively endless chunk world. Nearby chunks are loaded as you explore.
 const CHUNK_SIZE=16;
-const CHUNK_RADIUS=1; // 3x3 active chunks keeps mobile performance reasonable.
-const WORLD_SEED=Math.floor(Math.random()*0x7fffffff);
+let CHUNK_RADIUS=1; // configurable render distance
+const SAVE_KEY="classroomSandboxSaveV1";
+const SETTINGS_KEY="classroomSandboxSettingsV1";
+function readLocal(key){try{return JSON.parse(localStorage.getItem(key)||"null");}catch(_){return null;}}
+const bootSave=readLocal(SAVE_KEY);
+let WORLD_SEED=bootSave&&Number.isFinite(bootSave.seed)?bootSave.seed:Math.floor(Math.random()*0x7fffffff);
 const BEDROCK_Y=-6;
 const loadedChunks=new Set();
 const chunkQueue=[];
@@ -185,7 +210,7 @@ const queuedChunks=new Set();
 let activeChunkJob=null;
 // Keep edits in memory while chunks unload/reload during exploration.
 // This is session-only; permanent saving will be added in the save-system phase.
-const worldEdits=new Map();
+const worldEdits=new Map(bootSave&&bootSave.edits&&typeof bootSave.edits==="object"?Object.entries(bootSave.edits):[]);
 let lastChunkX=NaN,lastChunkZ=NaN;
 function hashNoise(x,z){
   let n=(Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(WORLD_SEED,1442695041))|0;
@@ -345,6 +370,12 @@ function respawn(){
   player.vx=player.vy=player.vz=0;player.grounded=false;player.yaw=0;player.pitch=0;
 }
 respawn();
+if(bootSave&&bootSave.player&&Number.isFinite(bootSave.player.x)&&Number.isFinite(bootSave.player.z)){
+  player.x=bootSave.player.x;player.z=bootSave.player.z;
+  player.y=Number.isFinite(bootSave.player.y)?bootSave.player.y:terrainHeight(player.x,player.z)+.501;
+  player.yaw=Number.isFinite(bootSave.player.yaw)?bootSave.player.yaw:0;
+  player.pitch=Number.isFinite(bootSave.player.pitch)?bootSave.player.pitch:0;
+}
 
 const keys=new Set();
 const touch={forward:0,back:0,left:0,right:0};
@@ -384,6 +415,7 @@ movementPad.addEventListener("pointerup",endJoystick);
 movementPad.addEventListener("pointercancel",endJoystick);
 movementPad.addEventListener("lostpointercapture",endJoystick);
 window.addEventListener("keydown",e=>{
+  if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
   const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
   if(k===" "&&!e.repeat)jump();
@@ -513,6 +545,46 @@ document.getElementById("fullscreenBtn").addEventListener("click",async()=>{
 });
 document.getElementById("resetBtn").addEventListener("click",()=>{respawn();status.textContent="Respawned!";});
 
+const menuOverlay=document.getElementById("menuOverlay");
+const menuMessage=document.getElementById("menuMessage");
+function openMenu(){menuOverlay.style.display="block";}
+function closeMenu(){menuOverlay.style.display="none";}
+function saveWorld(){
+  const edits={};for(const [key,value] of worldEdits)edits[key]=value;
+  const data={version:1,seed:WORLD_SEED,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));status.textContent="World saved on this device.";menuMessage.textContent="World saved on this device! Use Load Save after reloading to restore it.";return true;}
+  catch(_){status.textContent="Save failed: browser storage may be full or disabled.";menuMessage.textContent="Save failed. Browser storage may be unavailable.";return false;}
+}
+document.getElementById("saveBtn").addEventListener("click",saveWorld);
+document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
+document.getElementById("menuBtn").addEventListener("click",openMenu);
+document.getElementById("resumeBtn").addEventListener("click",closeMenu);
+document.getElementById("closeMenuBtn").addEventListener("click",closeMenu);
+document.getElementById("loadBtn").addEventListener("click",()=>{menuMessage.textContent="A saved world will load when you reload this page. Reload now to restore the last save.";status.textContent="Reload the page to load your saved world.";});
+document.getElementById("newWorldBtn").addEventListener("click",()=>{
+  if(!confirm("Start a new random world? Save first if you want to keep this one."))return;
+  try{localStorage.removeItem(SAVE_KEY);}catch(_){}
+  location.reload();
+});
+const savedSettings=readLocal(SETTINGS_KEY)||{};
+const qualitySelect=document.getElementById("qualitySelect"),distanceSelect=document.getElementById("distanceSelect");
+qualitySelect.value=String(savedSettings.quality||1);
+distanceSelect.value=String(savedSettings.distance===2?2:1);
+CHUNK_RADIUS=Number(distanceSelect.value)===2?2:1;
+renderer.setPixelRatio(Math.min((devicePixelRatio||1)*(Number(qualitySelect.value)||1),1.75));
+renderer.setSize(innerWidth,innerHeight);
+function applySettings(){
+  const quality=Number(qualitySelect.value)||1;
+  renderer.setPixelRatio(Math.min((devicePixelRatio||1)*quality,1.75));
+  CHUNK_RADIUS=Number(distanceSelect.value)===2?2:1;
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({quality,distance:CHUNK_RADIUS}));}catch(_){}
+  updateChunks(true);
+  menuMessage.textContent="Settings applied. Lower quality or near render distance can improve performance.";
+}
+qualitySelect.addEventListener("change",applySettings);
+distanceSelect.addEventListener("change",applySettings);
+if(bootSave)status.textContent="Save found · reload restores your last saved world.";
+
 function updatePlayer(dt){
   let f=0,s=0;
 
@@ -595,7 +667,7 @@ function animate(now){
   const dt=Math.min((now-previous)/1000,.035);previous=now;
   processChunkQueue();
   updateChunks();
-  if(loadedChunks.has("0,0"))updatePlayer(dt);
+  if(loadedChunks.has(chunkKey(Math.floor(player.x/CHUNK_SIZE),Math.floor(player.z/CHUNK_SIZE))))updatePlayer(dt);
   updateCamera();renderer.render(scene,camera);
 }
 window.addEventListener("resize",()=>{
@@ -604,7 +676,7 @@ window.addEventListener("resize",()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
 requestAnimationFrame(animate);
-status.textContent=`Generating nearby chunks · ${loadedChunks.size} ready · Deep caves · Seed ${WORLD_SEED}`;
+status.textContent=`Generating nearby chunks · ${loadedChunks.size} ready · Seed ${WORLD_SEED}`;
 })();
 </script>
 </body>
