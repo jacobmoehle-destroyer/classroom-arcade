@@ -1,1 +1,400 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Classroom Sandbox</title>
+<style>
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; width: 100%; height: 100%;
+  overflow: hidden; background: #8bd5ff;
+  font-family: Arial, sans-serif; touch-action: none;
+}
+#game { position: fixed; inset: 0; }
+canvas { display: block; width: 100%; height: 100%; }
+#top {
+  position: fixed; top: 10px; left: 10px; right: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; pointer-events: none;
+}
+.panel {
+  background: #17212be8; color: white; border-radius: 12px;
+  padding: 10px 12px; box-shadow: 0 3px 12px #0003;
+}
+#title { font-size: 16px; font-weight: bold; }
+#status { font-size: 12px; margin-top: 4px; color: #cbd5e1; }
+button {
+  border: 0; border-radius: 10px; padding: 12px;
+  background: #263747; color: white; font-weight: bold;
+  font-size: 14px; cursor: pointer; touch-action: none;
+}
+button:active, button.active { background: #e58b35; }
+#top button { pointer-events: auto; }
+#palette {
+  position: fixed; top: 88px; left: 10px;
+  display: flex; gap: 6px; flex-wrap: wrap; max-width: 210px;
+}
+.swatch { width: 42px; height: 42px; padding: 4px; border: 2px solid #ffffff88; }
+.swatch.selected { border: 3px solid white; outline: 2px solid #263747; }
+#tools {
+  position: fixed; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px; align-items: center;
+}
+#tools button { min-width: 76px; }
+#movement {
+  position: fixed; left: 14px; bottom: 20px;
+  display: grid; grid-template-columns: 52px 52px 52px;
+  grid-template-rows: 52px 52px 52px; gap: 5px;
+}
+#movement button { padding: 0; font-size: 20px; opacity: .88; }
+#forward { grid-column: 2; grid-row: 1; }
+#left { grid-column: 1; grid-row: 2; }
+#backward { grid-column: 2; grid-row: 2; }
+#right { grid-column: 3; grid-row: 2; }
+#jump { grid-column: 2; grid-row: 3; font-size: 13px; }
+#lookHint {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white; text-shadow: 0 2px 4px #000;
+  font-size: 24px; pointer-events: none;
+}
+#help {
+  position: fixed; bottom: 10px; right: 10px;
+  max-width: 230px; font-size: 12px; line-height: 1.5;
+  pointer-events: none;
+}
+@media (pointer: fine) {
+  #movement { display: none; }
+}
+@media (max-width: 650px) {
+  #help { display: none; }
+  #tools { left: auto; right: 10px; transform: none;
+           bottom: 205px; flex-direction: column; }
+  #tools button { min-width: 84px; padding: 12px 8px; }
+  #palette { top: 90px; max-width: 180px; }
+}
+</style>
+</head>
+<body>
+<div id="game"></div>
 
+<div id="top">
+  <div class="panel">
+    <div id="title">🧱 CLASSROOM SANDBOX</div>
+    <div id="status">Creative mode · Loading world…</div>
+  </div>
+  <button id="fullscreen">⛶ FULLSCREEN</button>
+</div>
+
+<div id="palette"></div>
+
+<div id="movement">
+  <button id="forward" data-move="forward">▲</button>
+  <button id="left" data-move="left">◀</button>
+  <button id="backward" data-move="backward">▼</button>
+  <button id="right" data-move="right">▶</button>
+  <button id="jump" data-move="jump">JUMP</button>
+</div>
+
+<div id="tools">
+  <button id="remove">⛏ REMOVE</button>
+  <button id="place">＋ PLACE</button>
+</div>
+
+<div id="lookHint">Tap PLAY to begin</div>
+<div id="help" class="panel">
+  Computer: WASD to move · Mouse to look<br>
+  Left-click: remove block · Right-click: place<br>
+  Choose a block from the palette.<br>
+  Press Esc to release the mouse.
+</div>
+
+<script src="./three.min.js"></script>
+<script>
+(() => {
+  const status = document.getElementById("status");
+  const hint = document.getElementById("lookHint");
+
+  if (!window.THREE) {
+    status.textContent = "Missing three.min.js — upload it beside index.html.";
+    hint.textContent = "3D engine not found";
+    return;
+  }
+
+  const THREE = window.THREE;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x8bd5ff);
+  scene.fog = new THREE.Fog(0x8bd5ff, 24, 65);
+
+  const camera = new THREE.PerspectiveCamera(
+    75, innerWidth / innerHeight, 0.1, 1000
+  );
+  camera.rotation.order = "YXZ";
+  camera.position.set(8, 5, 12);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById("game").appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x64794d, 2));
+  const sun = new THREE.DirectionalLight(0xffffff, 2);
+  sun.position.set(12, 24, 10);
+  sun.castShadow = true;
+  scene.add(sun);
+
+  const materials = {
+    grass: new THREE.MeshLambertMaterial({ color: 0x62b947 }),
+    dirt: new THREE.MeshLambertMaterial({ color: 0x956039 }),
+    stone: new THREE.MeshLambertMaterial({ color: 0x929ba5 }),
+    sand: new THREE.MeshLambertMaterial({ color: 0xe8d18a }),
+    wood: new THREE.MeshLambertMaterial({ color: 0x98602f }),
+    leaves: new THREE.MeshLambertMaterial({ color: 0x2f8a43 })
+  };
+  const colors = {
+    grass: "#62b947", dirt: "#956039", stone: "#929ba5",
+    sand: "#e8d18a", wood: "#98602f", leaves: "#2f8a43"
+  };
+  const names = Object.keys(materials);
+  let selected = "grass";
+
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const blocks = new Map();
+  const blockMeshes = [];
+  const keyOf = (x,y,z) => `${x},${y},${z}`;
+
+  function addBlock(x, y, z, type) {
+    const key = keyOf(x,y,z);
+    if (blocks.has(key)) return;
+    const mesh = new THREE.Mesh(geometry, materials[type] || materials.grass);
+    mesh.position.set(x,y,z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData = { x,y,z,type };
+    scene.add(mesh);
+    blocks.set(key, mesh);
+    blockMeshes.push(mesh);
+  }
+
+  function removeBlock(mesh) {
+    if (!mesh || !mesh.userData) return;
+    const {x,y,z} = mesh.userData;
+    blocks.delete(keyOf(x,y,z));
+    scene.remove(mesh);
+    const index = blockMeshes.indexOf(mesh);
+    if (index !== -1) blockMeshes.splice(index,1);
+  }
+
+  // Generate a small original voxel landscape.
+  for (let x=-12; x<=12; x++) {
+    for (let z=-12; z<=12; z++) {
+      const height = Math.round(
+        Math.sin(x*0.38)*0.7 + Math.cos(z*0.31)*0.7
+      );
+      for (let y=-2; y<=height; y++) {
+        let type = y === height ? "grass" : (y < -1 ? "stone" : "dirt");
+        if (height < -0.5 && y === height) type = "sand";
+        addBlock(x,y,z,type);
+      }
+    }
+  }
+
+  // A few simple block trees.
+  for (const [tx,tz] of [[-5,-4],[5,3],[8,-7],[-9,5]]) {
+    const ground = Math.round(Math.sin(tx*0.38)*0.7 + Math.cos(tz*0.31)*0.7);
+    for (let y=ground+1; y<=ground+3; y++) addBlock(tx,y,tz,"wood");
+    for (let dx=-1; dx<=1; dx++)
+      for (let dz=-1; dz<=1; dz++)
+        for (let dy=2; dy<=4; dy++)
+          if (Math.abs(dx)+Math.abs(dz)+(dy===4 ? 1 : 0) < 4)
+            addBlock(tx+dx,ground+dy,tz+dz,"leaves");
+  }
+
+  const palette = document.getElementById("palette");
+  for (const name of names) {
+    const button = document.createElement("button");
+    button.className = "swatch" + (name===selected ? " selected" : "");
+    button.style.background = colors[name];
+    button.title = name;
+    button.textContent = name === "grass" ? "🌱" :
+      name === "dirt" ? "🟫" : name === "stone" ? "🪨" :
+      name === "sand" ? "🏖️" : name === "wood" ? "🪵" : "🌿";
+    button.setAttribute("aria-label", name);
+    button.onclick = () => {
+      selected = name;
+      palette.querySelectorAll("button").forEach(b =>
+        b.classList.toggle("selected", b === button));
+      status.textContent = "Selected block: " + name;
+    };
+    palette.appendChild(button);
+  }
+
+  const raycaster = new THREE.Raycaster();
+  const center = new THREE.Vector2(0,0);
+  function targetBlock() {
+    raycaster.setFromCamera(center,camera);
+    const hits = raycaster.intersectObjects(blockMeshes,false);
+    return hits.length ? hits[0] : null;
+  }
+
+  function mine() {
+    const hit = targetBlock();
+    if (hit) {
+      removeBlock(hit.object);
+      status.textContent = "Block removed";
+    }
+  }
+  function build() {
+    const hit = targetBlock();
+    if (!hit) return;
+    const p = hit.object.position.clone().add(hit.face.normal);
+    const x=Math.round(p.x), y=Math.round(p.y), z=Math.round(p.z);
+    if (y > 20 || y < -3) return;
+    // Avoid placing a block inside the player's body.
+    if (Math.abs(x-camera.position.x)<0.8 &&
+        Math.abs(z-camera.position.z)<0.8 &&
+        Math.abs(y-camera.position.y)<1.8) return;
+    addBlock(x,y,z,selected);
+    status.textContent = "Placed " + selected;
+  }
+
+  const keys = {};
+  const move = { forward:false, backward:false, left:false, right:false, jump:false };
+  let yaw = Math.PI * 0.75, pitch = -0.15;
+  let locked = false;
+  let lastTouch = null;
+  let jumpVelocity = 0;
+  let onGround = false;
+
+  function syncCamera() {
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
+  }
+  syncCamera();
+
+  addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))
+      e.preventDefault();
+    if (e.key === "Escape") hint.textContent = "Tap or click to look around";
+  });
+  addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+  renderer.domElement.addEventListener("click", () => {
+    if (matchMedia("(pointer:fine)").matches &&
+        renderer.domElement.requestPointerLock) {
+      renderer.domElement.requestPointerLock();
+    } else {
+      hint.textContent = "Drag to look around";
+    }
+  });
+  document.addEventListener("pointerlockchange", () => {
+    locked = document.pointerLockElement === renderer.domElement;
+    hint.textContent = locked ? "" : "Tap PLAY to begin";
+  });
+  document.addEventListener("mousemove", e => {
+    if (!locked) return;
+    yaw -= e.movementX * 0.0025;
+    pitch -= e.movementY * 0.0025;
+    pitch = Math.max(-1.45, Math.min(1.45,pitch));
+    syncCamera();
+  });
+
+  renderer.domElement.addEventListener("contextmenu", e => e.preventDefault());
+  renderer.domElement.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse") {
+      if (e.button === 0) mine();
+      if (e.button === 2) build();
+      return;
+    }
+    lastTouch = { x:e.clientX, y:e.clientY, id:e.pointerId };
+    renderer.domElement.setPointerCapture(e.pointerId);
+  });
+  renderer.domElement.addEventListener("pointermove", e => {
+    if (!lastTouch || lastTouch.id !== e.pointerId) return;
+    const dx=e.clientX-lastTouch.x, dy=e.clientY-lastTouch.y;
+    yaw -= dx*0.006;
+    pitch -= dy*0.006;
+    pitch = Math.max(-1.45,Math.min(1.45,pitch));
+    syncCamera();
+    lastTouch = { x:e.clientX, y:e.clientY, id:e.pointerId };
+  });
+  renderer.domElement.addEventListener("pointerup", e => {
+    if (lastTouch && lastTouch.id === e.pointerId) lastTouch=null;
+  });
+  renderer.domElement.addEventListener("pointercancel", () => lastTouch=null);
+
+  document.getElementById("place").addEventListener("click",build);
+  document.getElementById("remove").addEventListener("click",mine);
+  document.getElementById("fullscreen").addEventListener("click",async () => {
+    try {
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    } catch (_) {
+      status.textContent = "Use your browser's fullscreen control";
+    }
+  });
+
+  document.querySelectorAll("[data-move]").forEach(button => {
+    const name = button.dataset.move;
+    const down = e => { e.preventDefault(); move[name]=true; button.classList.add("active"); };
+    const up = e => { e.preventDefault(); move[name]=false; button.classList.remove("active"); };
+    button.addEventListener("pointerdown",down);
+    button.addEventListener("pointerup",up);
+    button.addEventListener("pointercancel",up);
+    button.addEventListener("pointerleave",up);
+  });
+
+  function update(dt) {
+    const speed = keys["shift"] ? 9 : 5;
+    const forward = (keys["w"] || keys["arrowup"] || move.forward ? 1 : 0)
+                  - (keys["s"] || keys["arrowdown"] || move.backward ? 1 : 0);
+    const side = (keys["d"] || keys["arrowright"] || move.right ? 1 : 0)
+               - (keys["a"] || keys["arrowleft"] || move.left ? 1 : 0);
+    const direction = new THREE.Vector3(side,0,-forward);
+    if (direction.lengthSq()) {
+      direction.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+      camera.position.addScaledVector(direction,speed*dt);
+    }
+
+    if ((keys[" "] || move.jump) && onGround) {
+      jumpVelocity=6; onGround=false;
+    }
+    jumpVelocity -= 15*dt;
+    camera.position.y += jumpVelocity*dt;
+    const groundY = 2.5;
+    if (camera.position.y < groundY) {
+      camera.position.y=groundY;
+      jumpVelocity=0;
+      onGround=true;
+    }
+  }
+
+  let previous = performance.now();
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min((now-previous)/1000,0.04);
+    previous=now;
+    update(dt);
+    renderer.render(scene,camera);
+  }
+  addEventListener("resize", () => {
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+
+  status.textContent = "Creative mode · " + blocks.size + " blocks";
+  hint.textContent = "Tap or click to look around";
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
+```
