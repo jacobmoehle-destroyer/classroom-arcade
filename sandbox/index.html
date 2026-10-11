@@ -23,9 +23,24 @@ button:active,button.selected{background:#27864d}
 .recipe-grid button{min-height:58px;text-align:left;font-size:12px}
 @media(max-width:420px){.recipe-grid{grid-template-columns:1fr}}
 #status{position:absolute;top:65px;left:9px;max-width:75%;background:#17202ddd;border-radius:8px;padding:6px 9px;font-size:12px}
-#palette{position:absolute;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:4px;max-width:98vw;overflow-x:auto;padding:5px;border-radius:12px;background:#101820dd;pointer-events:auto;touch-action:pan-x;z-index:6}
-.block-choice{min-width:48px;padding:6px 4px;font-size:10px;flex-shrink:0}
-.swatch{width:23px;height:23px;display:block;margin:0 auto 4px;border:1px solid #ffffffaa;border-radius:4px}
+#palette{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));transform:translateX(-50%);display:grid;grid-template-columns:repeat(9,minmax(35px,49px));gap:3px;max-width:96vw;padding:5px;border:2px solid #ffffff55;border-radius:9px;background:#171717dd;pointer-events:auto;z-index:15;box-shadow:0 3px 12px #0008}
+.block-choice{position:relative;min-width:0;min-height:48px;padding:3px 2px;font-size:9px;border-radius:5px;border:2px solid #ffffff33;background:#252525ee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.block-choice.selected{border:2px solid #fff;background:#53634b}
+.swatch{width:21px;height:21px;display:block;border:1px solid #ffffff88;border-radius:2px;margin:0}
+.slot-count{position:absolute;right:2px;bottom:0;font-size:11px;line-height:1.1;text-shadow:1px 1px 2px #000;font-weight:900}
+#inventoryBtn{background:#315d87ee!important}
+#survivalHud{position:fixed!important;top:auto!important;left:50%!important;bottom:68px!important;transform:translateX(-50%);display:none;background:#171717dd!important;border:2px solid #ffffff44;border-radius:7px!important;padding:4px 10px!important;line-height:1!important;white-space:nowrap;font-size:20px!important;letter-spacing:2px;box-shadow:0 3px 10px #0007}
+#healthIcons,#hungerIcons{display:flex;justify-content:center;gap:3px;min-height:20px}
+#healthIcons{margin-bottom:2px}
+#inventoryOverlay{display:none;position:fixed;inset:0;z-index:45;background:#07101bf2;color:white;overflow:auto;padding:14px;touch-action:auto}
+#inventoryPanel{max-width:600px;margin:4vh auto;background:#17202d;border:2px solid #ffffff44;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0009}
+#inventoryGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:10px}
+.inventory-slot{min-height:66px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:2px solid #ffffff30;border-radius:7px;background:#0b1420;font-size:10px;position:relative;overflow:hidden}
+.inventory-slot .item-icon{font-size:22px;line-height:1.1}
+.inventory-slot .item-count{position:absolute;right:4px;bottom:3px;font-size:12px;font-weight:900}
+.inventory-slot:disabled{opacity:.6}
+@media(max-width:420px){#palette{grid-template-columns:repeat(9,minmax(29px,1fr));width:96vw;gap:2px}.block-choice{min-height:43px;font-size:8px}.swatch{width:18px;height:18px}#inventoryGrid{grid-template-columns:repeat(4,minmax(0,1fr))}#survivalHud{bottom:61px!important;font-size:17px!important}}
+
 #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
 #help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
 #movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -41,11 +56,11 @@ button:active,button.selected{background:#27864d}
 #movement{left:6px;bottom:84px;transform:scale(.82);transform-origin:bottom left}
 #actions{right:6px;bottom:76px}#actions button{width:65px;height:39px;font-size:9px}
 #jump{right:10px;bottom:270px;width:68px;height:62px}
-#palette{gap:2px}.block-choice{min-width:44px;font-size:9px}
+#palette{gap:2px}.block-choice{min-width:0;font-size:8px}#survivalHud{bottom:57px!important}
 }
 @media(orientation:landscape) and (max-height:500px){
 #help{display:none}#movement{bottom:40px}#actions{bottom:38px}#jump{bottom:224px}
-#palette{bottom:3px}#lookHint{display:none}
+#palette{bottom:3px}#survivalHud{bottom:55px!important}#lookHint{display:none}
 }
 </style>
 </head>
@@ -57,13 +72,14 @@ button:active,button.selected{background:#27864d}
     <button id="soundBtn">🔊 Sound: On</button>
     <button id="modeBtn">🛠 Creative</button>
     <button id="craftBtn">🧰 Craft</button>
+    <button id="inventoryBtn">🎒 Inventory</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
   <div id="status">Loading world...</div>
-  <div id="survivalHud" style="display:none;position:absolute;top:100px;left:9px;background:#17202ddd;border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.6">❤️ <span id="healthValue">20</span>/20<br>🍗 <span id="hungerValue">20</span>/20</div>
+  <div id="survivalHud" aria-label="Health and hunger"><div id="healthIcons" aria-label="Health">❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️</div><div id="hungerIcons" aria-label="Hunger">🍗🍗🍗🍗🍗🍗🍗🍗🍗🍗</div><div style="font-size:10px;letter-spacing:0;text-align:center"><span id="healthValue">20</span>/20 health · <span id="hungerValue">20</span>/20 hunger</div></div>
   <div id="crosshair">+</div>
   <div id="help">
     <b>COMPUTER</b><br>
@@ -73,7 +89,7 @@ button:active,button.selected{background:#27864d}
     Left pad: move<br>Drag world: look<br>
     Right buttons: jump/build
   </div>
-  <div id="palette"></div>
+  <div id="palette" aria-label="Quick access hotbar"></div>
 </div>
 
 <div id="movement" aria-label="Movement joystick">
@@ -119,6 +135,16 @@ button:active,button.selected{background:#27864d}
   </div>
 </div>
 
+<div id="inventoryOverlay" role="dialog" aria-label="Inventory">
+  <div id="inventoryPanel">
+    <h2 style="margin:0 0 5px">🎒 Inventory</h2>
+    <p style="font-size:12px;color:#cbd5e1;margin:0">Tap a block to equip it in your hotbar. In Survival, collected materials are limited and placing blocks uses them.</p>
+    <div id="inventoryGrid"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button id="inventoryCraftBtn">🧰 Craft</button><button id="closeInventoryBtn">Done</button></div>
+    <p id="inventoryMessage" style="font-size:12px;color:#b8f7c5;min-height:16px;margin-bottom:0"></p>
+  </div>
+</div>
+
 <div id="craftOverlay" role="dialog" aria-label="Crafting menu">
   <div id="craftPanel">
     <h2 style="margin:0 0 6px">🧰 Crafting & Tools</h2>
@@ -131,6 +157,8 @@ button:active,button.selected{background:#27864d}
       <button id="craftTableBtn">🧰 Crafting Table ×1<br><small>4 Planks</small></button>
       <button id="craftBedBtn">🛏️ Bed ×1<br><small>3 Planks + 3 Leaves</small></button>
       <button id="craftTorchBtn">🔥 Torches ×4<br><small>1 Stick + 1 Coal</small></button>
+      <button id="craftChestBtn">📦 Chest ×1<br><small>8 Planks</small></button>
+      <button id="craftFurnaceBtn">🔥 Furnace ×1<br><small>8 Cobblestone</small></button>
     </div>
     <h3 style="margin:15px 0 7px">⛏️ Tools</h3>
     <div class="recipe-grid">
@@ -231,8 +259,8 @@ for(let i=0;i<18;i++){
   group.position.set(((seed*7)%240)-120,27+(i%4)*1.8,((seed*11)%240)-120);scene.add(group);clouds.push({group,speed:.35+(i%5)*.08});
 }
 
-const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock",crafting_table:"Crafting Table",bed:"Bed",torch:"Torch"};
-const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d,crafting_table:0x8a6037,bed:0xb83c42,torch:0xffc857};
+const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock",crafting_table:"Crafting Table",bed:"Bed",torch:"Torch",chest:"Chest",furnace:"Furnace"};
+const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d,crafting_table:0x8a6037,bed:0xb83c42,torch:0xffc857,chest:0x9b6a35,furnace:0x65686b};
 const materials={};
 
 function createTexture(type){
@@ -594,8 +622,13 @@ function refreshModeUI(){
   document.getElementById("modeMenuBtn").textContent=survival?"Switch to Creative":"Switch to Survival";
   document.getElementById("healthValue").textContent=Math.ceil(health);
   document.getElementById("hungerValue").textContent=Math.ceil(hunger);
+  const heartCount=Math.ceil(health/2),foodCount=Math.ceil(hunger/2);
+  document.getElementById("healthIcons").textContent=Array.from({length:10},(_,i)=>i<heartCount?(health%2===1&&i===heartCount-1?"💔":"❤️"):"🖤").join("");
+  document.getElementById("hungerIcons").textContent=Array.from({length:10},(_,i)=>i<foodCount?"🍗":"▫️").join("");
   refreshInventoryUI();
 }
+const itemIcons={grass:"🟩",dirt:"🟫",stone:"🪨",sand:"🟨",wood:"🪵",leaves:"🌿",planks:"🪵",cobble:"🧱",bricks:"🧱",glass:"🔹",snow:"❄️",coal:"⚫",iron:"⛏️",gold:"🟡",diamond:"💎",bedrock:"⬛",crafting_table:"🧰",bed:"🛏️",torch:"🔥",chest:"📦",furnace:"🔥",sticks:"🪄",pork:"🍖",apple:"🍎",wooden_pickaxe:"⛏️",stone_pickaxe:"⛏️",wooden_axe:"🪓",wooden_shovel:"🥄"};
+let hotbarTypes=["grass","dirt","stone","wood","planks","cobble","sand","bricks","glass"];
 function refreshInventoryUI(){
   const labels={...names,planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel"};
   const lines=[];
@@ -603,6 +636,10 @@ function refreshInventoryUI(){
   const text=(gameMode==="creative"?"Creative: blocks are unlimited. Switch to Survival to collect and spend items.\n\n":"")+(lines.length?lines.join("\n"):"Your inventory is empty. Break blocks in Survival to collect resources.");
   const el=document.getElementById("inventoryText");if(el)el.textContent=text;
   const craftEl=document.getElementById("craftInventoryText");if(craftEl)craftEl.textContent=lines.length?lines.join("\n"):"Your inventory is empty.";
+  const hotbar=document.getElementById("palette");
+  if(hotbar){hotbar.innerHTML="";for(const type of hotbarTypes){const btn=document.createElement("button");btn.className="block-choice"+(type===selected?" selected":"");btn.setAttribute("aria-label","Select "+names[type]);const swatch=document.createElement("span");swatch.className="swatch";swatch.style.backgroundColor="#"+colors[type].toString(16).padStart(6,"0");const label=document.createElement("span");label.textContent=names[type];btn.append(swatch,label);if(gameMode==="survival"){const count=document.createElement("span");count.className="slot-count";count.textContent=inventory[type]||0;btn.append(count);}btn.addEventListener("click",()=>{selected=type;refreshInventoryUI();status.textContent="Selected "+names[type]+".";beep(520,.04,"sine",.025);});hotbar.appendChild(btn);}}
+  const grid=document.getElementById("inventoryGrid");
+  if(grid){grid.innerHTML="";const allItems=[...Object.keys(names),"planks","sticks","pork","apple","wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel"];const seen=new Set();for(const type of allItems){if(seen.has(type))continue;seen.add(type);const count=inventory[type]||0;const btn=document.createElement("button");btn.className="inventory-slot";btn.innerHTML="<span class=\"item-icon\"></span><span></span><span class=\"item-count\"></span>";btn.querySelector(".item-icon").textContent=itemIcons[type]||"📦";btn.querySelector("span:nth-child(2)").textContent=names[type]||({planks:"Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel"}[type]||type);btn.querySelector(".item-count").textContent=count;const placeable=Object.prototype.hasOwnProperty.call(names,type)&&!(["bedrock"].includes(type));btn.disabled=gameMode==="survival"&&count<1;if(placeable){btn.addEventListener("click",()=>{if(!hotbarTypes.includes(type))hotbarTypes[8]=type;selected=type;refreshInventoryUI();document.getElementById("inventoryMessage").textContent="Equipped "+(names[type]||type)+" in the hotbar.";status.textContent="Selected "+names[type]+".";closeInventory();});}else{btn.title="Inventory item";}grid.appendChild(btn);}}
 }
 function toggleMode(){gameMode=gameMode==="creative"?"survival":"creative";refreshModeUI();status.textContent=gameMode==="survival"?"Survival mode enabled. Watch your hunger!":"Creative mode enabled.";menuMessage.textContent=status.textContent;}
 
@@ -645,6 +682,7 @@ movementPad.addEventListener("pointercancel",endJoystick);
 movementPad.addEventListener("lostpointercapture",endJoystick);
 window.addEventListener("keydown",e=>{
   if(craftOverlay.style.display==="block"){if(e.key==="Escape")closeCrafting();return;}
+  if(inventoryOverlay.style.display==="block"){if(e.key==="Escape")closeInventory();return;}
   if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
   const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
@@ -790,6 +828,8 @@ function craftItem(recipe){
     table:{needs:[["planks",4]],gives:[["crafting_table",1]],label:"Crafting Table"},
     bed:{needs:[["planks",3],["leaves",3]],gives:[["bed",1]],label:"Bed"},
     torch:{needs:[["sticks",1],["coal",1]],gives:[["torch",4]],label:"4 Torches"},
+    chest:{needs:[["planks",8]],gives:[["chest",1]],label:"Chest"},
+    furnace:{needs:[["cobble",8]],gives:[["furnace",1]],label:"Furnace"},
     wooden_pick:{needs:[["planks",3],["sticks",2]],gives:[["wooden_pickaxe",1]],label:"Wooden Pickaxe"},
     stone_pick:{needs:[["cobble",3],["sticks",2]],gives:[["stone_pickaxe",1]],label:"Stone Pickaxe"},
     axe:{needs:[["planks",3],["sticks",2]],gives:[["wooden_axe",1]],label:"Wooden Axe"},
@@ -800,7 +840,7 @@ function craftItem(recipe){
   take(r.needs);r.gives.forEach(([item,count])=>inventory[item]=(inventory[item]||0)+count);
   refreshInventoryUI();beep(500,.1,"triangle");status.textContent="Crafted "+r.label+"!";
 }
-const recipeButtons={craftPlanksBtn:"planks",craftSticksBtn:"sticks",craftTableBtn:"table",craftBedBtn:"bed",craftTorchBtn:"torch",craftWoodPickBtn:"wooden_pick",craftStonePickBtn:"stone_pick",craftAxeBtn:"axe",craftShovelBtn:"shovel"};
+const recipeButtons={craftPlanksBtn:"planks",craftSticksBtn:"sticks",craftTableBtn:"table",craftBedBtn:"bed",craftTorchBtn:"torch",craftChestBtn:"chest",craftFurnaceBtn:"furnace",craftWoodPickBtn:"wooden_pick",craftStonePickBtn:"stone_pick",craftAxeBtn:"axe",craftShovelBtn:"shovel"};
 for(const [id,recipe] of Object.entries(recipeButtons))document.getElementById(id).addEventListener("click",()=>craftItem(recipe));
 const craftOverlay=document.getElementById("craftOverlay");
 function openCrafting(){craftOverlay.style.display="block";refreshInventoryUI();}
@@ -810,23 +850,14 @@ document.getElementById("openCraftFromMenuBtn").addEventListener("click",openCra
 document.getElementById("closeCraftBtn").addEventListener("click",closeCrafting);
 document.getElementById("craftBtn").addEventListener("pointerdown",e=>e.stopPropagation());
 
-const palette=document.getElementById("palette");
-for(const type of Object.keys(names)){
-  const btn=document.createElement("button");
-  btn.className="block-choice"+(type===selected?" selected":"");
-  const swatch=document.createElement("span");swatch.className="swatch";
-  swatch.style.backgroundColor="#"+colors[type].toString(16).padStart(6,"0");
-  const label=document.createElement("span");label.textContent=names[type];
-  btn.append(swatch,label);
-  btn.addEventListener("click",()=>{
-    selected=type;
-    palette.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
-    btn.classList.add("selected");
-    status.textContent="Selected "+names[type]+".";
-    beep(520,.04,"sine",.025);
-  });
-  palette.appendChild(btn);
-}
+// The hotbar is rendered by refreshInventoryUI; the full inventory lives in its own screen.
+const inventoryOverlay=document.getElementById("inventoryOverlay");
+function openInventory(){inventoryOverlay.style.display="block";refreshInventoryUI();}
+function closeInventory(){inventoryOverlay.style.display="none";}
+document.getElementById("inventoryBtn").addEventListener("click",openInventory);
+document.getElementById("closeInventoryBtn").addEventListener("click",closeInventory);
+document.getElementById("inventoryCraftBtn").addEventListener("click",()=>{closeInventory();openCrafting();});
+
 function toggleCamera(){
   thirdPerson=!thirdPerson;
   document.getElementById("cameraBtn").textContent=thirdPerson?"🎥 Third Person":"🎥 First Person";
