@@ -105,8 +105,8 @@ button:active,button.selected{background:#27864d}
     <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
     <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
-    <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
+    <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option><option value="3">Far (7×7 chunks)</option><option value="4">Very Far (9×9 chunks)</option></select>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">The game preloads a 7×7 area (49 chunks) before spawning. Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -121,7 +121,7 @@ button:active,button.selected{background:#27864d}
     <h2 style="font-size:18px;margin:12px 0">Create a new world</h2>
     <label for="worldTypeSelect" style="display:block;margin:8px 0 5px;color:#e2e8f0;font-size:14px">World type</label>
     <select id="worldTypeSelect" style="width:100%;padding:12px;border-radius:10px;font-size:15px;margin-bottom:10px"><option value="normal">🌍 Normal world — hills, forests, deserts, snow</option><option value="superflat">🟩 Superflat — flat building world</option></select>
-    <p style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Normal worlds have biome regions and hills. Superflat worlds are level for easy building. Choose a type, then pick Creative or Survival.</p>
+    <p style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Normal worlds include forests, deserts, snowy regions, taller mountains, deeper caves, and drifting clouds. Superflat worlds are level for easy building. Choose a type, then pick Creative or Survival.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button id="createCreativeBtn" style="padding:16px 10px;background:#246b42"><span style="font-size:24px">🛠️</span><br><span style="font-size:16px">Creative</span><br><small style="font-weight:500">Unlimited blocks · no hunger</small></button>
       <button id="createSurvivalBtn" style="padding:16px 10px;background:#8b3b35"><span style="font-size:24px">❤️</span><br><span style="font-size:16px">Survival</span><br><small style="font-weight:500">Collect · craft · stay alive</small></button>
@@ -131,6 +131,16 @@ button:active,button.selected{background:#27864d}
     <div id="savedWorldList" style="display:grid;gap:8px"><p style="color:#94a3b8;font-size:13px">No saved worlds yet. Create a world and press Save.</p></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px"><button id="mainSettingsBtn">⚙️ Settings</button><button id="mainExitBtn">✖ Back to Game</button></div>
     <p id="mainMenuMessage" style="min-height:18px;font-size:13px;color:#b8f7c5;margin:12px 0 0;text-align:center"></p>
+  </div>
+</div>
+
+<div id="loadingScreen" style="display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#0b1728f5,#193b2af5);color:white;align-items:center;justify-content:center;padding:24px;font-family:system-ui,Arial,sans-serif;text-align:center;touch-action:auto">
+  <div style="width:min(100%,460px);background:#101a28;border:1px solid #ffffff33;border-radius:20px;padding:26px;box-shadow:0 18px 60px #0008">
+    <div style="font-size:42px">🌄 🧱 ☁️</div><h1 style="margin:8px 0;font-size:28px">Building your world</h1>
+    <p id="loadingMessage" style="color:#cbd5e1;margin:0 0 16px">Preparing the spawn area...</p>
+    <div style="height:18px;border-radius:20px;background:#050b12;overflow:hidden;border:1px solid #ffffff33"><div id="loadingBar" style="height:100%;width:0%;background:linear-gradient(90deg,#37b66b,#9de36d);transition:width .12s"></div></div>
+    <p id="loadingPercent" style="font-weight:800;margin:10px 0 0">0%</p>
+    <p style="font-size:12px;color:#94a3b8;margin:8px 0 0">Generating 49 nearby chunks in small batches to reduce freezing.</p>
   </div>
 </div>
 
@@ -147,8 +157,8 @@ if (!window.THREE) {
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb,25,65);
-const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,120);
+scene.fog = new THREE.Fog(0x87ceeb,55,145);
+const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,240);
 const renderer = new THREE.WebGLRenderer({antialias:false});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
 renderer.setSize(innerWidth,innerHeight);
@@ -160,6 +170,19 @@ scene.add(new THREE.HemisphereLight(0xffffff,0x65704c,2));
 const sun = new THREE.DirectionalLight(0xffffff,2);
 sun.position.set(-15,30,12);
 scene.add(sun);
+// Lightweight voxel clouds drift above the terrain.
+const cloudMaterial=new THREE.MeshLambertMaterial({color:0xf5fbff});
+const cloudGeometry=new THREE.BoxGeometry(1,1,1);
+const clouds=[];
+for(let i=0;i<18;i++){
+  const group=new THREE.Group();const seed=i*137.7+41;
+  const width=3+(i%4),depth=2+(i%3);
+  for(let x=0;x<width;x++)for(let z=0;z<depth;z++){
+    if((x+z+i)%4===0)continue;
+    const cube=new THREE.Mesh(cloudGeometry,cloudMaterial);cube.position.set(x-width/2,0,z-depth/2);group.add(cube);
+  }
+  group.position.set(((seed*7)%240)-120,27+(i%4)*1.8,((seed*11)%240)-120);scene.add(group);clouds.push({group,speed:.35+(i%5)*.08});
+}
 
 const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock"};
 const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d};
@@ -251,7 +274,7 @@ function removeBlock(x,y,z){
 }
 // Seeded, effectively endless chunk world. Nearby chunks are loaded as you explore.
 const CHUNK_SIZE=16;
-let CHUNK_RADIUS=1; // configurable render distance
+let CHUNK_RADIUS=3; // configurable render distance; 7x7 starting area is the default
 const SAVE_KEY="classroomSandboxSaveV1";
 const SLOTS_KEY="classroomSandboxWorldSlotsV1";
 const ACTIVE_SLOT_KEY="classroomSandboxActiveSlotV1";
@@ -259,13 +282,14 @@ const START_MODE_KEY="classroomSandboxStartModeV1";
 const START_WORLD_TYPE_KEY="classroomSandboxStartWorldTypeV1";
 const WORLD_TYPE_PREF_KEY="classroomSandboxWorldTypePrefV1";
 const SETTINGS_KEY="classroomSandboxSettingsV1";
+const START_REQUEST_KEY="classroomSandboxStartRequestedV1";
 function readLocal(key){try{return JSON.parse(localStorage.getItem(key)||"null");}catch(_){return null;}}
 const bootSave=readLocal(SAVE_KEY);
 const pendingWorldType=readLocal(START_WORLD_TYPE_KEY);
 try{localStorage.removeItem(START_WORLD_TYPE_KEY);}catch(_){}
 let WORLD_TYPE=(bootSave&&bootSave.worldType==="superflat")?"superflat":(!bootSave&&pendingWorldType==="superflat"?"superflat":"normal");
 let WORLD_SEED=bootSave&&Number.isFinite(bootSave.seed)?bootSave.seed:Math.floor(Math.random()*0x7fffffff);
-const BEDROCK_Y=-6;
+const BEDROCK_Y=-14;
 const loadedChunks=new Set();
 const chunkQueue=[];
 const queuedChunks=new Set();
@@ -296,7 +320,9 @@ function terrainHeight(x,z){
   if(WORLD_TYPE==="superflat")return 2;
   const biome=getBiome(x,z);
   const broad=valueNoise(x+120,z-80,biome==="desert"?40:28),medium=valueNoise(x-40,z+60,biome==="desert"?20:12),detail=valueNoise(x+15,z+15,4);
-  const height=Math.floor(-1+broad*(biome==="desert"?4:7)+medium*(biome==="desert"?1.8:3.5)+detail*1.5);
+  const mountain=valueNoise(x+1700,z-2100,72);
+  const ridge=Math.max(0,(mountain-.58)*2.4);
+  const height=Math.floor(-1+broad*(biome==="desert"?4:9)+medium*(biome==="desert"?1.8:4.5)+detail*1.5+ridge*13);
   return biome==="desert"?Math.max(1,height):height;
 }
 function makeTree(x,z){
@@ -380,8 +406,8 @@ function processChunkQueue(){
       else{
         type="stone";
         const ore=hashNoise(x*13+y*7,z*11-y*5);
-        if(y<-2&&ore>.992)type="diamond";
-        else if(y<-1&&ore>.976)type="gold";
+        if(y<-8&&ore>.992)type="diamond";
+        else if(y<-6&&ore>.976)type="gold";
         else if(ore>.951)type="iron";
         else if(ore>.925)type="coal";
       }
@@ -425,10 +451,17 @@ function updateChunks(force=false){
   chunkQueue.sort((a,b)=>((a.cx-cx)**2+(a.cz-cz)**2)-((b.cx-cx)**2+(b.cz-cz)**2));
   status.textContent=`Loading nearby chunks · ${loadedChunks.size} ready · Seed ${WORLD_SEED}`;
 }
-// Queue the starting area with the spawn chunk first, rather than generating
-// all nine chunks in one blocking burst.
-for(let cx=-CHUNK_RADIUS;cx<=CHUNK_RADIUS;cx++)for(let cz=-CHUNK_RADIUS;cz<=CHUNK_RADIUS;cz++)generateChunk(cx,cz);
-chunkQueue.sort((a,b)=>(a.cx*a.cx+a.cz*a.cz)-(b.cx*b.cx+b.cz*b.cz));
+// Chunks are deliberately NOT queued at page load. The Start button begins a
+// 7x7 (49 chunk) preload and the loading screen tracks its progress.
+let loadingWorld=false;
+let preloadTarget=49;
+function queueSpawnSquare(){
+  chunkQueue.length=0;queuedChunks.clear();activeChunkJob=null;
+  const radius=3;
+  const centerX=Math.floor(player.x/CHUNK_SIZE),centerZ=Math.floor(player.z/CHUNK_SIZE);
+  for(let cx=centerX-radius;cx<=centerX+radius;cx++)for(let cz=centerZ-radius;cz<=centerZ+radius;cz++)generateChunk(cx,cz);
+  chunkQueue.sort((a,b)=>((a.cx-centerX)**2+(a.cz-centerZ)**2)-((b.cx-centerX)**2+(b.cz-centerZ)**2));
+}
 
 const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
 const avatar=new THREE.Group();scene.add(avatar);
@@ -749,6 +782,17 @@ function showMainMenu(){
   renderSavedWorlds();
 }
 function hideMainMenu(){mainMenu.style.display="none";}
+function startWorldLoading(){
+  gameStarted=false;loadingWorld=true;
+  mainMenu.style.display="none";menuOverlay.style.display="none";
+  const screen=document.getElementById("loadingScreen");screen.style.display="flex";
+  document.getElementById("loadingBar").style.width="0%";document.getElementById("loadingPercent").textContent="0%";
+  document.getElementById("loadingMessage").textContent="Preparing your 49-chunk spawn area...";
+  loadedChunks.clear();blocks.clear();meshes.forEach(m=>scene.remove(m));meshes.clear();
+  queueSpawnSquare();lastChunkX=NaN;lastChunkZ=NaN;
+  player.x=Number.isFinite(player.x)?player.x:0;player.z=Number.isFinite(player.z)?player.z:0;
+  status.textContent="Preparing world...";
+}
 function renderSavedWorlds(){
   const list=document.getElementById("savedWorldList");list.replaceChildren();
   const slots=readSlots();
@@ -791,7 +835,7 @@ function saveWorld(){
 }
 function loadWorldSlot(id){
   const slot=readSlots().find(item=>item.id===id);if(!slot)return;
-  try{localStorage.setItem(SAVE_KEY,JSON.stringify(slot.data));localStorage.setItem(ACTIVE_SLOT_KEY,id);location.reload();}
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(slot.data));localStorage.setItem(ACTIVE_SLOT_KEY,id);localStorage.setItem(START_REQUEST_KEY,"load");location.reload();}
   catch(_){mainMenuMessage.textContent="Couldn't load that save. Browser storage may be unavailable.";}
 }
 function deleteWorldSlot(id,name){
@@ -804,7 +848,7 @@ function createWorld(mode){
   try{
     const chosenType=document.getElementById("worldTypeSelect").value==="superflat"?"superflat":"normal";
     localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_SLOT_KEY);localStorage.setItem(START_MODE_KEY,JSON.stringify(mode));
-    localStorage.setItem(START_WORLD_TYPE_KEY,JSON.stringify(chosenType));localStorage.setItem(WORLD_TYPE_PREF_KEY,JSON.stringify(chosenType));
+    localStorage.setItem(START_WORLD_TYPE_KEY,JSON.stringify(chosenType));localStorage.setItem(WORLD_TYPE_PREF_KEY,JSON.stringify(chosenType));localStorage.setItem(START_REQUEST_KEY,"new");
     location.reload();
   }catch(_){mainMenuMessage.textContent="Couldn't create a world. Browser storage may be disabled.";}
 }
@@ -813,9 +857,9 @@ worldTypeSelect.value=(readLocal(WORLD_TYPE_PREF_KEY)==="superflat"?"superflat":
 worldTypeSelect.addEventListener("change",()=>{try{localStorage.setItem(WORLD_TYPE_PREF_KEY,JSON.stringify(worldTypeSelect.value));}catch(_){}});
 document.getElementById("createCreativeBtn").addEventListener("click",()=>createWorld("creative"));
 document.getElementById("createSurvivalBtn").addEventListener("click",()=>createWorld("survival"));
-document.getElementById("continueBtn").addEventListener("click",()=>{hideMainMenu();gameStarted=true;});
+document.getElementById("continueBtn").addEventListener("click",()=>startWorldLoading());
 document.getElementById("mainSettingsBtn").addEventListener("click",()=>{returnToMainMenu=true;hideMainMenu();openMenu();});
-document.getElementById("mainExitBtn").addEventListener("click",()=>{hideMainMenu();gameStarted=true;});
+document.getElementById("mainExitBtn").addEventListener("click",()=>{mainMenuMessage.textContent="Choose a world and press Creative or Survival to start.";});
 document.getElementById("saveBtn").addEventListener("click",saveWorld);
 document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
 document.getElementById("menuBtn").addEventListener("click",openMenu);
@@ -833,14 +877,14 @@ document.getElementById("newWorldBtn").addEventListener("click",()=>{
 const savedSettings=readLocal(SETTINGS_KEY)||{};
 const qualitySelect=document.getElementById("qualitySelect"),distanceSelect=document.getElementById("distanceSelect");
 qualitySelect.value=String(savedSettings.quality||1);
-distanceSelect.value=String(savedSettings.distance===2?2:1);
-CHUNK_RADIUS=Number(distanceSelect.value)===2?2:1;
+distanceSelect.value=String([1,2,3,4].includes(savedSettings.distance)?savedSettings.distance:3);
+CHUNK_RADIUS=Number(distanceSelect.value)||3;
 renderer.setPixelRatio(Math.min((devicePixelRatio||1)*(Number(qualitySelect.value)||1),1.75));
 renderer.setSize(innerWidth,innerHeight);
 function applySettings(){
   const quality=Number(qualitySelect.value)||1;
   renderer.setPixelRatio(Math.min((devicePixelRatio||1)*quality,1.75));
-  CHUNK_RADIUS=Number(distanceSelect.value)===2?2:1;
+  CHUNK_RADIUS=Number(distanceSelect.value)||3;
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({quality,distance:CHUNK_RADIUS}));}catch(_){}
   updateChunks(true);
   menuMessage.textContent="Settings applied. Lower quality or near render distance can improve performance.";
@@ -849,6 +893,8 @@ qualitySelect.addEventListener("change",applySettings);
 distanceSelect.addEventListener("change",applySettings);
 if(bootSave)status.textContent="Saved world ready · "+(bootSave.mode==="survival"?"SURVIVAL":"CREATIVE")+" · "+(bootSave.worldType==="superflat"?"SUPERFLAT":"NORMAL");
 showMainMenu();
+const startupRequest=localStorage.getItem(START_REQUEST_KEY);
+if(startupRequest){try{localStorage.removeItem(START_REQUEST_KEY);}catch(_){}startWorldLoading();}
 
 function updatePlayer(dt){
   let f=0,s=0;
@@ -936,12 +982,25 @@ let previous=performance.now();
 function animate(now){
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.035);previous=now;
-  processChunkQueue();
-  updateChunks();
+  if(loadingWorld||gameStarted)processChunkQueue();
+  if(gameStarted)updateChunks();
+  if(loadingWorld){
+    const done=Math.min(loadedChunks.size,preloadTarget);
+    const pct=Math.floor(done/preloadTarget*100);
+    document.getElementById("loadingBar").style.width=pct+"%";
+    document.getElementById("loadingPercent").textContent=pct+"%";
+    document.getElementById("loadingMessage").textContent=done<preloadTarget?`Generating chunks · ${done} of ${preloadTarget} ready`:"Finishing spawn area...";
+    if(done>=preloadTarget&&!chunkQueue.length&&!activeChunkJob){
+      loadingWorld=false;gameStarted=true;document.getElementById("loadingScreen").style.display="none";
+      status.textContent=`World ready · ${loadedChunks.size} chunks loaded · Seed ${WORLD_SEED}`;
+      updateChunks(true);
+    }
+  }
   if(gameStarted){
     updateMobs(now,dt);
     if(loadedChunks.has(chunkKey(Math.floor(player.x/CHUNK_SIZE),Math.floor(player.z/CHUNK_SIZE))))updatePlayer(dt);
   }
+  for(const cloud of clouds){cloud.group.position.x+=cloud.speed*dt;if(cloud.group.position.x>130)cloud.group.position.x=-130;}
   updateCamera();renderer.render(scene,camera);
 }
 window.addEventListener("resize",()=>{
@@ -950,7 +1009,7 @@ window.addEventListener("resize",()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
 requestAnimationFrame(animate);
-status.textContent=`Generating nearby chunks · ${loadedChunks.size} ready · Seed ${WORLD_SEED}`;
+status.textContent="Ready · choose a world and press Creative or Survival to start";
 })();
 </script>
 </body>
