@@ -180,6 +180,9 @@ const CHUNK_RADIUS=1; // 3x3 active chunks keeps mobile performance reasonable.
 const WORLD_SEED=Math.floor(Math.random()*0x7fffffff);
 const BEDROCK_Y=-6;
 const loadedChunks=new Set();
+const chunkQueue=[];
+const queuedChunks=new Set();
+let activeChunkJob=null;
 // Keep edits in memory while chunks unload/reload during exploration.
 // This is session-only; permanent saving will be added in the save-system phase.
 const worldEdits=new Map();
@@ -210,36 +213,16 @@ function makeTree(x,z){
 }
 function chunkKey(cx,cz){return `${cx},${cz}`;}
 function generateChunk(cx,cz){
-  const ck=chunkKey(cx,cz);if(loadedChunks.has(ck))return;
-  loadedChunks.add(ck);
-  const startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE,trees=[];
-  for(let x=startX;x<startX+CHUNK_SIZE;x++)for(let z=startZ;z<startZ+CHUNK_SIZE;z++){
-    const top=terrainHeight(x,z);
-    for(let y=BEDROCK_Y;y<=top;y++){
-      let type;
-      if(y===BEDROCK_Y)type="bedrock";
-      else if(y===top)type=top<=0?"sand":"grass";
-      else if(y>=top-2)type="dirt";
-      else {
-        type="stone";
-        const ore=hashNoise(x*13+y*7,z*11-y*5);
-        if(y<-2&&ore>.992)type="diamond";
-        else if(y<-1&&ore>.976)type="gold";
-        else if(ore>.951)type="iron";
-        else if(ore>.925)type="coal";
-      }
-      // Small deterministic caves underground, never cutting the surface or bedrock.
-      const cave=valueNoise(x+y*3,z-y*2,5);
-      if(y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
-      addBlock(x,y,z,type);
-    }
-    // Trees stay away from chunk borders so unloading a chunk never clips a neighbor's tree.
-    if(x>=startX+3&&x<startX+CHUNK_SIZE-3&&z>=startZ+3&&z<startZ+CHUNK_SIZE-3&&hashNoise(x+450,z+700)>.965)trees.push([x,z]);
-  }
+  const ck=chunkKey(cx,cz);
+  if(loadedChunks.has(ck)||queuedChunks.has(ck))return;
+  queuedChunks.add(ck);
+  chunkQueue.push({cx,cz,ck,column:0,trees:[]});
+}
+function finishChunk(job){
+  const {cx,cz,ck,trees}=job;
   for(const [tx,tz] of trees)makeTree(tx,tz);
-  // Reapply this session's edits after generating the natural terrain and trees.
-  // This prevents broken/placed blocks from resetting when walking away and back.
-  const minX=startX,maxX=startX+CHUNK_SIZE,minZ=startZ,maxZ=startZ+CHUNK_SIZE;
+  // Reapply this session's edits after generating natural terrain and trees.
+  const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
   for(const [k,type] of worldEdits){
     const parts=k.split(',').map(Number),x=parts[0],y=parts[1],z=parts[2];
     if(x<minX||x>=maxX||z<minZ||z>=maxZ)continue;
@@ -250,7 +233,49 @@ function generateChunk(cx,cz){
       if(!getBlock(x,y,z))addBlock(x,y,z,type);
     }
   }
+  loadedChunks.add(ck);
+  queuedChunks.delete(ck);
 }
+// Generate only a small batch of terrain columns per frame so chunk creation
+// doesn't freeze touch input or camera movement on slower devices.
+function processChunkQueue(){
+  if(!activeChunkJob){
+    if(!chunkQueue.length)return;
+    activeChunkJob=chunkQueue.shift();
+  }
+  const job=activeChunkJob;
+  const startX=job.cx*CHUNK_SIZE,startZ=job.cz*CHUNK_SIZE;
+  const columnsPerFrame=8;
+  for(let n=0;n<columnsPerFrame&&job.column<CHUNK_SIZE*CHUNK_SIZE;n++,job.column++){
+    const x=startX+Math.floor(job.column/CHUNK_SIZE);
+    const z=startZ+(job.column%CHUNK_SIZE);
+    const top=terrainHeight(x,z);
+    for(let y=BEDROCK_Y;y<=top;y++){
+      let type;
+      if(y===BEDROCK_Y)type="bedrock";
+      else if(y===top)type=top<=0?"sand":"grass";
+      else if(y>=top-2)type="dirt";
+      else{
+        type="stone";
+        const ore=hashNoise(x*13+y*7,z*11-y*5);
+        if(y<-2&&ore>.992)type="diamond";
+        else if(y<-1&&ore>.976)type="gold";
+        else if(ore>.951)type="iron";
+        else if(ore>.925)type="coal";
+      }
+      const cave=valueNoise(x+y*3,z-y*2,5);
+      if(y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
+      addBlock(x,y,z,type);
+    }
+    if(x>=startX+3&&x<startX+CHUNK_SIZE-3&&z>=startZ+3&&z<startZ+CHUNK_SIZE-3&&hashNoise(x+450,z+700)>.965)job.trees.push([x,z]);
+  }
+  if(job.column>=CHUNK_SIZE*CHUNK_SIZE){
+    finishChunk(job);
+    activeChunkJob=null;
+    status.textContent=`Generating world · ${loadedChunks.size} chunks ready · Seed ${WORLD_SEED}`;
+  }
+}
+
 function unloadChunk(cx,cz){
   const ck=chunkKey(cx,cz);if(!loadedChunks.has(ck))return;
   const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
@@ -264,12 +289,24 @@ function updateChunks(force=false){
   const cx=Math.floor(player.x/CHUNK_SIZE),cz=Math.floor(player.z/CHUNK_SIZE);
   if(!force&&cx===lastChunkX&&cz===lastChunkZ)return;
   lastChunkX=cx;lastChunkZ=cz;
-  for(let x=cx-CHUNK_RADIUS;x<=cx+CHUNK_RADIUS;x++)for(let z=cz-CHUNK_RADIUS;z<=cz+CHUNK_RADIUS;z++)generateChunk(x,z);
+  const wanted=[];
+  for(let x=cx-CHUNK_RADIUS;x<=cx+CHUNK_RADIUS;x++)for(let z=cz-CHUNK_RADIUS;z<=cz+CHUNK_RADIUS;z++)wanted.push({x,z,d:(x-cx)*(x-cx)+(z-cz)*(z-cz)});
+  wanted.sort((a,b)=>a.d-b.d);
+  for(const c of wanted)generateChunk(c.x,c.z);
   for(const ck of [...loadedChunks]){const [x,z]=ck.split(',').map(Number);if(Math.abs(x-cx)>CHUNK_RADIUS||Math.abs(z-cz)>CHUNK_RADIUS)unloadChunk(x,z);}
-  status.textContent=`World loaded · ${loadedChunks.size} chunks · Seed ${WORLD_SEED}`;
+  // Drop queued jobs that are no longer near the player; an already-active job
+  // finishes safely, then the queue prioritizes the closest remaining chunks.
+  for(let i=chunkQueue.length-1;i>=0;i--){
+    const job=chunkQueue[i];
+    if(Math.abs(job.cx-cx)>CHUNK_RADIUS||Math.abs(job.cz-cz)>CHUNK_RADIUS){chunkQueue.splice(i,1);queuedChunks.delete(job.ck);}
+  }
+  chunkQueue.sort((a,b)=>((a.cx-cx)**2+(a.cz-cz)**2)-((b.cx-cx)**2+(b.cz-cz)**2));
+  status.textContent=`Loading nearby chunks · ${loadedChunks.size} ready · Seed ${WORLD_SEED}`;
 }
-// Load the starting area around the origin.
+// Queue the starting area with the spawn chunk first, rather than generating
+// all nine chunks in one blocking burst.
 for(let cx=-CHUNK_RADIUS;cx<=CHUNK_RADIUS;cx++)for(let cz=-CHUNK_RADIUS;cz<=CHUNK_RADIUS;cz++)generateChunk(cx,cz);
+chunkQueue.sort((a,b)=>(a.cx*a.cx+a.cz*a.cz)-(b.cx*b.cx+b.cz*b.cz));
 
 const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
 const avatar=new THREE.Group();scene.add(avatar);
@@ -556,7 +593,10 @@ let previous=performance.now();
 function animate(now){
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.035);previous=now;
-  updatePlayer(dt);updateChunks();updateCamera();renderer.render(scene,camera);
+  processChunkQueue();
+  updateChunks();
+  if(loadedChunks.has("0,0"))updatePlayer(dt);
+  updateCamera();renderer.render(scene,camera);
 }
 window.addEventListener("resize",()=>{
   camera.aspect=innerWidth/innerHeight;
@@ -564,7 +604,7 @@ window.addEventListener("resize",()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
 requestAnimationFrame(animate);
-status.textContent=`World ready · ${loadedChunks.size} chunks · Deep caves · Seed ${WORLD_SEED} · edits stay until reload`;
+status.textContent=`Generating nearby chunks · ${loadedChunks.size} ready · Deep caves · Seed ${WORLD_SEED}`;
 })();
 </script>
 </body>
