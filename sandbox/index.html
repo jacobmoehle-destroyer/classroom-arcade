@@ -102,8 +102,8 @@ const sun = new THREE.DirectionalLight(0xffffff,2);
 sun.position.set(-15,30,12);
 scene.add(sun);
 
-const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves"};
-const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d};
+const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock"};
+const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d};
 const materials={};
 
 function createTexture(type){
@@ -132,13 +132,26 @@ function createTexture(type){
       ctx.fillRect(Math.floor(rand()*32),Math.floor(rand()*32),4,4);
     }
   }
+  if(type==="coal"||type==="iron"||type==="gold"||type==="diamond"){
+    const oreColor={coal:"#242629",iron:"#d0b9a5",gold:"#ffe15a",diamond:"#8afff3"}[type];
+    for(let i=0;i<15;i++){ctx.fillStyle=oreColor;ctx.fillRect(Math.floor(rand()*28),Math.floor(rand()*28),3+Math.floor(rand()*4),3+Math.floor(rand()*4));}
+  }
+  if(type==="bricks"){
+    ctx.strokeStyle="#e0a18a";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,10);ctx.lineTo(32,10);ctx.moveTo(0,22);ctx.lineTo(32,22);ctx.moveTo(10,0);ctx.lineTo(10,10);ctx.moveTo(24,10);ctx.lineTo(24,22);ctx.moveTo(8,22);ctx.lineTo(8,32);ctx.stroke();
+  }
+  if(type==="cobble"){
+    ctx.strokeStyle="#4c5054";ctx.lineWidth=2;for(let i=0;i<6;i++){ctx.strokeRect(Math.floor(rand()*23),Math.floor(rand()*23),6+Math.floor(rand()*5),5+Math.floor(rand()*5));}
+  }
+  if(type==="glass"){
+    ctx.strokeStyle="#e7ffff";ctx.lineWidth=2;ctx.strokeRect(2,2,28,28);ctx.beginPath();ctx.moveTo(5,25);ctx.lineTo(25,5);ctx.stroke();
+  }
   const tex=new THREE.CanvasTexture(c);
   tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
   tex.colorSpace=THREE.SRGBColorSpace;
   return tex;
 }
 for(const type of Object.keys(names)){
-  materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type)});
+  materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type), ...(type==="glass"?{transparent:true,opacity:.42}: {})});
 }
 
 const geometry=new THREE.BoxGeometry(1,1,1);
@@ -161,34 +174,29 @@ function removeBlock(x,y,z){
   scene.remove(mesh);blocks.delete(k);meshes.delete(k);
   return true;
 }
-// Randomized multi-chunk world: 3 x 3 chunks, each 16 x 16 blocks.
-// A world seed makes the terrain internally consistent during this session.
+// Seeded, effectively endless chunk world. Nearby chunks are loaded as you explore.
 const CHUNK_SIZE=16;
-const CHUNK_RADIUS=1;
+const CHUNK_RADIUS=1; // 3x3 active chunks keeps mobile performance reasonable.
 const WORLD_SEED=Math.floor(Math.random()*0x7fffffff);
+const BEDROCK_Y=-6;
+const loadedChunks=new Set();
+let lastChunkX=NaN,lastChunkZ=NaN;
 function hashNoise(x,z){
   let n=(Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(WORLD_SEED,1442695041))|0;
-  n=Math.imul(n^(n>>>13),1274126177);
-  n=(n^(n>>>16))>>>0;
-  return n/4294967295;
+  n=Math.imul(n^(n>>>13),1274126177);n=(n^(n>>>16))>>>0;return n/4294967295;
 }
 function smooth(t){return t*t*(3-2*t);}
 function valueNoise(x,z,scale){
-  const gx=Math.floor(x/scale),gz=Math.floor(z/scale);
-  const tx=smooth((x/scale)-gx),tz=smooth((z/scale)-gz);
+  const gx=Math.floor(x/scale),gz=Math.floor(z/scale),tx=smooth(x/scale-gx),tz=smooth(z/scale-gz);
   const a=hashNoise(gx,gz),b=hashNoise(gx+1,gz),c=hashNoise(gx,gz+1),d=hashNoise(gx+1,gz+1);
-  const top=a+(b-a)*tx,bottom=c+(d-c)*tx;
-  return top+(bottom-top)*tz;
+  const top=a+(b-a)*tx,bottom=c+(d-c)*tx;return top+(bottom-top)*tz;
 }
 function terrainHeight(x,z){
-  const broad=valueNoise(x+120,z-80,22);
-  const medium=valueNoise(x-40,z+60,10);
-  const detail=valueNoise(x+15,z+15,4);
-  return Math.floor(-1+broad*6+medium*3+detail*1.5);
+  const broad=valueNoise(x+120,z-80,28),medium=valueNoise(x-40,z+60,12),detail=valueNoise(x+15,z+15,4);
+  return Math.floor(-1+broad*7+medium*3.5+detail*1.5);
 }
 function makeTree(x,z){
   const g=terrainHeight(x,z);
-  // Keep the spawn clearing open and avoid planting on low beach tiles.
   if(Math.abs(x)<4&&Math.abs(z)<4)return;
   if(g<1)return;
   const trunk=3+(hashNoise(x+900,z-900)>.65?1:0);
@@ -197,24 +205,55 @@ function makeTree(x,z){
     if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-trunk)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
 }
-const generatedTrees=[];
-for(let chunkX=-CHUNK_RADIUS;chunkX<=CHUNK_RADIUS;chunkX++){
-  for(let chunkZ=-CHUNK_RADIUS;chunkZ<=CHUNK_RADIUS;chunkZ++){
-    const startX=chunkX*CHUNK_SIZE,startZ=chunkZ*CHUNK_SIZE;
-    for(let x=startX;x<startX+CHUNK_SIZE;x++){
-      for(let z=startZ;z<startZ+CHUNK_SIZE;z++){
-        const top=terrainHeight(x,z);
-        for(let y=top-3;y<=top;y++){
-          const type=y===top?(top<=0?"sand":"grass"):y>=top-1?"dirt":"stone";
-          addBlock(x,y,z,type);
-        }
-        // Deterministic placement gives each generated world its own forest pattern.
-        if(hashNoise(x+450,z+700)>.965)generatedTrees.push([x,z]);
+function chunkKey(cx,cz){return `${cx},${cz}`;}
+function generateChunk(cx,cz){
+  const ck=chunkKey(cx,cz);if(loadedChunks.has(ck))return;
+  loadedChunks.add(ck);
+  const startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE,trees=[];
+  for(let x=startX;x<startX+CHUNK_SIZE;x++)for(let z=startZ;z<startZ+CHUNK_SIZE;z++){
+    const top=terrainHeight(x,z);
+    for(let y=BEDROCK_Y;y<=top;y++){
+      let type;
+      if(y===BEDROCK_Y)type="bedrock";
+      else if(y===top)type=top<=0?"sand":"grass";
+      else if(y>=top-2)type="dirt";
+      else {
+        type="stone";
+        const ore=hashNoise(x*13+y*7,z*11-y*5);
+        if(y<-2&&ore>.992)type="diamond";
+        else if(y<-1&&ore>.976)type="gold";
+        else if(ore>.951)type="iron";
+        else if(ore>.925)type="coal";
       }
+      // Small deterministic caves underground, never cutting the surface or bedrock.
+      const cave=valueNoise(x+y*3,z-y*2,5);
+      if(y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
+      addBlock(x,y,z,type);
     }
+    // Trees stay away from chunk borders so unloading a chunk never clips a neighbor's tree.
+    if(x>=startX+2&&x<startX+CHUNK_SIZE-2&&z>=startZ+2&&z<startZ+CHUNK_SIZE-2&&hashNoise(x+450,z+700)>.965)trees.push([x,z]);
   }
+  for(const [tx,tz] of trees)makeTree(tx,tz);
 }
-for(const [treeX,treeZ] of generatedTrees)makeTree(treeX,treeZ);
+function unloadChunk(cx,cz){
+  const ck=chunkKey(cx,cz);if(!loadedChunks.has(ck))return;
+  const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
+  for(const [k,mesh] of meshes){
+    const x=mesh.userData.x,z=mesh.userData.z;
+    if(x>=minX&&x<maxX&&z>=minZ&&z<maxZ){scene.remove(mesh);meshes.delete(k);blocks.delete(k);}
+  }
+  loadedChunks.delete(ck);
+}
+function updateChunks(force=false){
+  const cx=Math.floor(player.x/CHUNK_SIZE),cz=Math.floor(player.z/CHUNK_SIZE);
+  if(!force&&cx===lastChunkX&&cz===lastChunkZ)return;
+  lastChunkX=cx;lastChunkZ=cz;
+  for(let x=cx-CHUNK_RADIUS;x<=cx+CHUNK_RADIUS;x++)for(let z=cz-CHUNK_RADIUS;z<=cz+CHUNK_RADIUS;z++)generateChunk(x,z);
+  for(const ck of [...loadedChunks]){const [x,z]=ck.split(',').map(Number);if(Math.abs(x-cx)>CHUNK_RADIUS||Math.abs(z-cz)>CHUNK_RADIUS)unloadChunk(x,z);}
+  status.textContent=`World loaded · ${loadedChunks.size} chunks · Seed ${WORLD_SEED}`;
+}
+// Load the starting area around the origin.
+for(let cx=-CHUNK_RADIUS;cx<=CHUNK_RADIUS;cx++)for(let cz=-CHUNK_RADIUS;cz<=CHUNK_RADIUS;cz++)generateChunk(cx,cz);
 
 const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
 const avatar=new THREE.Group();scene.add(avatar);
@@ -501,7 +540,7 @@ let previous=performance.now();
 function animate(now){
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.035);previous=now;
-  updatePlayer(dt);updateCamera();renderer.render(scene,camera);
+  updatePlayer(dt);updateChunks();updateCamera();renderer.render(scene,camera);
 }
 window.addEventListener("resize",()=>{
   camera.aspect=innerWidth/innerHeight;
@@ -509,7 +548,7 @@ window.addEventListener("resize",()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
 requestAnimationFrame(animate);
-status.textContent=`Random world ready! 9 chunks generated · Seed ${WORLD_SEED}`;
+status.textContent=`World ready · ${loadedChunks.size} chunks · Deep caves · Seed ${WORLD_SEED}`;
 })();
 </script>
 </body>
