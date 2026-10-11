@@ -119,6 +119,9 @@ button:active,button.selected{background:#27864d}
     <p style="text-align:center;color:#cbd5e1;margin:0 0 22px">Build your own world. Play your way.</p>
     <div id="continueArea" style="display:none;margin-bottom:10px"><button id="continueBtn" style="width:100%;padding:14px;font-size:16px">▶ Continue World</button></div>
     <h2 style="font-size:18px;margin:12px 0">Create a new world</h2>
+    <label for="worldTypeSelect" style="display:block;margin:8px 0 5px;color:#e2e8f0;font-size:14px">World type</label>
+    <select id="worldTypeSelect" style="width:100%;padding:12px;border-radius:10px;font-size:15px;margin-bottom:10px"><option value="normal">🌍 Normal world — hills, forests, deserts, snow</option><option value="superflat">🟩 Superflat — flat building world</option></select>
+    <p style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Normal worlds have biome regions and hills. Superflat worlds are level for easy building. Choose a type, then pick Creative or Survival.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button id="createCreativeBtn" style="padding:16px 10px;background:#246b42"><span style="font-size:24px">🛠️</span><br><span style="font-size:16px">Creative</span><br><small style="font-weight:500">Unlimited blocks · no hunger</small></button>
       <button id="createSurvivalBtn" style="padding:16px 10px;background:#8b3b35"><span style="font-size:24px">❤️</span><br><span style="font-size:16px">Survival</span><br><small style="font-weight:500">Collect · craft · stay alive</small></button>
@@ -253,9 +256,14 @@ const SAVE_KEY="classroomSandboxSaveV1";
 const SLOTS_KEY="classroomSandboxWorldSlotsV1";
 const ACTIVE_SLOT_KEY="classroomSandboxActiveSlotV1";
 const START_MODE_KEY="classroomSandboxStartModeV1";
+const START_WORLD_TYPE_KEY="classroomSandboxStartWorldTypeV1";
+const WORLD_TYPE_PREF_KEY="classroomSandboxWorldTypePrefV1";
 const SETTINGS_KEY="classroomSandboxSettingsV1";
 function readLocal(key){try{return JSON.parse(localStorage.getItem(key)||"null");}catch(_){return null;}}
 const bootSave=readLocal(SAVE_KEY);
+const pendingWorldType=readLocal(START_WORLD_TYPE_KEY);
+try{localStorage.removeItem(START_WORLD_TYPE_KEY);}catch(_){}
+let WORLD_TYPE=(bootSave&&bootSave.worldType==="superflat")?"superflat":(!bootSave&&pendingWorldType==="superflat"?"superflat":"normal");
 let WORLD_SEED=bootSave&&Number.isFinite(bootSave.seed)?bootSave.seed:Math.floor(Math.random()*0x7fffffff);
 const BEDROCK_Y=-6;
 const loadedChunks=new Set();
@@ -276,12 +284,24 @@ function valueNoise(x,z,scale){
   const a=hashNoise(gx,gz),b=hashNoise(gx+1,gz),c=hashNoise(gx,gz+1),d=hashNoise(gx+1,gz+1);
   const top=a+(b-a)*tx,bottom=c+(d-c)*tx;return top+(bottom-top)*tz;
 }
+function getBiome(x,z){
+  if(WORLD_TYPE==="superflat")return "plains";
+  const n=valueNoise(x+731,z-419,96);
+  if(n<.22)return "snowy";
+  if(n>.73)return "desert";
+  if(n>.48)return "forest";
+  return "plains";
+}
 function terrainHeight(x,z){
-  const broad=valueNoise(x+120,z-80,28),medium=valueNoise(x-40,z+60,12),detail=valueNoise(x+15,z+15,4);
-  return Math.floor(-1+broad*7+medium*3.5+detail*1.5);
+  if(WORLD_TYPE==="superflat")return 2;
+  const biome=getBiome(x,z);
+  const broad=valueNoise(x+120,z-80,biome==="desert"?40:28),medium=valueNoise(x-40,z+60,biome==="desert"?20:12),detail=valueNoise(x+15,z+15,4);
+  const height=Math.floor(-1+broad*(biome==="desert"?4:7)+medium*(biome==="desert"?1.8:3.5)+detail*1.5);
+  return biome==="desert"?Math.max(1,height):height;
 }
 function makeTree(x,z){
   const g=terrainHeight(x,z);
+  if(WORLD_TYPE==="superflat"||getBiome(x,z)!=="forest")return;
   if(Math.abs(x)<4&&Math.abs(z)<4)return;
   if(g<1)return;
   const trunk=3+(hashNoise(x+900,z-900)>.65?1:0);
@@ -350,10 +370,12 @@ function processChunkQueue(){
     const x=startX+Math.floor(job.column/CHUNK_SIZE);
     const z=startZ+(job.column%CHUNK_SIZE);
     const top=terrainHeight(x,z);
+    const biome=getBiome(x,z);
     for(let y=BEDROCK_Y;y<=top;y++){
       let type;
       if(y===BEDROCK_Y)type="bedrock";
-      else if(y===top)type=top<=0?"sand":"grass";
+      else if(y===top)type=biome==="desert"?"sand":biome==="snowy"?"snow":(top<=0?"sand":"grass");
+      else if(biome==="desert"&&y>=top-3)type="sand";
       else if(y>=top-2)type="dirt";
       else{
         type="stone";
@@ -364,10 +386,10 @@ function processChunkQueue(){
         else if(ore>.925)type="coal";
       }
       const cave=valueNoise(x+y*3,z-y*2,5);
-      if(y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
+      if(WORLD_TYPE!=="superflat"&&y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
       addBlock(x,y,z,type);
     }
-    if(x>=startX+3&&x<startX+CHUNK_SIZE-3&&z>=startZ+3&&z<startZ+CHUNK_SIZE-3&&hashNoise(x+450,z+700)>.965)job.trees.push([x,z]);
+    if(WORLD_TYPE!=="superflat"&&biome==="forest"&&x>=startX+3&&x<startX+CHUNK_SIZE-3&&z>=startZ+3&&z<startZ+CHUNK_SIZE-3&&hashNoise(x+450,z+700)>.94)job.trees.push([x,z]);
   }
   if(job.column>=CHUNK_SIZE*CHUNK_SIZE){
     finishChunk(job);
@@ -721,7 +743,9 @@ function readSlots(){
 function showMainMenu(){
   gameStarted=false;
   mainMenu.style.display="flex";
-  document.getElementById("continueArea").style.display=readLocal(SAVE_KEY)?"block":"none";
+  const lastSave=readLocal(SAVE_KEY);
+  document.getElementById("continueArea").style.display=lastSave?"block":"none";
+  if(lastSave)document.getElementById("continueBtn").textContent="▶ Continue · "+(lastSave.mode==="survival"?"Survival":"Creative")+" · "+(lastSave.worldType==="superflat"?"Superflat":"Normal");
   renderSavedWorlds();
 }
 function hideMainMenu(){mainMenu.style.display="none";}
@@ -733,7 +757,7 @@ function renderSavedWorlds(){
     const card=document.createElement("div");card.style.cssText="display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#0a1320;border:1px solid #ffffff22;border-radius:12px;padding:10px";
     const info=document.createElement("div");info.style.cssText="flex:1;min-width:130px";
     const name=document.createElement("div");name.style.cssText="font-weight:800";name.textContent=slot.name||"My World";
-    const meta=document.createElement("div");meta.style.cssText="font-size:12px;color:#cbd5e1;margin-top:3px";meta.textContent=(slot.data.mode==="survival"?"❤️ SURVIVAL":"🛠 CREATIVE")+" · Seed "+(slot.data.seed??"?");
+    const meta=document.createElement("div");meta.style.cssText="font-size:12px;color:#cbd5e1;margin-top:3px";meta.textContent=(slot.data.mode==="survival"?"❤️ SURVIVAL":"🛠 CREATIVE")+" · "+(slot.data.worldType==="superflat"?"🟩 SUPERFLAT":"🌍 NORMAL")+" · Seed "+(slot.data.seed??"?");
     info.append(name,meta);
     const load=document.createElement("button");load.textContent="▶ Load";load.style.padding="9px 12px";load.addEventListener("click",()=>loadWorldSlot(slot.id));
     const del=document.createElement("button");del.textContent="🗑";del.title="Delete saved world";del.setAttribute("aria-label","Delete "+(slot.name||"world"));del.style.padding="9px 12px";del.addEventListener("click",()=>deleteWorldSlot(slot.id,slot.name||"My World"));
@@ -742,7 +766,7 @@ function renderSavedWorlds(){
 }
 function saveWorld(){
   const edits={};for(const [key,value] of worldEdits)edits[key]=value;
-  const data={version:3,seed:WORLD_SEED,mode:gameMode,inventory:{...inventory},health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  const data={version:4,seed:WORLD_SEED,mode:gameMode,worldType:WORLD_TYPE,inventory:{...inventory},health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
   try{
     let slots=readSlots();
     let slot=slots.find(item=>item.id===activeSlotId);
@@ -778,10 +802,15 @@ function deleteWorldSlot(id,name){
 }
 function createWorld(mode){
   try{
+    const chosenType=document.getElementById("worldTypeSelect").value==="superflat"?"superflat":"normal";
     localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_SLOT_KEY);localStorage.setItem(START_MODE_KEY,JSON.stringify(mode));
+    localStorage.setItem(START_WORLD_TYPE_KEY,JSON.stringify(chosenType));localStorage.setItem(WORLD_TYPE_PREF_KEY,JSON.stringify(chosenType));
     location.reload();
   }catch(_){mainMenuMessage.textContent="Couldn't create a world. Browser storage may be disabled.";}
 }
+const worldTypeSelect=document.getElementById("worldTypeSelect");
+worldTypeSelect.value=(readLocal(WORLD_TYPE_PREF_KEY)==="superflat"?"superflat":"normal");
+worldTypeSelect.addEventListener("change",()=>{try{localStorage.setItem(WORLD_TYPE_PREF_KEY,JSON.stringify(worldTypeSelect.value));}catch(_){}});
 document.getElementById("createCreativeBtn").addEventListener("click",()=>createWorld("creative"));
 document.getElementById("createSurvivalBtn").addEventListener("click",()=>createWorld("survival"));
 document.getElementById("continueBtn").addEventListener("click",()=>{hideMainMenu();gameStarted=true;});
@@ -818,7 +847,7 @@ function applySettings(){
 }
 qualitySelect.addEventListener("change",applySettings);
 distanceSelect.addEventListener("change",applySettings);
-if(bootSave)status.textContent="Saved world ready · "+(bootSave.mode==="survival"?"SURVIVAL":"CREATIVE");
+if(bootSave)status.textContent="Saved world ready · "+(bootSave.mode==="survival"?"SURVIVAL":"CREATIVE")+" · "+(bootSave.worldType==="superflat"?"SUPERFLAT":"NORMAL");
 showMainMenu();
 
 function updatePlayer(dt){
