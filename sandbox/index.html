@@ -4,139 +4,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+ content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Classroom Sandbox</title>
+
 <style>
-* { box-sizing: border-box; }
-html, body {
-  margin: 0; width: 100%; height: 100%;
-  overflow: hidden; background: #8bd5ff;
-  font-family: Arial, sans-serif; touch-action: none;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
-#game { position: fixed; inset: 0; }
-canvas { display: block; width: 100%; height: 100%; }
-#top {
-  position: fixed; top: 10px; left: 10px; right: 10px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 8px; pointer-events: none; z-index: 5;
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #8bd5ff;
+  font-family: Arial, sans-serif;
+  touch-action: none;
+}
+#game {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px;
+  background: #263747;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+button:active, button.active {
+  background: #e58b35;
 }
 .panel {
-  background: #17212be8; color: white; border-radius: 12px;
-  padding: 10px 12px; box-shadow: 0 3px 12px #0003;
+  padding: 10px 12px;
+  color: white;
+  background: #17212be8;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #0003;
 }
-#title { font-size: 16px; font-weight: bold; }
-#status { font-size: 12px; margin-top: 4px; color: #cbd5e1; }
-button {
-  border: 0; border-radius: 10px; padding: 12px;
-  background: #263747; color: white; font-weight: bold;
-  font-size: 14px; cursor: pointer; touch-action: none;
-  -webkit-user-select: none; user-select: none;
+#top {
+  position: fixed;
+  z-index: 5;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
 }
-button:active, button.active { background: #e58b35; }
-#top button { pointer-events: auto; }
+#top button {
+  pointer-events: auto;
+}
+#title {
+  font-size: 16px;
+  font-weight: bold;
+}
+#status {
+  margin-top: 4px;
+  color: #d5e2ed;
+  font-size: 12px;
+}
 #palette {
-  position: fixed; top: 88px; left: 10px;
-  display: flex; gap: 6px; flex-wrap: wrap;
-  max-width: 210px; z-index: 5;
+  position: fixed;
+  z-index: 5;
+  top: 88px;
+  left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 210px;
 }
 .swatch {
-  width: 42px; height: 42px; padding: 4px;
+  width: 42px;
+  height: 42px;
+  padding: 4px;
   border: 2px solid #ffffff88;
+  background-size: cover !important;
+  background-position: center !important;
 }
 .swatch.selected {
   border: 3px solid white;
   outline: 2px solid #263747;
 }
-#tools {
-  position: fixed; bottom: 12px; left: 50%;
-  transform: translateX(-50%);
-  display: flex; gap: 8px; align-items: center; z-index: 6;
-}
-#tools button { min-width: 76px; }
 #movement {
-  position: fixed; left: 14px; bottom: 20px;
+  position: fixed;
+  z-index: 6;
+  left: 14px;
+  bottom: 20px;
   display: grid;
   grid-template-columns: 52px 52px 52px;
   grid-template-rows: 52px 52px;
-  gap: 5px; z-index: 6;
+  gap: 5px;
 }
-#movement button { padding: 0; font-size: 20px; opacity: .9; }
+#movement button {
+  padding: 0;
+  font-size: 20px;
+  opacity: .9;
+}
 #forward { grid-column: 2; grid-row: 1; }
 #left { grid-column: 1; grid-row: 2; }
 #backward { grid-column: 2; grid-row: 2; }
 #right { grid-column: 3; grid-row: 2; }
 
-/* JUMP stays on the right side of the screen on touch devices */
 #jump {
   position: fixed;
-  left: auto;
-  right: 22px;
+  z-index: 10;
+  right: 20px;
   bottom: 125px;
   width: 76px;
   height: 76px;
   border-radius: 50%;
-  font-size: 14px;
   background: #e58b35;
   box-shadow: 0 3px 10px #0005;
-  z-index: 10;
+}
+#tools {
+  position: fixed;
+  z-index: 6;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#tools button {
+  min-width: 76px;
 }
 #lookHint {
-  position: fixed; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  color: white; text-shadow: 0 2px 4px #000;
-  font-size: 24px; pointer-events: none; z-index: 4;
+  position: fixed;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-shadow: 0 2px 5px #000;
+  font-size: 20px;
+  text-align: center;
+  pointer-events: none;
 }
 #help {
-  position: fixed; bottom: 10px; right: 10px;
-  max-width: 230px; font-size: 12px; line-height: 1.5;
-  pointer-events: none; z-index: 5;
+  position: fixed;
+  z-index: 5;
+  right: 10px;
+  bottom: 10px;
+  max-width: 235px;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: none;
 }
 @media (pointer: fine) {
-  #movement, #jump { display: none; }
+  #movement, #jump {
+    display: none;
+  }
 }
 @media (max-width: 650px) {
-  #help { display: none; }
-  #tools {
-    left: auto; right: 10px; transform: none;
-    bottom: 12px; flex-direction: column;
+  #help {
+    display: none;
   }
-  #tools button { min-width: 84px; padding: 12px 8px; }
-  #palette { top: 90px; max-width: 180px; }
-  #jump { right: 20px; bottom: 125px; }
+  #palette {
+    top: 90px;
+    max-width: 180px;
+  }
+  #tools {
+    left: auto;
+    right: 10px;
+    bottom: 12px;
+    transform: none;
+    flex-direction: column;
+  }
+  #tools button {
+    min-width: 84px;
+    padding: 12px 8px;
+  }
 }
 </style>
 </head>
+
 <body>
 <div id="game"></div>
 
 <div id="top">
   <div class="panel">
     <div id="title">🧱 CLASSROOM SANDBOX</div>
-    <div id="status">Creative mode · Loading world…</div>
+    <div id="status">Loading textured world...</div>
   </div>
   <button id="fullscreen">⛶ FULLSCREEN</button>
 </div>
 
 <div id="palette"></div>
 
-<!-- LEFT SIDE: movement -->
 <div id="movement">
-  <button id="forward" data-move="forward" aria-label="Move forward">▲</button>
-  <button id="left" data-move="left" aria-label="Move left">◀</button>
-  <button id="backward" data-move="backward" aria-label="Move backward">▼</button>
-  <button id="right" data-move="right" aria-label="Move right">▶</button>
+  <button id="forward" data-move="forward">▲</button>
+  <button id="left" data-move="left">◀</button>
+  <button id="backward" data-move="backward">▼</button>
+  <button id="right" data-move="right">▶</button>
 </div>
 
-<!-- RIGHT SIDE: jump -->
-<button id="jump" data-move="jump" aria-label="Jump">JUMP ↑</button>
+<button id="jump" data-move="jump">JUMP ↑</button>
 
-<!-- ACTION BUTTONS -->
 <div id="tools">
   <button id="remove">⛏ REMOVE</button>
   <button id="place">＋ PLACE</button>
 </div>
 
 <div id="lookHint">Tap or click to look around</div>
+
 <div id="help" class="panel">
   Computer: WASD to move · Mouse to look<br>
   Left-click: remove block · Right-click: place<br>
@@ -151,15 +235,21 @@ button:active, button.active { background: #e58b35; }
   const hint = document.getElementById("lookHint");
 
   if (!window.THREE) {
-    status.textContent = "Missing three.min.js — upload it beside index.html.";
+    status.textContent =
+      "Missing three.min.js — upload it beside index.html.";
     hint.textContent = "3D engine not found";
     return;
   }
 
   const THREE = window.THREE;
+
+  // --------------------------------------------------
+  // WORLD AND CAMERA
+  // --------------------------------------------------
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x8bd5ff);
-  scene.fog = new THREE.Fog(0x8bd5ff, 24, 65);
+  scene.fog = new THREE.Fog(0x8bd5ff, 25, 70);
 
   const camera = new THREE.PerspectiveCamera(
     75, innerWidth / innerHeight, 0.1, 1000
@@ -167,144 +257,371 @@ button:active, button.active { background: #e58b35; }
   camera.rotation.order = "YXZ";
   camera.position.set(8, 5, 12);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const renderer = new THREE.WebGLRenderer({
+    antialias: false,
+    powerPreference: "default"
+  });
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  if ("outputColorSpace" in renderer) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  }
+
   document.getElementById("game").appendChild(renderer.domElement);
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x64794d, 2));
+
   const sun = new THREE.DirectionalLight(0xffffff, 2);
   sun.position.set(12, 24, 10);
   sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
   scene.add(sun);
 
+  // --------------------------------------------------
+  // ORIGINAL PIXEL-ART TEXTURE GENERATOR
+  // No external texture files are required.
+  // --------------------------------------------------
+
+  function makeTexture(type) {
+    const size = 32;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+
+    function fill(color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    // Fixed seed gives consistent textures.
+    let seed = ({
+      grass: 1234, dirt: 2345, stone: 3456,
+      sand: 4567, wood: 5678, leaves: 6789
+    })[type] || 1111;
+
+    function random() {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    }
+
+    function flecks(colors, count, minSize, maxSize) {
+      for (let i = 0; i < count; i++) {
+        ctx.fillStyle = colors[
+          Math.floor(random() * colors.length)
+        ];
+
+        const w = minSize +
+          Math.floor(random() * (maxSize - minSize + 1));
+        const h = minSize +
+          Math.floor(random() * (maxSize - minSize + 1));
+
+        ctx.fillRect(
+          Math.floor(random() * size),
+          Math.floor(random() * size),
+          w, h
+        );
+      }
+    }
+
+    if (type === "grass") {
+      fill("#64b83e");
+      flecks(
+        ["#4c9d31", "#75c84a", "#8bd45a", "#529c32"],
+        110, 1, 3
+      );
+    }
+
+    if (type === "dirt") {
+      fill("#936039");
+      flecks(
+        ["#754729", "#ad7849", "#80502f", "#b38252"],
+        125, 1, 4
+      );
+    }
+
+    if (type === "stone") {
+      fill("#8d969e");
+      flecks(
+        ["#737c84", "#aab1b7", "#818990", "#686f77"],
+        115, 1, 4
+      );
+    }
+
+    if (type === "sand") {
+      fill("#e7d18b");
+      flecks(
+        ["#d8bd70", "#f3e2a5", "#c9b36e", "#edda98"],
+        105, 1, 3
+      );
+    }
+
+    if (type === "wood") {
+      fill("#98602f");
+
+      for (let x = 2; x < size; x += 6) {
+        ctx.fillStyle = random() > .5 ? "#78451f" : "#b17a40";
+        ctx.fillRect(x, 0, 2, size);
+      }
+
+      flecks(["#70401f", "#c18a4a"], 28, 1, 2);
+    }
+
+    if (type === "leaves") {
+      fill("#318440");
+      flecks(
+        ["#246c32", "#3f9a48", "#57ad4d", "#2b7838"],
+        135, 2, 5
+      );
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+
+    if ("colorSpace" in texture) {
+      texture.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    return texture;
+  }
+
+  const textures = {
+    grass: makeTexture("grass"),
+    dirt: makeTexture("dirt"),
+    stone: makeTexture("stone"),
+    sand: makeTexture("sand"),
+    wood: makeTexture("wood"),
+    leaves: makeTexture("leaves")
+  };
+
+  function material(texture) {
+    return new THREE.MeshLambertMaterial({ map: texture });
+  }
+
   const materials = {
-    grass: new THREE.MeshLambertMaterial({ color: 0x62b947 }),
-    dirt: new THREE.MeshLambertMaterial({ color: 0x956039 }),
-    stone: new THREE.MeshLambertMaterial({ color: 0x929ba5 }),
-    sand: new THREE.MeshLambertMaterial({ color: 0xe8d18a }),
-    wood: new THREE.MeshLambertMaterial({ color: 0x98602f }),
-    leaves: new THREE.MeshLambertMaterial({ color: 0x2f8a43 })
+    grassTop: material(textures.grass),
+    grassSide: material(textures.grass),
+    dirt: material(textures.dirt),
+    stone: material(textures.stone),
+    sand: material(textures.sand),
+    woodSide: material(textures.wood),
+    woodEnd: material(textures.wood),
+    leaves: material(textures.leaves)
   };
-  const colors = {
-    grass: "#62b947", dirt: "#956039", stone: "#929ba5",
-    sand: "#e8d18a", wood: "#98602f", leaves: "#2f8a43"
+
+  // Box face order: +X, -X, +Y, -Y, +Z, -Z.
+  // Grass has grass on top and dirt beneath the surface.
+  const blockMaterials = {
+    grass: [
+      materials.grassSide,
+      materials.grassSide,
+      materials.grassTop,
+      materials.dirt,
+      materials.grassSide,
+      materials.grassSide
+    ],
+    dirt: [
+      materials.dirt, materials.dirt,
+      materials.dirt, materials.dirt,
+      materials.dirt, materials.dirt
+    ],
+    stone: [
+      materials.stone, materials.stone,
+      materials.stone, materials.stone,
+      materials.stone, materials.stone
+    ],
+    sand: [
+      materials.sand, materials.sand,
+      materials.sand, materials.sand,
+      materials.sand, materials.sand
+    ],
+    wood: [
+      materials.woodSide, materials.woodSide,
+      materials.woodEnd, materials.woodEnd,
+      materials.woodSide, materials.woodSide
+    ],
+    leaves: [
+      materials.leaves, materials.leaves,
+      materials.leaves, materials.leaves,
+      materials.leaves, materials.leaves
+    ]
   };
-  const names = Object.keys(materials);
+
+  const blockColors = {
+    grass: "#64b83e",
+    dirt: "#936039",
+    stone: "#8d969e",
+    sand: "#e7d18b",
+    wood: "#98602f",
+    leaves: "#318440"
+  };
+
+  const blockIcons = {
+    grass: "🌱",
+    dirt: "🟫",
+    stone: "🪨",
+    sand: "🏖️",
+    wood: "🪵",
+    leaves: "🌿"
+  };
+
+  const names = Object.keys(blockMaterials);
   let selected = "grass";
+
+  // --------------------------------------------------
+  // BLOCK WORLD
+  // --------------------------------------------------
 
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const blocks = new Map();
   const blockMeshes = [];
 
-  const keyOf = (x,y,z) => `${x},${y},${z}`;
+  function keyOf(x, y, z) {
+    return `${x},${y},${z}`;
+  }
 
   function addBlock(x, y, z, type) {
-    const key = keyOf(x,y,z);
-    if (blocks.has(key)) return;
+    const key = keyOf(x, y, z);
 
-    const mesh = new THREE.Mesh(
-      geometry, materials[type] || materials.grass
-    );
-    mesh.position.set(x,y,z);
+    if (blocks.has(key)) return false;
+
+    if (!blockMaterials[type]) type = "grass";
+
+    const mesh = new THREE.Mesh(geometry, blockMaterials[type]);
+    mesh.position.set(x, y, z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    mesh.userData = { x,y,z,type };
+    mesh.userData = { x, y, z, type };
 
     scene.add(mesh);
     blocks.set(key, mesh);
     blockMeshes.push(mesh);
+
+    return true;
   }
 
   function removeBlock(mesh) {
     if (!mesh || !mesh.userData) return;
 
-    const {x,y,z} = mesh.userData;
-    blocks.delete(keyOf(x,y,z));
+    const { x, y, z } = mesh.userData;
+    blocks.delete(keyOf(x, y, z));
     scene.remove(mesh);
 
     const index = blockMeshes.indexOf(mesh);
-    if (index !== -1) blockMeshes.splice(index,1);
+    if (index !== -1) blockMeshes.splice(index, 1);
   }
 
-  // Generate the original block landscape.
-  for (let x=-12; x<=12; x++) {
-    for (let z=-12; z<=12; z++) {
+  // Generate hills with grass, dirt, and stone layers.
+  for (let x = -12; x <= 12; x++) {
+    for (let z = -12; z <= 12; z++) {
       const height = Math.round(
-        Math.sin(x*0.38)*0.7 + Math.cos(z*0.31)*0.7
+        Math.sin(x * 0.38) * 0.7 +
+        Math.cos(z * 0.31) * 0.7
       );
 
-      for (let y=-2; y<=height; y++) {
-        let type = y === height ? "grass" :
-          (y < -1 ? "stone" : "dirt");
+      for (let y = -2; y <= height; y++) {
+        let type;
 
-        if (height < -0.5 && y === height) type = "sand";
-        addBlock(x,y,z,type);
+        if (y === height) {
+          type = height < -0.5 ? "sand" : "grass";
+        } else if (y < -1) {
+          type = "stone";
+        } else {
+          type = "dirt";
+        }
+
+        addBlock(x, y, z, type);
       }
     }
   }
 
-  // Add simple voxel trees.
-  for (const [tx,tz] of [[-5,-4],[5,3],[8,-7],[-9,5]]) {
+  // Add simple block trees.
+  for (const [tx, tz] of [[-5,-4], [5,3], [8,-7], [-9,5]]) {
     const ground = Math.round(
-      Math.sin(tx*0.38)*0.7 + Math.cos(tz*0.31)*0.7
+      Math.sin(tx * 0.38) * 0.7 +
+      Math.cos(tz * 0.31) * 0.7
     );
 
-    for (let y=ground+1; y<=ground+3; y++)
-      addBlock(tx,y,tz,"wood");
+    for (let y = ground + 1; y <= ground + 3; y++) {
+      addBlock(tx, y, tz, "wood");
+    }
 
-    for (let dx=-1; dx<=1; dx++) {
-      for (let dz=-1; dz<=1; dz++) {
-        for (let dy=2; dy<=4; dy++) {
-          if (Math.abs(dx)+Math.abs(dz)+(dy===4 ? 1 : 0) < 4)
-            addBlock(tx+dx,ground+dy,tz+dz,"leaves");
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) {
+        for (let dy = 2; dy <= 4; dy++) {
+          if (
+            Math.abs(dx) + Math.abs(dz) +
+            (dy === 4 ? 1 : 0) < 4
+          ) {
+            addBlock(tx + dx, ground + dy, tz + dz, "leaves");
+          }
         }
       }
     }
   }
 
-  // Block palette.
+  // --------------------------------------------------
+  // BLOCK SELECTION PALETTE
+  // --------------------------------------------------
+
   const palette = document.getElementById("palette");
 
   for (const name of names) {
     const button = document.createElement("button");
-    button.className = "swatch" +
-      (name===selected ? " selected" : "");
-    button.style.background = colors[name];
-    button.title = name;
-    button.textContent =
-      name === "grass" ? "🌱" :
-      name === "dirt" ? "🟫" :
-      name === "stone" ? "🪨" :
-      name === "sand" ? "🏖️" :
-      name === "wood" ? "🪵" : "🌿";
 
+    button.className = "swatch" +
+      (name === selected ? " selected" : "");
+
+    button.style.backgroundColor = blockColors[name];
+    button.textContent = blockIcons[name];
+    button.title = name;
     button.setAttribute("aria-label", name);
 
+    // Use the same original generated texture for the icon.
+    button.style.backgroundImage =
+      `url("${textures[name].image.toDataURL
+        ? textures[name].image.toDataURL()
+        : ""}")`;
+
+    // A simple colored fallback remains if the texture preview
+    // isn't available from the texture source.
     button.onclick = () => {
       selected = name;
-      palette.querySelectorAll("button").forEach(b =>
-        b.classList.toggle("selected", b === button)
-      );
+
+      palette.querySelectorAll("button").forEach(b => {
+        b.classList.toggle("selected", b === button);
+      });
+
       status.textContent = "Selected block: " + name;
     };
 
     palette.appendChild(button);
   }
 
+  // --------------------------------------------------
+  // BLOCK PLACEMENT AND REMOVAL
+  // --------------------------------------------------
+
   const raycaster = new THREE.Raycaster();
-  const center = new THREE.Vector2(0,0);
+  const center = new THREE.Vector2(0, 0);
 
   function targetBlock() {
-    raycaster.setFromCamera(center,camera);
-    const hits = raycaster.intersectObjects(blockMeshes,false);
+    raycaster.setFromCamera(center, camera);
+
+    const hits = raycaster.intersectObjects(blockMeshes, false);
     return hits.length ? hits[0] : null;
   }
 
   function mine() {
     const hit = targetBlock();
+
     if (hit) {
       removeBlock(hit.object);
       status.textContent = "Block removed";
@@ -316,25 +633,37 @@ button:active, button.active { background: #e58b35; }
     if (!hit) return;
 
     const p = hit.object.position.clone().add(hit.face.normal);
-    const x=Math.round(p.x);
-    const y=Math.round(p.y);
-    const z=Math.round(p.z);
+
+    const x = Math.round(p.x);
+    const y = Math.round(p.y);
+    const z = Math.round(p.z);
 
     if (y > 20 || y < -3) return;
 
-    // Avoid placing a block directly inside the player.
-    if (Math.abs(x-camera.position.x)<0.8 &&
-        Math.abs(z-camera.position.z)<0.8 &&
-        Math.abs(y-camera.position.y)<1.8) return;
+    // Prevent placing a block inside the camera/player.
+    if (
+      Math.abs(x - camera.position.x) < 0.8 &&
+      Math.abs(z - camera.position.z) < 0.8 &&
+      Math.abs(y - camera.position.y) < 1.8
+    ) return;
 
-    addBlock(x,y,z,selected);
-    status.textContent = "Placed " + selected;
+    if (addBlock(x, y, z, selected)) {
+      status.textContent = "Placed " + selected;
+    }
   }
 
+  // --------------------------------------------------
+  // MOVEMENT AND CAMERA CONTROLS
+  // --------------------------------------------------
+
   const keys = {};
+
   const move = {
-    forward:false, backward:false, left:false,
-    right:false, jump:false
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    jump: false
   };
 
   let yaw = Math.PI * 0.75;
@@ -348,13 +677,18 @@ button:active, button.active { background: #e58b35; }
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
   }
+
   syncCamera();
 
   addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
 
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "]
-        .includes(e.key)) e.preventDefault();
+    if (
+      ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "]
+        .includes(e.key)
+    ) {
+      e.preventDefault();
+    }
   });
 
   addEventListener("keyup", e => {
@@ -362,8 +696,10 @@ button:active, button.active { background: #e58b35; }
   });
 
   renderer.domElement.addEventListener("click", () => {
-    if (matchMedia("(pointer:fine)").matches &&
-        renderer.domElement.requestPointerLock) {
+    if (
+      matchMedia("(pointer:fine)").matches &&
+      renderer.domElement.requestPointerLock
+    ) {
       renderer.domElement.requestPointerLock();
     } else {
       hint.textContent = "Drag to look around";
@@ -380,13 +716,14 @@ button:active, button.active { background: #e58b35; }
 
     yaw -= e.movementX * 0.0025;
     pitch -= e.movementY * 0.0025;
-    pitch = Math.max(-1.45,Math.min(1.45,pitch));
+
+    pitch = Math.max(-1.45, Math.min(1.45, pitch));
     syncCamera();
   });
 
-  renderer.domElement.addEventListener(
-    "contextmenu", e => e.preventDefault()
-  );
+  renderer.domElement.addEventListener("contextmenu", e => {
+    e.preventDefault();
+  });
 
   renderer.domElement.addEventListener("pointerdown", e => {
     if (e.pointerType === "mouse") {
@@ -396,72 +733,80 @@ button:active, button.active { background: #e58b35; }
     }
 
     lastTouch = {
-      x:e.clientX, y:e.clientY, id:e.pointerId
+      x: e.clientX,
+      y: e.clientY,
+      id: e.pointerId
     };
+
     renderer.domElement.setPointerCapture(e.pointerId);
   });
 
   renderer.domElement.addEventListener("pointermove", e => {
     if (!lastTouch || lastTouch.id !== e.pointerId) return;
 
-    const dx=e.clientX-lastTouch.x;
-    const dy=e.clientY-lastTouch.y;
+    const dx = e.clientX - lastTouch.x;
+    const dy = e.clientY - lastTouch.y;
 
-    yaw -= dx*0.006;
-    pitch -= dy*0.006;
-    pitch = Math.max(-1.45,Math.min(1.45,pitch));
+    yaw -= dx * 0.006;
+    pitch -= dy * 0.006;
+
+    pitch = Math.max(-1.45, Math.min(1.45, pitch));
     syncCamera();
 
     lastTouch = {
-      x:e.clientX, y:e.clientY, id:e.pointerId
+      x: e.clientX,
+      y: e.clientY,
+      id: e.pointerId
     };
   });
 
   renderer.domElement.addEventListener("pointerup", e => {
-    if (lastTouch && lastTouch.id === e.pointerId)
-      lastTouch=null;
+    if (lastTouch && lastTouch.id === e.pointerId) {
+      lastTouch = null;
+    }
   });
 
-  renderer.domElement.addEventListener(
-    "pointercancel", () => lastTouch=null
-  );
+  renderer.domElement.addEventListener("pointercancel", () => {
+    lastTouch = null;
+  });
 
-  document.getElementById("place").addEventListener("click",build);
-  document.getElementById("remove").addEventListener("click",mine);
+  document.getElementById("place").addEventListener("click", build);
+  document.getElementById("remove").addEventListener("click", mine);
 
   document.getElementById("fullscreen").addEventListener(
     "click", async () => {
       try {
-        if (!document.fullscreenElement)
+        if (!document.fullscreenElement) {
           await document.documentElement.requestFullscreen();
-        else
+        } else {
           await document.exitFullscreen();
+        }
       } catch (_) {
         status.textContent = "Use your browser's fullscreen control";
       }
     }
   );
 
-  // Press-and-hold movement and jump controls.
+  // Press and hold movement buttons.
   document.querySelectorAll("[data-move]").forEach(button => {
     const name = button.dataset.move;
 
     const down = e => {
       e.preventDefault();
-      move[name]=true;
+      move[name] = true;
       button.classList.add("active");
     };
 
     const up = e => {
       e.preventDefault();
-      move[name]=false;
+      move[name] = false;
       button.classList.remove("active");
     };
 
-    button.addEventListener("pointerdown",down);
-    button.addEventListener("pointerup",up);
-    button.addEventListener("pointercancel",up);
-    button.addEventListener("pointerleave",up);
+    button.addEventListener("pointerdown", down);
+    button.addEventListener("pointerup", up);
+    button.addEventListener("pointercancel", up);
+    button.addEventListener("pointerleave", up);
   });
 
   function update(dt) {
@@ -475,29 +820,30 @@ button:active, button.active { background: #e58b35; }
       (keys["d"] || keys["arrowright"] || move.right ? 1 : 0) -
       (keys["a"] || keys["arrowleft"] || move.left ? 1 : 0);
 
-    const direction = new THREE.Vector3(side,0,-forward);
+    const direction = new THREE.Vector3(side, 0, -forward);
 
     if (direction.lengthSq()) {
       direction.normalize().applyAxisAngle(
-        new THREE.Vector3(0,1,0),yaw
+        new THREE.Vector3(0, 1, 0), yaw
       );
-      camera.position.addScaledVector(direction,speed*dt);
+
+      camera.position.addScaledVector(direction, speed * dt);
     }
 
     if ((keys[" "] || move.jump) && onGround) {
-      jumpVelocity=6;
-      onGround=false;
+      jumpVelocity = 6;
+      onGround = false;
     }
 
-    jumpVelocity -= 15*dt;
-    camera.position.y += jumpVelocity*dt;
+    jumpVelocity -= 15 * dt;
+    camera.position.y += jumpVelocity * dt;
 
     const groundY = 2.5;
 
     if (camera.position.y < groundY) {
-      camera.position.y=groundY;
-      jumpVelocity=0;
-      onGround=true;
+      camera.position.y = groundY;
+      jumpVelocity = 0;
+      onGround = true;
     }
   }
 
@@ -505,21 +851,26 @@ button:active, button.active { background: #e58b35; }
 
   function animate(now) {
     requestAnimationFrame(animate);
-    const dt = Math.min((now-previous)/1000,0.04);
-    previous=now;
+
+    const dt = Math.min((now - previous) / 1000, 0.04);
+    previous = now;
 
     update(dt);
-    renderer.render(scene,camera);
+    renderer.render(scene, camera);
   }
 
   addEventListener("resize", () => {
-    camera.aspect=innerWidth/innerHeight;
+    camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth,innerHeight);
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   });
 
-  status.textContent = "Creative mode · " + blocks.size + " blocks";
+  status.textContent =
+    "Creative mode · " + blocks.size + " blocks · Pixel textures";
+
   hint.textContent = "Tap or click to look around";
+
   requestAnimationFrame(animate);
 })();
 </script>
