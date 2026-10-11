@@ -161,26 +161,60 @@ function removeBlock(x,y,z){
   scene.remove(mesh);blocks.delete(k);meshes.delete(k);
   return true;
 }
-function terrainHeight(x,z){
-  return Math.floor(1.4+Math.sin(x*.35)*1.2+Math.cos(z*.28)*1.1+Math.sin((x+z)*.19)*.7);
+// Randomized multi-chunk world: 3 x 3 chunks, each 16 x 16 blocks.
+// A world seed makes the terrain internally consistent during this session.
+const CHUNK_SIZE=16;
+const CHUNK_RADIUS=1;
+const WORLD_SEED=Math.floor(Math.random()*0x7fffffff);
+function hashNoise(x,z){
+  let n=(Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(WORLD_SEED,1442695041))|0;
+  n=Math.imul(n^(n>>>13),1274126177);
+  n=(n^(n>>>16))>>>0;
+  return n/4294967295;
 }
-for(let x=-14;x<=14;x++){
-  for(let z=-14;z<=14;z++){
-    const top=terrainHeight(x,z);
-    for(let y=-3;y<=top;y++){
-      const type=y===top?(top<=0?"sand":"grass"):y>=top-2?"dirt":"stone";
-      addBlock(x,y,z,type);
-    }
-  }
+function smooth(t){return t*t*(3-2*t);}
+function valueNoise(x,z,scale){
+  const gx=Math.floor(x/scale),gz=Math.floor(z/scale);
+  const tx=smooth((x/scale)-gx),tz=smooth((z/scale)-gz);
+  const a=hashNoise(gx,gz),b=hashNoise(gx+1,gz),c=hashNoise(gx,gz+1),d=hashNoise(gx+1,gz+1);
+  const top=a+(b-a)*tx,bottom=c+(d-c)*tx;
+  return top+(bottom-top)*tz;
+}
+function terrainHeight(x,z){
+  const broad=valueNoise(x+120,z-80,22);
+  const medium=valueNoise(x-40,z+60,10);
+  const detail=valueNoise(x+15,z+15,4);
+  return Math.floor(-1+broad*6+medium*3+detail*1.5);
 }
 function makeTree(x,z){
   const g=terrainHeight(x,z);
-  for(let y=1;y<=3;y++)addBlock(x,g+y,z,"wood");
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=2;dy<=4;dy++){
-    if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-3)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
+  // Keep the spawn clearing open and avoid planting on low beach tiles.
+  if(Math.abs(x)<4&&Math.abs(z)<4)return;
+  if(g<1)return;
+  const trunk=3+(hashNoise(x+900,z-900)>.65?1:0);
+  for(let y=1;y<=trunk;y++)addBlock(x,g+y,z,"wood");
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=trunk-1;dy<=trunk+1;dy++){
+    if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-trunk)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
 }
-makeTree(-7,-4);makeTree(6,-7);makeTree(8,6);makeTree(-8,8);
+const generatedTrees=[];
+for(let chunkX=-CHUNK_RADIUS;chunkX<=CHUNK_RADIUS;chunkX++){
+  for(let chunkZ=-CHUNK_RADIUS;chunkZ<=CHUNK_RADIUS;chunkZ++){
+    const startX=chunkX*CHUNK_SIZE,startZ=chunkZ*CHUNK_SIZE;
+    for(let x=startX;x<startX+CHUNK_SIZE;x++){
+      for(let z=startZ;z<startZ+CHUNK_SIZE;z++){
+        const top=terrainHeight(x,z);
+        for(let y=top-3;y<=top;y++){
+          const type=y===top?(top<=0?"sand":"grass"):y>=top-1?"dirt":"stone";
+          addBlock(x,y,z,type);
+        }
+        // Deterministic placement gives each generated world its own forest pattern.
+        if(hashNoise(x+450,z+700)>.965)generatedTrees.push([x,z]);
+      }
+    }
+  }
+}
+for(const [treeX,treeZ] of generatedTrees)makeTree(treeX,treeZ);
 
 const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
 const avatar=new THREE.Group();scene.add(avatar);
@@ -475,7 +509,7 @@ window.addEventListener("resize",()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
 requestAnimationFrame(animate);
-status.textContent="World ready! Build, dig, jump, and explore.";
+status.textContent=`Random world ready! 9 chunks generated · Seed ${WORLD_SEED}`;
 })();
 </script>
 </body>
