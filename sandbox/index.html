@@ -401,8 +401,9 @@ function updatePlayer(dt){
   if(len>0){f/=len;s/=len;}
   const speed=keys.has("shift")?7.2:5.2;
   const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
-  player.vx=(s*cos-f*sin)*speed;
-  player.vz=(s*sin+f*cos)*speed;
+  // Rotate movement by the current camera yaw so forward always follows where you look.
+  player.vx=(s*cos+f*sin)*speed;
+  player.vz=(-s*sin+f*cos)*speed;
 
   const steps=Math.max(1,Math.ceil(Math.max(Math.abs(player.vx*dt),Math.abs(player.vz*dt))/.1));
   const dx=player.vx*dt/steps,dz=player.vz*dt/steps;
