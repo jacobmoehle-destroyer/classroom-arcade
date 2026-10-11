@@ -16,6 +16,12 @@ button:active,button.selected{background:#27864d}
 #top{position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;pointer-events:auto}
 #brand{background:#17202dee;border-radius:10px;padding:9px;font-size:13px;font-weight:900}
 #top button{font-size:11px;padding:9px}
+#craftBtn{background:#6a4a18ee!important;border-color:#ffe29a!important}
+#craftOverlay{display:none;position:fixed;inset:0;z-index:40;background:#07101beF;color:white;overflow:auto;padding:16px;touch-action:auto}
+#craftPanel{max-width:560px;margin:5vh auto;background:#17202d;border:1px solid #ffffff33;border-radius:18px;padding:18px;box-shadow:0 12px 40px #0008}
+.recipe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.recipe-grid button{min-height:58px;text-align:left;font-size:12px}
+@media(max-width:420px){.recipe-grid{grid-template-columns:1fr}}
 #status{position:absolute;top:65px;left:9px;max-width:75%;background:#17202ddd;border-radius:8px;padding:6px 9px;font-size:12px}
 #palette{position:absolute;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:4px;max-width:98vw;overflow-x:auto;padding:5px;border-radius:12px;background:#101820dd;pointer-events:auto;touch-action:pan-x;z-index:6}
 .block-choice{min-width:48px;padding:6px 4px;font-size:10px;flex-shrink:0}
@@ -50,6 +56,7 @@ button:active,button.selected{background:#27864d}
     <button id="cameraBtn">🎥 First Person</button>
     <button id="soundBtn">🔊 Sound: On</button>
     <button id="modeBtn">🛠 Creative</button>
+    <button id="craftBtn">🧰 Craft</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
@@ -96,10 +103,10 @@ button:active,button.selected{background:#27864d}
     <h2 style="font-size:18px">🎒 Inventory & Crafting</h2>
     <p id="inventoryText" style="font-size:13px;line-height:1.7;color:#e2e8f0;background:#0b1420;border-radius:10px;padding:10px;max-height:150px;overflow:auto">Inventory loads here.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-      <button id="craftPlanksBtn">🪵 Craft 4 Planks</button><button id="craftSticksBtn">🪄 Craft 4 Sticks</button>
       <button id="eatMenuBtn">🍖 Eat Food</button><button id="collectMenuBtn">🐷 Collect Nearby</button>
     </div>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">In Survival, break blocks to collect them, place blocks to spend them, and collect a nearby pig for pork. Wood crafts into planks; planks craft into sticks. Eating pork restores hunger.</p>
+    <button id="openCraftFromMenuBtn" style="width:100%;margin-top:8px">🧰 Open Crafting & Tools</button>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">In Survival, broken blocks go into your inventory. Use the dedicated 🧰 Craft button to make tools, a crafting table, a bed, torches, planks, and sticks.</p>
     <hr style="border-color:#ffffff22;margin:18px 0">
     <h2 style="font-size:18px">Graphics</h2>
     <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
@@ -109,6 +116,31 @@ button:active,button.selected{background:#27864d}
     <p style="font-size:12px;color:#cbd5e1;line-height:1.5">The game preloads 30 nearby chunks before spawning. Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
+  </div>
+</div>
+
+<div id="craftOverlay" role="dialog" aria-label="Crafting menu">
+  <div id="craftPanel">
+    <h2 style="margin:0 0 6px">🧰 Crafting & Tools</h2>
+    <p style="margin:0 0 12px;color:#cbd5e1;font-size:13px">Craft tools to mine tougher blocks. Crafted blocks and tools are saved with your inventory.</p>
+    <p id="craftInventoryText" style="white-space:pre-line;background:#0b1420;padding:10px;border-radius:9px;font-size:12px"></p>
+    <h3 style="margin:12px 0 7px">🪵 Materials & building</h3>
+    <div class="recipe-grid">
+      <button id="craftPlanksBtn">🪵 Wooden Planks ×4<br><small>1 Wood</small></button>
+      <button id="craftSticksBtn">🪄 Sticks ×4<br><small>2 Planks</small></button>
+      <button id="craftTableBtn">🧰 Crafting Table ×1<br><small>4 Planks</small></button>
+      <button id="craftBedBtn">🛏️ Bed ×1<br><small>3 Planks + 3 Leaves</small></button>
+      <button id="craftTorchBtn">🔥 Torches ×4<br><small>1 Stick + 1 Coal</small></button>
+    </div>
+    <h3 style="margin:15px 0 7px">⛏️ Tools</h3>
+    <div class="recipe-grid">
+      <button id="craftWoodPickBtn">🪵 Wooden Pickaxe ×1<br><small>3 Planks + 2 Sticks</small></button>
+      <button id="craftStonePickBtn">🪨 Stone Pickaxe ×1<br><small>3 Cobblestone + 2 Sticks</small></button>
+      <button id="craftAxeBtn">🪓 Wooden Axe ×1<br><small>3 Planks + 2 Sticks</small></button>
+      <button id="craftShovelBtn">🥄 Wooden Shovel ×1<br><small>1 Plank + 2 Sticks</small></button>
+    </div>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Survival mining: stone and coal need a wooden pickaxe or better. Iron, gold, and diamond ore need a stone pickaxe. Other normal blocks drop into your inventory when broken. Bedrock cannot be mined.</p>
+    <button id="closeCraftBtn" style="width:100%;margin-top:12px">Done</button>
   </div>
 </div>
 
@@ -199,8 +231,8 @@ for(let i=0;i<18;i++){
   group.position.set(((seed*7)%240)-120,27+(i%4)*1.8,((seed*11)%240)-120);scene.add(group);clouds.push({group,speed:.35+(i%5)*.08});
 }
 
-const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock"};
-const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d};
+const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock",crafting_table:"Crafting Table",bed:"Bed",torch:"Torch"};
+const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d,crafting_table:0x8a6037,bed:0xb83c42,torch:0xffc857};
 const materials={};
 
 function createTexture(type){
@@ -547,6 +579,7 @@ let gameMode=(pendingStartMode==="survival" || (!pendingStartMode && bootSave&&b
 const inventory={};
 for(const type of Object.keys(names))inventory[type]=0;
 inventory.planks=0;inventory.sticks=0;inventory.pork=0;inventory.apple=0;
+for(const item of ["wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel"])if(!Number.isFinite(inventory[item]))inventory[item]=0;
 if(bootSave&&bootSave.inventory&&typeof bootSave.inventory==="object"){
   for(const key of Object.keys(inventory))if(Number.isFinite(bootSave.inventory[key]))inventory[key]=Math.max(0,Math.floor(bootSave.inventory[key]));
 }
@@ -564,12 +597,12 @@ function refreshModeUI(){
   refreshInventoryUI();
 }
 function refreshInventoryUI(){
-  const el=document.getElementById("inventoryText");
-  if(!el)return;
+  const labels={...names,planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel"};
   const lines=[];
-  for(const type of Object.keys(names))if(type!=="planks"&&inventory[type]>0)lines.push(`${names[type]}: ${inventory[type]}`);
-  for(const type of ["planks","sticks","pork","apple"])if(inventory[type]>0)lines.push(`${({planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple"})[type]}: ${inventory[type]}`);
-  el.textContent=(gameMode==="creative"?"Creative: blocks are unlimited. Switch to Survival to collect and spend items.\n\n":"")+(lines.length?lines.join("\n"):"Your inventory is empty. Break blocks in Survival to collect resources.");
+  for(const [type,count] of Object.entries(inventory))if(count>0&&labels[type])lines.push(`${labels[type]}: ${count}`);
+  const text=(gameMode==="creative"?"Creative: blocks are unlimited. Switch to Survival to collect and spend items.\n\n":"")+(lines.length?lines.join("\n"):"Your inventory is empty. Break blocks in Survival to collect resources.");
+  const el=document.getElementById("inventoryText");if(el)el.textContent=text;
+  const craftEl=document.getElementById("craftInventoryText");if(craftEl)craftEl.textContent=lines.length?lines.join("\n"):"Your inventory is empty.";
 }
 function toggleMode(){gameMode=gameMode==="creative"?"survival":"creative";refreshModeUI();status.textContent=gameMode==="survival"?"Survival mode enabled. Watch your hunger!":"Creative mode enabled.";menuMessage.textContent=status.textContent;}
 
@@ -611,6 +644,7 @@ movementPad.addEventListener("pointerup",endJoystick);
 movementPad.addEventListener("pointercancel",endJoystick);
 movementPad.addEventListener("lostpointercapture",endJoystick);
 window.addEventListener("keydown",e=>{
+  if(craftOverlay.style.display==="block"){if(e.key==="Escape")closeCrafting();return;}
   if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
   const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
@@ -689,9 +723,18 @@ function breakBlock(){
   if(!hit){status.textContent="Aim at a block within reach.";return;}
   const p=hit.object.userData;
   if(gameMode==="survival"&&p.type==="bedrock"){status.textContent="Bedrock can't be mined in Survival.";return;}
+  if(gameMode==="survival"){
+    const oreTypes=["iron","gold","diamond"];
+    const pickTypes=["stone","cobble","bricks","coal"];
+    if(oreTypes.includes(p.type)&&inventory.stone_pickaxe<1){status.textContent="You need a Stone Pickaxe to mine this ore. Craft one in 🧰 Craft.";return;}
+    if(pickTypes.includes(p.type)&&inventory.wooden_pickaxe<1&&inventory.stone_pickaxe<1){status.textContent="You need a Pickaxe to mine this block. Craft a Wooden Pickaxe in 🧰 Craft.";return;}
+  }
   removeBlock(p.x,p.y,p.z);worldEdits.set(blockKey(p.x,p.y,p.z),null);
   if(gameMode==="survival"){
     inventory[p.type]=(inventory[p.type]||0)+1;
+    // Correct tools reward extra materials, while basic blocks remain collectable by hand.
+    if(p.type==="wood"&&inventory.wooden_axe>0)inventory[p.type]++;
+    if(["grass","dirt","sand","snow"].includes(p.type)&&inventory.wooden_shovel>0)inventory[p.type]++;
     if(p.type==="leaves"&&Math.random()<.18)inventory.apple++;
     refreshInventoryUI();
   }
@@ -738,18 +781,34 @@ document.getElementById("eatBtn").addEventListener("pointerdown",e=>{e.preventDe
 document.getElementById("collectMenuBtn").addEventListener("click",collectNearbyPig);
 document.getElementById("eatMenuBtn").addEventListener("click",eatFood);
 function craftItem(recipe){
-  if(gameMode!=="survival"){status.textContent="Crafting is for Survival mode.";return;}
-  if(recipe==="planks"){
-    if(inventory.wood<1){status.textContent="Need 1 Wood block to craft 4 planks.";return;}
-    inventory.wood--;inventory.planks+=4;status.textContent="Crafted 4 wooden planks.";
-  }else if(recipe==="sticks"){
-    if(inventory.planks<2){status.textContent="Need 2 planks to craft 4 sticks.";return;}
-    inventory.planks-=2;inventory.sticks+=4;status.textContent="Crafted 4 sticks.";
-  }
-  refreshInventoryUI();beep(500,.1,"triangle");
+  if(gameMode!=="survival"){status.textContent="Crafting is for Survival mode. Switch to Survival first.";return;}
+  const need=(items)=>items.every(([item,count])=>(inventory[item]||0)>=count);
+  const take=(items)=>items.forEach(([item,count])=>inventory[item]-=count);
+  const recipes={
+    planks:{needs:[["wood",1]],gives:[["planks",4]],label:"4 Wooden Planks"},
+    sticks:{needs:[["planks",2]],gives:[["sticks",4]],label:"4 Sticks"},
+    table:{needs:[["planks",4]],gives:[["crafting_table",1]],label:"Crafting Table"},
+    bed:{needs:[["planks",3],["leaves",3]],gives:[["bed",1]],label:"Bed"},
+    torch:{needs:[["sticks",1],["coal",1]],gives:[["torch",4]],label:"4 Torches"},
+    wooden_pick:{needs:[["planks",3],["sticks",2]],gives:[["wooden_pickaxe",1]],label:"Wooden Pickaxe"},
+    stone_pick:{needs:[["cobble",3],["sticks",2]],gives:[["stone_pickaxe",1]],label:"Stone Pickaxe"},
+    axe:{needs:[["planks",3],["sticks",2]],gives:[["wooden_axe",1]],label:"Wooden Axe"},
+    shovel:{needs:[["planks",1],["sticks",2]],gives:[["wooden_shovel",1]],label:"Wooden Shovel"}
+  };
+  const r=recipes[recipe];if(!r)return;
+  if(!need(r.needs)){status.textContent="Not enough materials to craft "+r.label+". Check the 🧰 Craft menu.";return;}
+  take(r.needs);r.gives.forEach(([item,count])=>inventory[item]=(inventory[item]||0)+count);
+  refreshInventoryUI();beep(500,.1,"triangle");status.textContent="Crafted "+r.label+"!";
 }
-document.getElementById("craftPlanksBtn").addEventListener("click",()=>craftItem("planks"));
-document.getElementById("craftSticksBtn").addEventListener("click",()=>craftItem("sticks"));
+const recipeButtons={craftPlanksBtn:"planks",craftSticksBtn:"sticks",craftTableBtn:"table",craftBedBtn:"bed",craftTorchBtn:"torch",craftWoodPickBtn:"wooden_pick",craftStonePickBtn:"stone_pick",craftAxeBtn:"axe",craftShovelBtn:"shovel"};
+for(const [id,recipe] of Object.entries(recipeButtons))document.getElementById(id).addEventListener("click",()=>craftItem(recipe));
+const craftOverlay=document.getElementById("craftOverlay");
+function openCrafting(){craftOverlay.style.display="block";refreshInventoryUI();}
+function closeCrafting(){craftOverlay.style.display="none";}
+document.getElementById("craftBtn").addEventListener("click",openCrafting);
+document.getElementById("openCraftFromMenuBtn").addEventListener("click",openCrafting);
+document.getElementById("closeCraftBtn").addEventListener("click",closeCrafting);
+document.getElementById("craftBtn").addEventListener("pointerdown",e=>e.stopPropagation());
 
 const palette=document.getElementById("palette");
 for(const type of Object.keys(names)){
