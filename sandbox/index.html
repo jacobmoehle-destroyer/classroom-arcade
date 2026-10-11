@@ -22,23 +22,23 @@ button:active,button.selected{background:#27864d}
 .swatch{width:23px;height:23px;display:block;margin:0 auto 4px;border:1px solid #ffffffaa;border-radius:4px}
 #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
 #help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
-#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:118px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
 #stick{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
 #movement:after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%);border-radius:50%;background:#ffffff55;pointer-events:none}
-#actions{position:fixed;z-index:10;right:max(14px,env(safe-area-inset-right));bottom:118px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
-#actions button{width:76px;height:52px;padding:4px;font-size:11px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
-#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:238px;width:78px;height:70px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#actions{position:fixed;z-index:10;right:max(14px,env(safe-area-inset-right));bottom:88px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
+#actions button{width:76px;height:46px;padding:4px;font-size:10px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:288px;width:78px;height:70px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
 #lookHint{position:fixed;z-index:5;bottom:65px;left:50%;transform:translateX(-50%);background:#17202ddd;padding:5px 9px;border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none}
 @media(max-width:650px){
 #brand{font-size:11px}#top{gap:4px}#top button{padding:8px 6px;font-size:10px}
 #help{top:105px;max-width:145px;font-size:10px}#status{top:62px;font-size:11px}
-#movement{left:6px;bottom:102px;transform:scale(.9);transform-origin:bottom left}
-#actions{right:6px;bottom:102px}#actions button{width:65px;height:46px}
-#jump{right:10px;bottom:210px;width:68px;height:62px}
+#movement{left:6px;bottom:84px;transform:scale(.82);transform-origin:bottom left}
+#actions{right:6px;bottom:76px}#actions button{width:65px;height:39px;font-size:9px}
+#jump{right:10px;bottom:270px;width:68px;height:62px}
 #palette{gap:2px}.block-choice{min-width:44px;font-size:9px}
 }
 @media(orientation:landscape) and (max-height:500px){
-#help{display:none}#movement{bottom:62px}#actions{bottom:62px}#jump{bottom:158px}
+#help{display:none}#movement{bottom:40px}#actions{bottom:38px}#jump{bottom:224px}
 #palette{bottom:3px}#lookHint{display:none}
 }
 </style>
@@ -61,7 +61,7 @@ button:active,button.selected{background:#27864d}
   <div id="help">
     <b>COMPUTER</b><br>
     WASD: move<br>Space: jump<br>Mouse: look<br>
-    Left click: break<br>Right click: place<br>
+    Left click: break<br>Right click: place<br>E: collect pig<br>R: eat food<br>
     <b>TOUCH</b><br>
     Left pad: move<br>Drag world: look<br>
     Right buttons: jump/build
@@ -76,6 +76,8 @@ button:active,button.selected{background:#27864d}
 <div id="actions">
   <button id="breakBtn">⛏ BREAK</button>
   <button id="placeBtn">🧱 PLACE</button>
+  <button id="useBtn">🐷 COLLECT</button>
+  <button id="eatBtn">🍖 EAT</button>
 </div>
 <div id="lookHint">Drag the world to look up, down, and around</div>
 <div id="menuOverlay" style="display:none;position:fixed;inset:0;z-index:30;background:#08111beF;color:white;overflow:auto;padding:20px;font-family:system-ui,Arial,sans-serif;touch-action:auto">
@@ -88,15 +90,23 @@ button:active,button.selected{background:#27864d}
     </div>
     <hr style="border-color:#ffffff22;margin:18px 0">
     <h2 style="font-size:18px">Game mode</h2>
-    <p style="font-size:13px;color:#cbd5e1">Creative lets you build freely. Survival adds health and hunger; friendly animals wander around the world.</p>
+    <p style="font-size:13px;color:#cbd5e1">Creative has unlimited blocks. Survival adds health, hunger, resource collecting, food, and basic crafting.</p>
     <button id="modeMenuBtn" style="width:100%">Switch to Survival</button>
+    <hr style="border-color:#ffffff22;margin:18px 0">
+    <h2 style="font-size:18px">🎒 Inventory & Crafting</h2>
+    <p id="inventoryText" style="font-size:13px;line-height:1.7;color:#e2e8f0;background:#0b1420;border-radius:10px;padding:10px;max-height:150px;overflow:auto">Inventory loads here.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <button id="craftPlanksBtn">🪵 Craft 4 Planks</button><button id="craftSticksBtn">🪄 Craft 4 Sticks</button>
+      <button id="eatMenuBtn">🍖 Eat Food</button><button id="collectMenuBtn">🐷 Collect Nearby</button>
+    </div>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">In Survival, break blocks to collect them, place blocks to spend them, and collect a nearby pig for pork. Wood crafts into planks; planks craft into sticks. Eating pork restores hunger.</p>
     <hr style="border-color:#ffffff22;margin:18px 0">
     <h2 style="font-size:18px">Graphics</h2>
     <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
     <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
     <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; friendly animals wander nearby.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -420,7 +430,15 @@ if(bootSave&&bootSave.player&&Number.isFinite(bootSave.player.x)&&Number.isFinit
   player.pitch=Number.isFinite(bootSave.player.pitch)?bootSave.player.pitch:0;
 }
 let gameMode=(bootSave&&bootSave.mode==="survival")?"survival":"creative";
-let health=20,hunger=20,hungerClock=0,damageClock=0;
+const inventory={};
+for(const type of Object.keys(names))inventory[type]=0;
+inventory.planks=0;inventory.sticks=0;inventory.pork=0;inventory.apple=0;
+if(bootSave&&bootSave.inventory&&typeof bootSave.inventory==="object"){
+  for(const key of Object.keys(inventory))if(Number.isFinite(bootSave.inventory[key]))inventory[key]=Math.max(0,Math.floor(bootSave.inventory[key]));
+}
+let health=bootSave&&Number.isFinite(bootSave.health)?THREE.MathUtils.clamp(bootSave.health,1,20):20;
+let hunger=bootSave&&Number.isFinite(bootSave.hunger)?THREE.MathUtils.clamp(bootSave.hunger,0,20):20;
+let hungerClock=0,damageClock=0;
 const survivalHud=document.getElementById("survivalHud");
 function refreshModeUI(){
   const survival=gameMode==="survival";
@@ -429,6 +447,15 @@ function refreshModeUI(){
   document.getElementById("modeMenuBtn").textContent=survival?"Switch to Creative":"Switch to Survival";
   document.getElementById("healthValue").textContent=Math.ceil(health);
   document.getElementById("hungerValue").textContent=Math.ceil(hunger);
+  refreshInventoryUI();
+}
+function refreshInventoryUI(){
+  const el=document.getElementById("inventoryText");
+  if(!el)return;
+  const lines=[];
+  for(const type of Object.keys(names))if(type!=="planks"&&inventory[type]>0)lines.push(`${names[type]}: ${inventory[type]}`);
+  for(const type of ["planks","sticks","pork","apple"])if(inventory[type]>0)lines.push(`${({planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple"})[type]}: ${inventory[type]}`);
+  el.textContent=(gameMode==="creative"?"Creative: blocks are unlimited. Switch to Survival to collect and spend items.\n\n":"")+(lines.length?lines.join("\n"):"Your inventory is empty. Break blocks in Survival to collect resources.");
 }
 function toggleMode(){gameMode=gameMode==="creative"?"survival":"creative";refreshModeUI();status.textContent=gameMode==="survival"?"Survival mode enabled. Watch your hunger!":"Creative mode enabled.";menuMessage.textContent=status.textContent;}
 
@@ -476,6 +503,8 @@ window.addEventListener("keydown",e=>{
   if(k===" "&&!e.repeat)jump();
   if(k==="f")breakBlock();
   if(k==="g")placeBlock();
+  if(k==="e")collectNearbyPig();
+  if(k==="r")eatFood();
   if(k==="v")toggleCamera();
 });
 window.addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
@@ -545,8 +574,15 @@ function breakBlock(){
   const hit=getTarget();
   if(!hit){status.textContent="Aim at a block within reach.";return;}
   const p=hit.object.userData;
-  removeBlock(p.x,p.y,p.z);worldEdits.set(blockKey(p.x,p.y,p.z),null);beep(115,.09);
-  status.textContent="Broke "+names[p.type]+". Changes stay while you explore this session.";
+  if(gameMode==="survival"&&p.type==="bedrock"){status.textContent="Bedrock can't be mined in Survival.";return;}
+  removeBlock(p.x,p.y,p.z);worldEdits.set(blockKey(p.x,p.y,p.z),null);
+  if(gameMode==="survival"){
+    inventory[p.type]=(inventory[p.type]||0)+1;
+    if(p.type==="leaves"&&Math.random()<.18)inventory.apple++;
+    refreshInventoryUI();
+  }
+  beep(115,.09);
+  status.textContent=gameMode==="survival"?`Collected ${names[p.type]} ×1.`:`Broke ${names[p.type]}.`;
 }
 let selected="grass";
 function placeBlock(){
@@ -559,10 +595,47 @@ function placeBlock(){
     z+.5>player.z-player.radius&&z-.5<player.z+player.radius&&
     y+.5>player.y&&y-.5<player.y+player.height;
   if(overlapsPlayer){status.textContent="Move away to place that block.";return;}
-  if(addBlock(x,y,z,selected)){worldEdits.set(blockKey(x,y,z),selected);beep(420,.07,"triangle");status.textContent="Placed "+names[selected]+".";}
+  if(gameMode==="survival"&&(inventory[selected]||0)<1){status.textContent=`No ${names[selected]} in your inventory. Break blocks to collect them.`;return;}
+  if(addBlock(x,y,z,selected)){
+    worldEdits.set(blockKey(x,y,z),selected);
+    if(gameMode==="survival"){inventory[selected]--;refreshInventoryUI();}
+    beep(420,.07,"triangle");status.textContent="Placed "+names[selected]+".";
+  }
 }
 document.getElementById("breakBtn").addEventListener("pointerdown",e=>{e.preventDefault();breakBlock();});
 document.getElementById("placeBtn").addEventListener("pointerdown",e=>{e.preventDefault();placeBlock();});
+function collectNearbyPig(){
+  if(gameMode!=="survival"){status.textContent="Switch to Survival to collect food.";return;}
+  let best=-1,bestD=3.2;
+  for(let i=0;i<mobs.length;i++){const m=mobs[i],d=Math.hypot(m.x-player.x,m.z-player.z);if(d<bestD){best=i;bestD=d;}}
+  if(best<0){status.textContent="Move closer to a pig to collect pork.";return;}
+  const m=mobs[best];scene.remove(m.group);mobs.splice(best,1);inventory.pork++;refreshInventoryUI();beep(340,.12,"triangle");status.textContent="Collected 1 porkchop! Open Menu to see your inventory.";
+}
+function eatFood(){
+  if(gameMode!=="survival"){status.textContent="Food is only needed in Survival.";return;}
+  if(hunger>=20){status.textContent="Your hunger is already full.";return;}
+  if(inventory.pork>0){inventory.pork--;hunger=Math.min(20,hunger+7);status.textContent="Ate porkchop · hunger +7.";}
+  else if(inventory.apple>0){inventory.apple--;hunger=Math.min(20,hunger+4);status.textContent="Ate apple · hunger +4.";}
+  else{status.textContent="No food! Collect a nearby pig or break leaves for a chance at an apple.";return;}
+  refreshModeUI();beep(620,.12,"sine");
+}
+document.getElementById("useBtn").addEventListener("pointerdown",e=>{e.preventDefault();collectNearbyPig();});
+document.getElementById("eatBtn").addEventListener("pointerdown",e=>{e.preventDefault();eatFood();});
+document.getElementById("collectMenuBtn").addEventListener("click",collectNearbyPig);
+document.getElementById("eatMenuBtn").addEventListener("click",eatFood);
+function craftItem(recipe){
+  if(gameMode!=="survival"){status.textContent="Crafting is for Survival mode.";return;}
+  if(recipe==="planks"){
+    if(inventory.wood<1){status.textContent="Need 1 Wood block to craft 4 planks.";return;}
+    inventory.wood--;inventory.planks+=4;status.textContent="Crafted 4 wooden planks.";
+  }else if(recipe==="sticks"){
+    if(inventory.planks<2){status.textContent="Need 2 planks to craft 4 sticks.";return;}
+    inventory.planks-=2;inventory.sticks+=4;status.textContent="Crafted 4 sticks.";
+  }
+  refreshInventoryUI();beep(500,.1,"triangle");
+}
+document.getElementById("craftPlanksBtn").addEventListener("click",()=>craftItem("planks"));
+document.getElementById("craftSticksBtn").addEventListener("click",()=>craftItem("sticks"));
 
 const palette=document.getElementById("palette");
 for(const type of Object.keys(names)){
@@ -606,7 +679,7 @@ function openMenu(){menuOverlay.style.display="block";}
 function closeMenu(){menuOverlay.style.display="none";}
 function saveWorld(){
   const edits={};for(const [key,value] of worldEdits)edits[key]=value;
-  const data={version:1,seed:WORLD_SEED,mode:gameMode,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  const data={version:2,seed:WORLD_SEED,mode:gameMode,inventory,health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));status.textContent="World saved on this device.";menuMessage.textContent="World saved on this device! Use Load Save after reloading to restore it.";return true;}
   catch(_){status.textContent="Save failed: browser storage may be full or disabled.";menuMessage.textContent="Save failed. Browser storage may be unavailable.";return false;}
 }
