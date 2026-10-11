@@ -112,6 +112,25 @@ button:active,button.selected{background:#27864d}
   </div>
 </div>
 
+<div id="mainMenu" style="position:fixed;inset:0;z-index:50;overflow:auto;padding:20px;background:linear-gradient(145deg,#101c2bee,#183c2bee),linear-gradient(#87ceeb,#3d743c);color:white;font-family:system-ui,Arial,sans-serif;touch-action:auto;display:flex;align-items:center;justify-content:center">
+  <div style="width:min(100%,620px);max-height:94vh;overflow:auto;background:#101a28f5;border:1px solid #ffffff33;border-radius:22px;padding:clamp(18px,4vw,30px);box-shadow:0 18px 60px #0009">
+    <div style="text-align:center;font-size:46px;line-height:1.2">🧱🌳⛏️</div>
+    <h1 style="text-align:center;font-size:clamp(27px,6vw,40px);margin:8px 0 4px">CLASSROOM SANDBOX</h1>
+    <p style="text-align:center;color:#cbd5e1;margin:0 0 22px">Build your own world. Play your way.</p>
+    <div id="continueArea" style="display:none;margin-bottom:10px"><button id="continueBtn" style="width:100%;padding:14px;font-size:16px">▶ Continue World</button></div>
+    <h2 style="font-size:18px;margin:12px 0">Create a new world</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button id="createCreativeBtn" style="padding:16px 10px;background:#246b42"><span style="font-size:24px">🛠️</span><br><span style="font-size:16px">Creative</span><br><small style="font-weight:500">Unlimited blocks · no hunger</small></button>
+      <button id="createSurvivalBtn" style="padding:16px 10px;background:#8b3b35"><span style="font-size:24px">❤️</span><br><span style="font-size:16px">Survival</span><br><small style="font-weight:500">Collect · craft · stay alive</small></button>
+    </div>
+    <h2 style="font-size:18px;margin:22px 0 8px">Saved worlds</h2>
+    <p style="color:#cbd5e1;font-size:13px;margin:0 0 10px">Each world shows its game mode. Saves are stored only in this browser on this device.</p>
+    <div id="savedWorldList" style="display:grid;gap:8px"><p style="color:#94a3b8;font-size:13px">No saved worlds yet. Create a world and press Save.</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px"><button id="mainSettingsBtn">⚙️ Settings</button><button id="mainExitBtn">✖ Back to Game</button></div>
+    <p id="mainMenuMessage" style="min-height:18px;font-size:13px;color:#b8f7c5;margin:12px 0 0;text-align:center"></p>
+  </div>
+</div>
+
 <script src="./three.min.js"></script>
 <script>
 (() => {
@@ -231,6 +250,9 @@ function removeBlock(x,y,z){
 const CHUNK_SIZE=16;
 let CHUNK_RADIUS=1; // configurable render distance
 const SAVE_KEY="classroomSandboxSaveV1";
+const SLOTS_KEY="classroomSandboxWorldSlotsV1";
+const ACTIVE_SLOT_KEY="classroomSandboxActiveSlotV1";
+const START_MODE_KEY="classroomSandboxStartModeV1";
 const SETTINGS_KEY="classroomSandboxSettingsV1";
 function readLocal(key){try{return JSON.parse(localStorage.getItem(key)||"null");}catch(_){return null;}}
 const bootSave=readLocal(SAVE_KEY);
@@ -429,7 +451,9 @@ if(bootSave&&bootSave.player&&Number.isFinite(bootSave.player.x)&&Number.isFinit
   player.yaw=Number.isFinite(bootSave.player.yaw)?bootSave.player.yaw:0;
   player.pitch=Number.isFinite(bootSave.player.pitch)?bootSave.player.pitch:0;
 }
-let gameMode=(bootSave&&bootSave.mode==="survival")?"survival":"creative";
+let pendingStartMode=readLocal(START_MODE_KEY);
+try{localStorage.removeItem(START_MODE_KEY);}catch(_){}
+let gameMode=(pendingStartMode==="survival" || (!pendingStartMode && bootSave&&bootSave.mode==="survival"))?"survival":"creative";
 const inventory={};
 for(const type of Object.keys(names))inventory[type]=0;
 inventory.planks=0;inventory.sticks=0;inventory.pork=0;inventory.apple=0;
@@ -675,14 +699,94 @@ document.getElementById("resetBtn").addEventListener("click",()=>{respawn();stat
 
 const menuOverlay=document.getElementById("menuOverlay");
 const menuMessage=document.getElementById("menuMessage");
+let gameStarted=false;
+let returnToMainMenu=false;
 function openMenu(){menuOverlay.style.display="block";}
-function closeMenu(){menuOverlay.style.display="none";}
+function closeMenu(){menuOverlay.style.display="none";if(returnToMainMenu){returnToMainMenu=false;showMainMenu();}}
+let activeSlotId=localStorage.getItem(ACTIVE_SLOT_KEY)||null;
+if(!activeSlotId&&bootSave){const migrated=readSlots().find(slot=>slot.data&&slot.data.seed===bootSave.seed);if(migrated)activeSlotId=migrated.id;}
+const mainMenu=document.getElementById("mainMenu");
+const mainMenuMessage=document.getElementById("mainMenuMessage");
+function readSlots(){
+  let slots=readLocal(SLOTS_KEY);
+  if(!Array.isArray(slots))slots=[];
+  // Migrate the older single-save format into a named slot without deleting it.
+  const legacy=readLocal(SAVE_KEY);
+  if(legacy&&!slots.length){
+    slots.unshift({id:"legacy-world",name:"My World",data:legacy});
+    try{localStorage.setItem(SLOTS_KEY,JSON.stringify(slots));}catch(_){}
+  }
+  return slots.filter(slot=>slot&&typeof slot.id==="string"&&slot.data&&typeof slot.data==="object");
+}
+function showMainMenu(){
+  gameStarted=false;
+  mainMenu.style.display="flex";
+  document.getElementById("continueArea").style.display=readLocal(SAVE_KEY)?"block":"none";
+  renderSavedWorlds();
+}
+function hideMainMenu(){mainMenu.style.display="none";}
+function renderSavedWorlds(){
+  const list=document.getElementById("savedWorldList");list.replaceChildren();
+  const slots=readSlots();
+  if(!slots.length){const empty=document.createElement("p");empty.style.cssText="color:#94a3b8;font-size:13px";empty.textContent="No saved worlds yet. Create a world and press Save.";list.appendChild(empty);return;}
+  slots.forEach(slot=>{
+    const card=document.createElement("div");card.style.cssText="display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#0a1320;border:1px solid #ffffff22;border-radius:12px;padding:10px";
+    const info=document.createElement("div");info.style.cssText="flex:1;min-width:130px";
+    const name=document.createElement("div");name.style.cssText="font-weight:800";name.textContent=slot.name||"My World";
+    const meta=document.createElement("div");meta.style.cssText="font-size:12px;color:#cbd5e1;margin-top:3px";meta.textContent=(slot.data.mode==="survival"?"❤️ SURVIVAL":"🛠 CREATIVE")+" · Seed "+(slot.data.seed??"?");
+    info.append(name,meta);
+    const load=document.createElement("button");load.textContent="▶ Load";load.style.padding="9px 12px";load.addEventListener("click",()=>loadWorldSlot(slot.id));
+    const del=document.createElement("button");del.textContent="🗑";del.title="Delete saved world";del.setAttribute("aria-label","Delete "+(slot.name||"world"));del.style.padding="9px 12px";del.addEventListener("click",()=>deleteWorldSlot(slot.id,slot.name||"My World"));
+    card.append(info,load,del);list.appendChild(card);
+  });
+}
 function saveWorld(){
   const edits={};for(const [key,value] of worldEdits)edits[key]=value;
-  const data={version:2,seed:WORLD_SEED,mode:gameMode,inventory,health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
-  try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));status.textContent="World saved on this device.";menuMessage.textContent="World saved on this device! Use Load Save after reloading to restore it.";return true;}
-  catch(_){status.textContent="Save failed: browser storage may be full or disabled.";menuMessage.textContent="Save failed. Browser storage may be unavailable.";return false;}
+  const data={version:3,seed:WORLD_SEED,mode:gameMode,inventory:{...inventory},health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  try{
+    let slots=readSlots();
+    let slot=slots.find(item=>item.id===activeSlotId);
+    if(!slot){
+      const suggested=gameMode==="survival"?"Survival World":"Creative World";
+      let name=prompt("Name this saved world:",suggested);
+      if(name===null)name=suggested;
+      name=name.trim().slice(0,40)||suggested;
+      activeSlotId="world-"+Date.now()+"-"+Math.floor(Math.random()*10000);
+      slot={id:activeSlotId,name,data};slots.unshift(slot);
+      localStorage.setItem(ACTIVE_SLOT_KEY,activeSlotId);
+    }else{slot.data=data;}
+    // Keep a maximum of 12 save slots so local browser storage remains manageable.
+    slots=slots.slice(0,12);
+    localStorage.setItem(SLOTS_KEY,JSON.stringify(slots));
+    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+    status.textContent="World saved · "+(gameMode==="survival"?"SURVIVAL":"CREATIVE");
+    menuMessage.textContent="Saved as “"+slot.name+"” · "+(gameMode==="survival"?"❤️ SURVIVAL":"🛠 CREATIVE");
+    mainMenuMessage.textContent="Saved “"+slot.name+"” as "+(gameMode==="survival"?"SURVIVAL":"CREATIVE")+".";
+    renderSavedWorlds();return true;
+  }catch(_){status.textContent="Save failed: browser storage may be full or disabled.";menuMessage.textContent="Save failed. Browser storage may be unavailable.";return false;}
 }
+function loadWorldSlot(id){
+  const slot=readSlots().find(item=>item.id===id);if(!slot)return;
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(slot.data));localStorage.setItem(ACTIVE_SLOT_KEY,id);location.reload();}
+  catch(_){mainMenuMessage.textContent="Couldn't load that save. Browser storage may be unavailable.";}
+}
+function deleteWorldSlot(id,name){
+  if(!confirm("Delete saved world “"+name+"”? This cannot be undone."))return;
+  const slots=readSlots().filter(item=>item.id!==id);
+  try{localStorage.setItem(SLOTS_KEY,JSON.stringify(slots));if(activeSlotId===id){activeSlotId=null;localStorage.removeItem(ACTIVE_SLOT_KEY);localStorage.removeItem(SAVE_KEY);}mainMenuMessage.textContent="Deleted “"+name+"”.";renderSavedWorlds();document.getElementById("continueArea").style.display=readLocal(SAVE_KEY)?"block":"none";}
+  catch(_){mainMenuMessage.textContent="Couldn't delete that world.";}
+}
+function createWorld(mode){
+  try{
+    localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_SLOT_KEY);localStorage.setItem(START_MODE_KEY,JSON.stringify(mode));
+    location.reload();
+  }catch(_){mainMenuMessage.textContent="Couldn't create a world. Browser storage may be disabled.";}
+}
+document.getElementById("createCreativeBtn").addEventListener("click",()=>createWorld("creative"));
+document.getElementById("createSurvivalBtn").addEventListener("click",()=>createWorld("survival"));
+document.getElementById("continueBtn").addEventListener("click",()=>{hideMainMenu();gameStarted=true;});
+document.getElementById("mainSettingsBtn").addEventListener("click",()=>{returnToMainMenu=true;hideMainMenu();openMenu();});
+document.getElementById("mainExitBtn").addEventListener("click",()=>{hideMainMenu();gameStarted=true;});
 document.getElementById("saveBtn").addEventListener("click",saveWorld);
 document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
 document.getElementById("menuBtn").addEventListener("click",openMenu);
@@ -714,7 +818,8 @@ function applySettings(){
 }
 qualitySelect.addEventListener("change",applySettings);
 distanceSelect.addEventListener("change",applySettings);
-if(bootSave)status.textContent="Save found · reload restores your last saved world.";
+if(bootSave)status.textContent="Saved world ready · "+(bootSave.mode==="survival"?"SURVIVAL":"CREATIVE");
+showMainMenu();
 
 function updatePlayer(dt){
   let f=0,s=0;
@@ -804,8 +909,10 @@ function animate(now){
   const dt=Math.min((now-previous)/1000,.035);previous=now;
   processChunkQueue();
   updateChunks();
-  updateMobs(now,dt);
-  if(loadedChunks.has(chunkKey(Math.floor(player.x/CHUNK_SIZE),Math.floor(player.z/CHUNK_SIZE))))updatePlayer(dt);
+  if(gameStarted){
+    updateMobs(now,dt);
+    if(loadedChunks.has(chunkKey(Math.floor(player.x/CHUNK_SIZE),Math.floor(player.z/CHUNK_SIZE))))updatePlayer(dt);
+  }
   updateCamera();renderer.render(scene,camera);
 }
 window.addEventListener("resize",()=>{
