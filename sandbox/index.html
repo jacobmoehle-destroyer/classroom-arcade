@@ -106,7 +106,7 @@ button:active,button.selected{background:#27864d}
     <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
     <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option><option value="3">Far (7×7 chunks)</option><option value="4">Very Far (9×9 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">The game preloads a 7×7 area (49 chunks) before spawning. Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">The game preloads 30 nearby chunks before spawning. Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -140,7 +140,7 @@ button:active,button.selected{background:#27864d}
     <p id="loadingMessage" style="color:#cbd5e1;margin:0 0 16px">Preparing the spawn area...</p>
     <div style="height:18px;border-radius:20px;background:#050b12;overflow:hidden;border:1px solid #ffffff33"><div id="loadingBar" style="height:100%;width:0%;background:linear-gradient(90deg,#37b66b,#9de36d);transition:width .12s"></div></div>
     <p id="loadingPercent" style="font-weight:800;margin:10px 0 0">0%</p>
-    <p style="font-size:12px;color:#94a3b8;margin:8px 0 0">Generating 49 nearby chunks in small batches to reduce freezing.</p>
+    <p style="font-size:12px;color:#94a3b8;margin:8px 0 0">Generating 30 nearby chunks in small batches to reduce freezing.</p>
   </div>
 </div>
 
@@ -479,15 +479,21 @@ function updateChunks(force=false){
   chunkQueue.sort((a,b)=>((a.cx-cx)**2+(a.cz-cz)**2)-((b.cx-cx)**2+(b.cz-cz)**2));
   status.textContent=`Loading nearby chunks · ${loadedChunks.size} ready · Seed ${WORLD_SEED}`;
 }
-// Chunks are deliberately NOT queued at page load. The Start button begins a
-// 7x7 (49 chunk) preload and the loading screen tracks its progress.
+// Chunks are deliberately NOT queued at page load. Start preloads the 30 nearest chunks.
 let loadingWorld=false;
-let preloadTarget=49;
+let preloadTarget=30;
 function queueSpawnSquare(){
   chunkQueue.length=0;queuedChunks.clear();activeChunkJob=null;
   const radius=3;
   const centerX=Math.floor(player.x/CHUNK_SIZE),centerZ=Math.floor(player.z/CHUNK_SIZE);
-  for(let cx=centerX-radius;cx<=centerX+radius;cx++)for(let cz=centerZ-radius;cz<=centerZ+radius;cz++)generateChunk(cx,cz);
+  const candidates=[];
+  for(let cx=centerX-radius;cx<=centerX+radius;cx++){
+    for(let cz=centerZ-radius;cz<=centerZ+radius;cz++){
+      candidates.push({cx,cz,distance:(cx-centerX)**2+(cz-centerZ)**2});
+    }
+  }
+  candidates.sort((a,b)=>a.distance-b.distance);
+  candidates.slice(0,preloadTarget).forEach(({cx,cz})=>generateChunk(cx,cz));
   chunkQueue.sort((a,b)=>((a.cx-centerX)**2+(a.cz-centerZ)**2)-((b.cx-centerX)**2+(b.cz-centerZ)**2));
 }
 
@@ -816,7 +822,7 @@ function startWorldLoading(){
   mainMenu.style.display="none";menuOverlay.style.display="none";
   const screen=document.getElementById("loadingScreen");screen.style.display="flex";
   document.getElementById("loadingBar").style.width="0%";document.getElementById("loadingPercent").textContent="0%";
-  document.getElementById("loadingMessage").textContent="Preparing your 49-chunk spawn area...";
+  document.getElementById("loadingMessage").textContent="Preparing your 30-chunk spawn area...";
   loadedChunks.clear();blocks.clear();meshes.forEach(m=>scene.remove(m));meshes.clear();
   queueSpawnSquare();lastChunkX=NaN;lastChunkZ=NaN;
   player.x=Number.isFinite(player.x)?player.x:0;player.z=Number.isFinite(player.z)?player.z:0;
