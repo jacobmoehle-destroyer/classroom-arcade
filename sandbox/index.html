@@ -170,8 +170,23 @@ scene.add(new THREE.HemisphereLight(0xffffff,0x65704c,2));
 const sun = new THREE.DirectionalLight(0xffffff,2);
 sun.position.set(-15,30,12);
 scene.add(sun);
-// Lightweight voxel clouds drift above the terrain.
-const cloudMaterial=new THREE.MeshLambertMaterial({color:0xf5fbff});
+// Small nearest-filtered pixel-art textures for environmental objects.
+// These are generated locally so the game needs no external image downloads.
+function makePixelTexture(base, palette, seed=1, detail=120, size=32){
+  const c=document.createElement("canvas");c.width=c.height=size;
+  const ctx=c.getContext("2d");ctx.fillStyle=base;ctx.fillRect(0,0,size,size);
+  let state=(seed>>>0)||1;function rand(){state=(state*1664525+1013904223)>>>0;return state/4294967296;}
+  for(let i=0;i<detail;i++){
+    ctx.fillStyle=palette[Math.floor(rand()*palette.length)];
+    const w=1+Math.floor(rand()*4),h=1+Math.floor(rand()*4);
+    ctx.fillRect(Math.floor(rand()*size),Math.floor(rand()*size),w,h);
+  }
+  const tex=new THREE.CanvasTexture(c);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.colorSpace=THREE.SRGBColorSpace;
+  return tex;
+}
+function pixelMaterial(base,palette,seed,detail=120){return new THREE.MeshLambertMaterial({map:makePixelTexture(base,palette,seed,detail)});}
+// Lightweight voxel clouds drift above the terrain, with subtle pixel shading.
+const cloudMaterial=pixelMaterial("#f7fbff",["#ffffff","#eaf3f8","#dce8ef","#f4f8fb"],194,75);
 const cloudGeometry=new THREE.BoxGeometry(1,1,1);
 const clouds=[];
 for(let i=0;i<18;i++){
@@ -336,14 +351,27 @@ function makeTree(x,z){
     if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-trunk)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
 }
-// Simple friendly animals: chunky pig-like wanderers, kept lightweight.
-const mobs=[];const mobMat=new THREE.MeshLambertMaterial({color:0xd98b9c});const mobFaceMat=new THREE.MeshLambertMaterial({color:0x75434a});
+// Friendly voxel pigs with generated pixel textures, ears, eyes and a detailed snout.
+// Textures are procedural/local: no remote assets or external requests are required.
+const mobs=[];
+const pigBodyMat=pixelMaterial("#e6a1ad",["#f3bac3","#d98999","#e8a6b1","#c97889","#f0b1bb"],912,150);
+const pigHeadMat=pixelMaterial("#e8a4b0",["#f5c1c8","#d98a9a","#e7a0ae","#ca7888"],913,95);
+const pigLegMat=pixelMaterial("#bd7483",["#d58b99","#a95f70","#e0a0aa"],914,65);
+const pigSnoutMat=pixelMaterial("#f2b5bf",["#ffd0d6","#df8999","#e99aaa"],915,50);
+const pigEyeMat=new THREE.MeshLambertMaterial({color:0x2a2024});
+const pigNostrilMat=new THREE.MeshLambertMaterial({color:0x713b48});
 function spawnMob(x,z){
   const y=terrainHeight(x,z)+.5;const group=new THREE.Group();
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.85,.55,.5),mobMat);body.position.y=.55;group.add(body);
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.38,.38,.38),mobMat);head.position.set(0,.72,-.38);group.add(head);
-  const snout=new THREE.Mesh(new THREE.BoxGeometry(.22,.16,.12),mobFaceMat);snout.position.set(0,.67,-.6);group.add(snout);
-  for(const lx of [-.25,.25])for(const lz of [-.15,.15]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.14,.3,.14),mobFaceMat);leg.position.set(lx,.18,lz);group.add(leg);}
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.85,.55,.5),pigBodyMat);body.position.y=.55;group.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.38),pigHeadMat);head.position.set(0,.76,-.38);group.add(head);
+  // Snout projects from the front of the head; two dark pixel nostrils make the face readable.
+  const snout=new THREE.Mesh(new THREE.BoxGeometry(.23,.16,.105),pigSnoutMat);snout.position.set(0,.69,-.615);group.add(snout);
+  for(const nx of [-.055,.055]){const nostril=new THREE.Mesh(new THREE.BoxGeometry(.035,.055,.012),pigNostrilMat);nostril.position.set(nx,.69,-.674);group.add(nostril);}
+  // Small upright ears.
+  for(const ex of [-.14,.14]){const ear=new THREE.Mesh(new THREE.BoxGeometry(.105,.15,.12),pigHeadMat);ear.position.set(ex,.99,-.36);group.add(ear);}
+  // Eyes sit on both visible sides of the head.
+  for(const side of [-1,1]){const eye=new THREE.Mesh(new THREE.BoxGeometry(.045,.055,.018),pigEyeMat);eye.position.set(side*.205,.81,-.46);group.add(eye);}
+  for(const lx of [-.25,.25])for(const lz of [-.15,.15]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.14,.3,.14),pigLegMat);leg.position.set(lx,.18,lz);group.add(leg);}
   group.position.set(x,y,z);scene.add(group);mobs.push({group,x,z,dir:Math.random()*Math.PI*2,changeAt:performance.now()+1000+Math.random()*4000});
 }
 function updateMobs(now,dt){
@@ -465,11 +493,12 @@ function queueSpawnSquare(){
 
 const player={x:0,y:8,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,height:1.8,radius:.29};
 const avatar=new THREE.Group();scene.add(avatar);
-const skin=new THREE.MeshLambertMaterial({color:0xe1b28a});
-const shirt=new THREE.MeshLambertMaterial({color:0x2877cf});
-const pants=new THREE.MeshLambertMaterial({color:0x333c58});
-const hair=new THREE.MeshLambertMaterial({color:0x493020});
-const shoes=new THREE.MeshLambertMaterial({color:0x292929});
+// Textured player clothing/skin instead of flat-color boxes.
+const skin=pixelMaterial("#e1b28a",["#f0c49b","#d6a078","#e8b58b","#c99570"],721,55);
+const shirt=pixelMaterial("#2877cf",["#3d91e8","#1e5eaa","#2e7bd0","#69afea"],722,90);
+const pants=pixelMaterial("#333c58",["#485878","#252e47","#3b4969","#596785"],723,80);
+const hair=pixelMaterial("#493020",["#63412a","#352318","#795037","#41291b"],724,70);
+const shoes=pixelMaterial("#292929",["#414141","#1d1d1d","#555555"],725,45);
 function part(w,h,d,mat,x,y,z){
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
   m.position.set(x,y,z);avatar.add(m);return m;
