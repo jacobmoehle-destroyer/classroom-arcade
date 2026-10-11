@@ -49,12 +49,14 @@ button:active,button.selected{background:#27864d}
     <div id="brand">🧱 CLASSROOM SANDBOX</div>
     <button id="cameraBtn">🎥 First Person</button>
     <button id="soundBtn">🔊 Sound: On</button>
+    <button id="modeBtn">🛠 Creative</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
   <div id="status">Loading world...</div>
+  <div id="survivalHud" style="display:none;position:absolute;top:100px;left:9px;background:#17202ddd;border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.6">❤️ <span id="healthValue">20</span>/20<br>🍗 <span id="hungerValue">20</span>/20</div>
   <div id="crosshair">+</div>
   <div id="help">
     <b>COMPUTER</b><br>
@@ -85,12 +87,16 @@ button:active,button.selected{background:#27864d}
       <button id="loadBtn">📂 Load Save</button><button id="newWorldBtn">🌍 New World</button>
     </div>
     <hr style="border-color:#ffffff22;margin:18px 0">
+    <h2 style="font-size:18px">Game mode</h2>
+    <p style="font-size:13px;color:#cbd5e1">Creative lets you build freely. Survival adds health and hunger; friendly animals wander around the world.</p>
+    <button id="modeMenuBtn" style="width:100%">Switch to Survival</button>
+    <hr style="border-color:#ffffff22;margin:18px 0">
     <h2 style="font-size:18px">Graphics</h2>
     <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
     <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
     <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; friendly animals wander nearby.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -174,6 +180,22 @@ function createTexture(type){
 for(const type of Object.keys(names)){
   materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type), ...(type==="glass"?{transparent:true,opacity:.42}: {})});
 }
+// Grass blocks use six face materials: green top, dirt bottom, grassy dirt sides.
+function makeGrassFace(kind){
+  const c=document.createElement("canvas");c.width=c.height=32;const ctx=c.getContext("2d");
+  let seed=kind.length*733+0x51a55;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+  if(kind==="top"){
+    ctx.fillStyle="#62a844";ctx.fillRect(0,0,32,32);
+    for(let i=0;i<110;i++){ctx.fillStyle=rand()>.5?"#79bb50":"#4d9137";ctx.fillRect(Math.floor(rand()*32),Math.floor(rand()*32),1+Math.floor(rand()*3),1+Math.floor(rand()*3));}
+  }else{
+    ctx.fillStyle="#87502c";ctx.fillRect(0,0,32,32);
+    for(let i=0;i<85;i++){ctx.fillStyle=rand()>.5?"#99603a":"#704124";ctx.fillRect(Math.floor(rand()*32),Math.floor(rand()*32),2+Math.floor(rand()*4),2+Math.floor(rand()*3));}
+    ctx.fillStyle="#62a844";ctx.fillRect(0,0,32,7);
+    for(let i=0;i<24;i++){ctx.fillStyle=rand()>.5?"#79bb50":"#4d9137";ctx.fillRect(Math.floor(rand()*32),5+Math.floor(rand()*5),1+Math.floor(rand()*3),1+Math.floor(rand()*2));}
+  }
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshLambertMaterial({map:t});
+}
+materials.grass=[makeGrassFace("side"),makeGrassFace("side"),makeGrassFace("top"),materials.dirt,makeGrassFace("side"),makeGrassFace("side")];
 
 const geometry=new THREE.BoxGeometry(1,1,1);
 const blocks=new Map(),meshes=new Map();
@@ -236,6 +258,27 @@ function makeTree(x,z){
     if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-trunk)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
 }
+// Simple friendly animals: chunky pig-like wanderers, kept lightweight.
+const mobs=[];const mobMat=new THREE.MeshLambertMaterial({color:0xd98b9c});const mobFaceMat=new THREE.MeshLambertMaterial({color:0x75434a});
+function spawnMob(x,z){
+  const y=terrainHeight(x,z)+.5;const group=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.85,.55,.5),mobMat);body.position.y=.55;group.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.38,.38,.38),mobMat);head.position.set(0,.72,-.38);group.add(head);
+  const snout=new THREE.Mesh(new THREE.BoxGeometry(.22,.16,.12),mobFaceMat);snout.position.set(0,.67,-.6);group.add(snout);
+  for(const lx of [-.25,.25])for(const lz of [-.15,.15]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.14,.3,.14),mobFaceMat);leg.position.set(lx,.18,lz);group.add(leg);}
+  group.position.set(x,y,z);scene.add(group);mobs.push({group,x,z,dir:Math.random()*Math.PI*2,changeAt:performance.now()+1000+Math.random()*4000});
+}
+function updateMobs(now,dt){
+  // Spawn a few animals once around the starting area; never spam new mobs.
+  if(mobs.length<5&&loadedChunks.size>=1&&now>nextMobSpawn){const angle=Math.random()*Math.PI*2,dist=5+Math.random()*9;const x=Math.round(player.x+Math.cos(angle)*dist),z=Math.round(player.z+Math.sin(angle)*dist);spawnMob(x,z);nextMobSpawn=now+4500;}
+  for(const m of mobs){if(now>m.changeAt){m.dir+=(Math.random()-.5)*2.4;m.changeAt=now+1300+Math.random()*3600;}
+    if(Math.hypot(m.x-player.x,m.z-player.z)>CHUNK_RADIUS*CHUNK_SIZE+8)continue;
+    const nx=m.x+Math.sin(m.dir)*dt*.65,nz=m.z+Math.cos(m.dir)*dt*.65;
+    const ground=terrainHeight(Math.round(nx),Math.round(nz));
+    if(Math.abs(ground-terrainHeight(Math.round(m.x),Math.round(m.z)))<=1){m.x=nx;m.z=nz;m.group.position.set(m.x,ground+.5,m.z);m.group.rotation.y=m.dir;}
+  }
+}
+let nextMobSpawn=performance.now()+2500;
 function chunkKey(cx,cz){return `${cx},${cz}`;}
 function generateChunk(cx,cz){
   const ck=chunkKey(cx,cz);
@@ -376,6 +419,18 @@ if(bootSave&&bootSave.player&&Number.isFinite(bootSave.player.x)&&Number.isFinit
   player.yaw=Number.isFinite(bootSave.player.yaw)?bootSave.player.yaw:0;
   player.pitch=Number.isFinite(bootSave.player.pitch)?bootSave.player.pitch:0;
 }
+let gameMode=(bootSave&&bootSave.mode==="survival")?"survival":"creative";
+let health=20,hunger=20,hungerClock=0,damageClock=0;
+const survivalHud=document.getElementById("survivalHud");
+function refreshModeUI(){
+  const survival=gameMode==="survival";
+  survivalHud.style.display=survival?"block":"none";
+  document.getElementById("modeBtn").textContent=survival?"❤️ Survival":"🛠 Creative";
+  document.getElementById("modeMenuBtn").textContent=survival?"Switch to Creative":"Switch to Survival";
+  document.getElementById("healthValue").textContent=Math.ceil(health);
+  document.getElementById("hungerValue").textContent=Math.ceil(hunger);
+}
+function toggleMode(){gameMode=gameMode==="creative"?"survival":"creative";refreshModeUI();status.textContent=gameMode==="survival"?"Survival mode enabled. Watch your hunger!":"Creative mode enabled.";menuMessage.textContent=status.textContent;}
 
 const keys=new Set();
 const touch={forward:0,back:0,left:0,right:0};
@@ -551,13 +606,16 @@ function openMenu(){menuOverlay.style.display="block";}
 function closeMenu(){menuOverlay.style.display="none";}
 function saveWorld(){
   const edits={};for(const [key,value] of worldEdits)edits[key]=value;
-  const data={version:1,seed:WORLD_SEED,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  const data={version:1,seed:WORLD_SEED,mode:gameMode,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));status.textContent="World saved on this device.";menuMessage.textContent="World saved on this device! Use Load Save after reloading to restore it.";return true;}
   catch(_){status.textContent="Save failed: browser storage may be full or disabled.";menuMessage.textContent="Save failed. Browser storage may be unavailable.";return false;}
 }
 document.getElementById("saveBtn").addEventListener("click",saveWorld);
 document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
 document.getElementById("menuBtn").addEventListener("click",openMenu);
+document.getElementById("modeBtn").addEventListener("click",toggleMode);
+document.getElementById("modeMenuBtn").addEventListener("click",toggleMode);
+refreshModeUI();
 document.getElementById("resumeBtn").addEventListener("click",closeMenu);
 document.getElementById("closeMenuBtn").addEventListener("click",closeMenu);
 document.getElementById("loadBtn").addEventListener("click",()=>{menuMessage.textContent="A saved world will load when you reload this page. Reload now to restore the last save.";status.textContent="Reload the page to load your saved world.";});
@@ -618,7 +676,13 @@ function updatePlayer(dt){
     if(!collides(player.x,player.y+dy,player.z))player.y+=dy;
     else{if(dy<0)player.grounded=true;player.vy=0;break;}
   }
-  if(player.y < -30)respawn();
+  if(player.y < -30){if(gameMode==="survival"){health=Math.max(1,health-5);refreshModeUI();}respawn();}
+  if(gameMode==="survival"){
+    hungerClock+=dt;damageClock+=dt;
+    if(hungerClock>=12){hunger=Math.max(0,hunger-1);hungerClock=0;refreshModeUI();}
+    if(hunger===0&&damageClock>=3){health=Math.max(1,health-1);damageClock=0;refreshModeUI();}
+    if(hunger>=18&&health<20&&damageClock>=5){health=Math.min(20,health+1);damageClock=0;refreshModeUI();}
+  }
 
   avatar.position.set(player.x,player.y,player.z);
   avatar.rotation.y=player.yaw;
@@ -667,6 +731,7 @@ function animate(now){
   const dt=Math.min((now-previous)/1000,.035);previous=now;
   processChunkQueue();
   updateChunks();
+  updateMobs(now,dt);
   if(loadedChunks.has(chunkKey(Math.floor(player.x/CHUNK_SIZE),Math.floor(player.z/CHUNK_SIZE))))updatePlayer(dt);
   updateCamera();renderer.render(scene,camera);
 }
