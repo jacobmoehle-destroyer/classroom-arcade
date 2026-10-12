@@ -1433,84 +1433,21 @@ window.addEventListener("keydown",e=>{
   }
 });
 
+let nightmareScreamAudio=null;
 function playNightmareSting(){
-  // Original synthetic horror shriek: wavering, metallic, and distorted.
-  // Master gain stays capped so the scare comes from its texture, not unsafe volume.
+  // Play the user-provided Slendy-style sound from the same /sandbox/ folder.
+  // Keep the in-page level moderate; the device volume still controls loudness.
   if(!soundOn)return;
   try{
-    const AC=window.AudioContext||window.webkitAudioContext;
-    if(!AC)return;
-    if(!audio)audio=new AC();
-    if(audio.state==="suspended")audio.resume();
-    const now=audio.currentTime;
-    const duration=2.65;
-    const master=audio.createGain();
-    master.gain.setValueAtTime(0.0001,now);
-    master.gain.linearRampToValueAtTime(0.28,now+0.045);
-    master.gain.setValueAtTime(0.28,now+0.22);
-    master.gain.exponentialRampToValueAtTime(0.0001,now+duration);
-    master.connect(audio.destination);
-
-    // Main rising-then-falling scream tones, with a fast uneven pitch wobble.
-    const screamBus=audio.createGain();
-    screamBus.gain.value=0.9;
-    const screamFilter=audio.createBiquadFilter();
-    screamFilter.type="bandpass";
-    screamFilter.frequency.setValueAtTime(1050,now);
-    screamFilter.frequency.exponentialRampToValueAtTime(1850,now+0.32);
-    screamFilter.frequency.exponentialRampToValueAtTime(720,now+duration);
-    screamFilter.Q.value=1.8;
-    screamBus.connect(screamFilter);
-    screamFilter.connect(master);
-
-    [1,1.47,2.03].forEach((ratio,i)=>{
-      const osc=audio.createOscillator();
-      const gain=audio.createGain();
-      const wobble=audio.createOscillator();
-      const wobbleDepth=audio.createGain();
-      osc.type=i===1?"sawtooth":"triangle";
-      const base=[390,570,760][i];
-      osc.frequency.setValueAtTime(base,now);
-      osc.frequency.exponentialRampToValueAtTime(base*1.75,now+0.26);
-      osc.frequency.exponentialRampToValueAtTime(base*0.72,now+1.15);
-      osc.frequency.exponentialRampToValueAtTime(base*0.48,now+duration);
-      wobble.type="sine";
-      wobble.frequency.setValueAtTime(7.2+i*1.7,now);
-      wobbleDepth.gain.setValueAtTime(18+i*7,now);
-      wobble.connect(wobbleDepth);
-      wobbleDepth.connect(osc.frequency);
-      gain.gain.setValueAtTime(0.0001,now);
-      gain.gain.linearRampToValueAtTime([0.25,0.15,0.09][i],now+0.06);
-      gain.gain.setValueAtTime([0.25,0.15,0.09][i],now+0.24);
-      gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
-      osc.connect(gain);
-      gain.connect(screamBus);
-      wobble.start(now);
-      osc.start(now);
-      osc.stop(now+duration+0.03);
-      wobble.stop(now+duration+0.03);
-    });
-
-    // Short filtered static rasp adds a creature-like edge without recorded audio.
-    const frames=Math.ceil(audio.sampleRate*0.9);
-    const noiseBuffer=audio.createBuffer(1,frames,audio.sampleRate);
-    const noiseData=noiseBuffer.getChannelData(0);
-    for(let i=0;i<frames;i++)noiseData[i]=(Math.random()*2-1)*(1-i/frames);
-    const noise=audio.createBufferSource();
-    noise.buffer=noiseBuffer;
-    const noiseFilter=audio.createBiquadFilter();
-    noiseFilter.type="highpass";
-    noiseFilter.frequency.value=1250;
-    const noiseGain=audio.createGain();
-    noiseGain.gain.setValueAtTime(0.0001,now);
-    noiseGain.gain.linearRampToValueAtTime(0.22,now+0.035);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001,now+0.88);
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(master);
-    noise.start(now);
-    noise.stop(now+0.92);
-    setTimeout(()=>{try{master.disconnect();screamBus.disconnect();screamFilter.disconnect();}catch(_){}},3100);
+    if(!nightmareScreamAudio){
+      nightmareScreamAudio=new Audio("./slendy1.mp3");
+      nightmareScreamAudio.preload="auto";
+      nightmareScreamAudio.volume=0.65;
+    }
+    nightmareScreamAudio.pause();
+    nightmareScreamAudio.currentTime=0;
+    const playback=nightmareScreamAudio.play();
+    if(playback && typeof playback.catch==="function")playback.catch(()=>{});
   }catch(_){}
 }
 function beginHerobrineReveal(){
