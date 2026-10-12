@@ -29,6 +29,8 @@ button:active,button.selected{background:#27864d}
 .swatch{width:21px;height:21px;display:block;border:1px solid #ffffff88;border-radius:2px;margin:0}
 .slot-count{position:absolute;right:2px;bottom:0;font-size:11px;line-height:1.1;text-shadow:1px 1px 2px #000;font-weight:900}
 #inventoryBtn{background:#315d87ee!important}
+#stationOverlay{display:none;position:fixed;inset:0;z-index:48;background:#07101bf2;color:white;overflow:auto;padding:14px;touch-action:auto}
+#stationPanel{max-width:540px;margin:6vh auto;background:#17202d;border:2px solid #ffffff44;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0009}
 #survivalHud{position:fixed!important;top:auto!important;left:50%!important;bottom:68px!important;transform:translateX(-50%);display:none;background:#171717dd!important;border:2px solid #ffffff44;border-radius:7px!important;padding:4px 10px!important;line-height:1!important;white-space:nowrap;font-size:20px!important;letter-spacing:2px;box-shadow:0 3px 10px #0007}
 #healthIcons,#hungerIcons{display:flex;justify-content:center;gap:3px;min-height:20px}
 #healthIcons{margin-bottom:2px}
@@ -84,7 +86,7 @@ button:active,button.selected{background:#27864d}
   <div id="help">
     <b>COMPUTER</b><br>
     WASD: move<br>Space: jump<br>Mouse: look<br>
-    Left click: break<br>Right click: place<br>E: collect pig<br>R: eat food<br>
+    Left click: break<br>Right click: place<br>E: collect animal<br>R: eat food<br>
     <b>TOUCH</b><br>
     Left pad: move<br>Drag world: look<br>
     Right buttons: jump/build
@@ -99,7 +101,7 @@ button:active,button.selected{background:#27864d}
 <div id="actions">
   <button id="breakBtn">⛏ BREAK</button>
   <button id="placeBtn">🧱 PLACE</button>
-  <button id="useBtn">🐷 COLLECT</button>
+  <button id="useBtn">🐾 COLLECT</button>
   <button id="eatBtn">🍖 EAT</button>
 </div>
 <div id="lookHint">Drag the world to look up, down, and around</div>
@@ -119,17 +121,17 @@ button:active,button.selected{background:#27864d}
     <h2 style="font-size:18px">🎒 Inventory & Crafting</h2>
     <p id="inventoryText" style="font-size:13px;line-height:1.7;color:#e2e8f0;background:#0b1420;border-radius:10px;padding:10px;max-height:150px;overflow:auto">Inventory loads here.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-      <button id="eatMenuBtn">🍖 Eat Food</button><button id="collectMenuBtn">🐷 Collect Nearby</button>
+      <button id="eatMenuBtn">🍖 Eat Food</button><button id="collectMenuBtn">🐾 Collect Nearby</button>
     </div>
     <button id="openCraftFromMenuBtn" style="width:100%;margin-top:8px">🧰 Open Crafting & Tools</button>
     <p style="font-size:12px;color:#cbd5e1;line-height:1.5">In Survival, broken blocks go into your inventory. Use the dedicated 🧰 Craft button to make tools, a crafting table, a bed, torches, planks, and sticks.</p>
     <hr style="border-color:#ffffff22;margin:18px 0">
     <h2 style="font-size:18px">Graphics</h2>
     <label for="qualitySelect" style="display:block;margin:10px 0 5px">Rendering quality</label>
-    <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.75">Battery saver</option><option value="1">Balanced</option><option value="1.35">High</option></select>
+    <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.65">Ultra battery saver</option><option value="0.85">Battery saver</option><option value="1">Balanced</option><option value="1.2">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
     <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option><option value="3">Far (7×7 chunks)</option><option value="4">Very Far (9×9 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">The game preloads 30 nearby chunks before spawning. Higher render distance can cause more lag on older devices. Saves are stored in this browser on this device. Survival hunger decreases over time; collect pigs for food and use the inventory to craft.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Performance update: lower default pixel ratio, small chunk-generation batches, configurable render distance, and FPS display. The game preloads 30 nearby chunks before spawning. Use Battery Saver and Near render distance on older iPads/Chromebooks. Saves stay in this browser on this device. Day/night, new biomes, ores, armor, and crafting are included.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -142,6 +144,20 @@ button:active,button.selected{background:#27864d}
     <div id="inventoryGrid"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button id="inventoryCraftBtn">🧰 Craft</button><button id="closeInventoryBtn">Done</button></div>
     <p id="inventoryMessage" style="font-size:12px;color:#b8f7c5;min-height:16px;margin-bottom:0"></p>
+  </div>
+</div>
+
+<div id="stationOverlay" role="dialog" aria-label="Storage station">
+  <div id="stationPanel">
+    <h2 id="stationTitle" style="margin:0 0 6px">📦 Chest</h2>
+    <p id="stationDescription" style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Store items here for this world.</p>
+    <div id="stationContents" style="white-space:pre-line;background:#0b1420;border-radius:10px;padding:12px;min-height:100px;font-size:13px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+      <button id="stationStoreBtn">📥 Store Inventory</button><button id="stationTakeBtn">📤 Take All</button>
+    </div>
+    <button id="stationSmeltBtn" style="display:none;width:100%;margin-top:8px">🔥 Smelt 1 Iron Ore (needs Coal)</button>
+    <button id="stationCloseBtn" style="width:100%;margin-top:8px">Done</button>
+    <p id="stationMessage" style="font-size:12px;color:#b8f7c5;min-height:16px;margin-bottom:0"></p>
   </div>
 </div>
 
@@ -159,6 +175,10 @@ button:active,button.selected{background:#27864d}
       <button id="craftTorchBtn">🔥 Torches ×4<br><small>1 Stick + 1 Coal</small></button>
       <button id="craftChestBtn">📦 Chest ×1<br><small>8 Planks</small></button>
       <button id="craftFurnaceBtn">🔥 Furnace ×1<br><small>8 Cobblestone</small></button>
+      <button id="craftConcreteBtn">⬜ Concrete ×4<br><small>4 Sand + 4 Clay</small></button>
+      <button id="craftObsidianBtn">🟪 Obsidian ×1<br><small>4 Stone + 2 Amethyst Shards</small></button>
+      <button id="craftGlowstoneBtn">✨ Glowstone ×1<br><small>4 Amethyst Shards</small></button>
+      <button id="craftCherryBtn">🌸 Cherry Wood ×2<br><small>2 Wood</small></button>
     </div>
     <h3 style="margin:15px 0 7px">⛏️ Tools</h3>
     <div class="recipe-grid">
@@ -166,8 +186,13 @@ button:active,button.selected{background:#27864d}
       <button id="craftStonePickBtn">🪨 Stone Pickaxe ×1<br><small>3 Cobblestone + 2 Sticks</small></button>
       <button id="craftAxeBtn">🪓 Wooden Axe ×1<br><small>3 Planks + 2 Sticks</small></button>
       <button id="craftShovelBtn">🥄 Wooden Shovel ×1<br><small>1 Plank + 2 Sticks</small></button>
+      <button id="craftShieldBtn">🛡️ Shield ×1<br><small>6 Planks + 1 Iron Ingot</small></button>
+      <button id="craftHelmetBtn">⛑️ Iron Helmet ×1<br><small>5 Iron Ingots</small></button>
+      <button id="craftChestplateBtn">🦺 Iron Chestplate ×1<br><small>8 Iron Ingots</small></button>
+      <button id="craftLeggingsBtn">👖 Iron Leggings ×1<br><small>7 Iron Ingots</small></button>
+      <button id="craftBootsBtn">🥾 Iron Boots ×1<br><small>4 Iron Ingots</small></button>
     </div>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Survival mining: stone and coal need a wooden pickaxe or better. Iron, gold, and diamond ore need a stone pickaxe. Other normal blocks drop into your inventory when broken. Bedrock cannot be mined.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Survival mining: stone, coal, and amethyst need a wooden pickaxe or better. Iron, copper, gold, emerald, diamond, and ancient debris need a stone pickaxe. New biomes include jungle, cherry grove, and mushroom regions. Armor reduces fall damage; day and night cycle automatically. Bedrock cannot be mined.</p>
     <button id="closeCraftBtn" style="width:100%;margin-top:12px">Done</button>
   </div>
 </div>
@@ -181,7 +206,7 @@ button:active,button.selected{background:#27864d}
     <h2 style="font-size:18px;margin:12px 0">Create a new world</h2>
     <label for="worldTypeSelect" style="display:block;margin:8px 0 5px;color:#e2e8f0;font-size:14px">World type</label>
     <select id="worldTypeSelect" style="width:100%;padding:12px;border-radius:10px;font-size:15px;margin-bottom:10px"><option value="normal">🌍 Normal world — hills, forests, deserts, snow</option><option value="superflat">🟩 Superflat — flat building world</option></select>
-    <p style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Normal worlds include forests, deserts, snowy regions, taller mountains, deeper caves, and drifting clouds. Superflat worlds are level for easy building. Choose a type, then pick Creative or Survival.</p>
+    <p style="font-size:12px;color:#cbd5e1;margin:0 0 12px">Normal worlds include forests, jungles, cherry groves, mushroom regions, deserts, snowy regions, taller mountains, deeper caves, new ores, and drifting clouds. Superflat worlds are level for easy building. Choose a type, then pick Creative or Survival.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button id="createCreativeBtn" style="padding:16px 10px;background:#246b42"><span style="font-size:24px">🛠️</span><br><span style="font-size:16px">Creative</span><br><small style="font-weight:500">Unlimited blocks · no hunger</small></button>
       <button id="createSurvivalBtn" style="padding:16px 10px;background:#8b3b35"><span style="font-size:24px">❤️</span><br><span style="font-size:16px">Survival</span><br><small style="font-weight:500">Collect · craft · stay alive</small></button>
@@ -220,7 +245,7 @@ scene.background = new THREE.Color(0x87ceeb);
 scene.fog = new THREE.Fog(0x87ceeb,55,145);
 const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,240);
 const renderer = new THREE.WebGLRenderer({antialias:false});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia("(max-width: 700px)").matches?1.05:1.25));
 renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.domElement.id = "world";
@@ -259,8 +284,8 @@ for(let i=0;i<18;i++){
   group.position.set(((seed*7)%240)-120,27+(i%4)*1.8,((seed*11)%240)-120);scene.add(group);clouds.push({group,speed:.35+(i%5)*.08});
 }
 
-const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock",crafting_table:"Crafting Table",bed:"Bed",torch:"Torch",chest:"Chest",furnace:"Furnace"};
-const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d,crafting_table:0x8a6037,bed:0xb83c42,torch:0xffc857,chest:0x9b6a35,furnace:0x65686b};
+const names={grass:"Grass",dirt:"Dirt",stone:"Stone",sand:"Sand",wood:"Wood",leaves:"Leaves",planks:"Planks",cobble:"Cobblestone",bricks:"Bricks",glass:"Glass",snow:"Snow",coal:"Coal Ore",iron:"Iron Ore",gold:"Gold Ore",diamond:"Diamond Ore",bedrock:"Bedrock",crafting_table:"Crafting Table",bed:"Bed",torch:"Torch",chest:"Chest",furnace:"Furnace",copper:"Copper Ore",amethyst:"Amethyst Block",emerald:"Emerald Ore",obsidian:"Obsidian",netherrack:"Netherrack",glowstone:"Glowstone",prismarine:"Prismarine",ice:"Ice",concrete:"Concrete",cherry_wood:"Cherry Wood",mangrove_wood:"Mangrove Wood",mushroom_block:"Mushroom Block",clay:"Clay",ancient_debris:"Ancient Debris"};
+const colors={grass:0x62a844,dirt:0x87502c,stone:0x888b91,sand:0xd8c27c,wood:0x93602f,leaves:0x388a3d,planks:0xb9874d,cobble:0x686d72,bricks:0x9d4d3e,glass:0x9adbe8,snow:0xeaf4ff,coal:0x414449,iron:0xa7a09a,gold:0xe4b52c,diamond:0x32d5d1,bedrock:0x292a2d,crafting_table:0x8a6037,bed:0xb83c42,torch:0xffc857,chest:0x9b6a35,furnace:0x65686b,copper:0xb96e48,amethyst:0x9b65cc,emerald:0x16a86b,obsidian:0x302344,netherrack:0x7e302b,glowstone:0xe9bd58,prismarine:0x4faaa0,ice:0xa8e5f4,concrete:0xc9cbd0,cherry_wood:0xd88da6,mangrove_wood:0x784334,mushroom_block:0xd7c3b4,clay:0x929fae,ancient_debris:0x705348};
 const materials={};
 
 function createTexture(type){
@@ -299,7 +324,10 @@ function createTexture(type){
   if(type==="cobble"){
     ctx.strokeStyle="#4c5054";ctx.lineWidth=2;for(let i=0;i<6;i++){ctx.strokeRect(Math.floor(rand()*23),Math.floor(rand()*23),6+Math.floor(rand()*5),5+Math.floor(rand()*5));}
   }
-  if(type==="glass"){
+  if(type==="copper"){for(let i=0;i<18;i++){ctx.fillStyle=i%2?"#d78b5d":"#875039";ctx.fillRect(Math.floor(rand()*28),Math.floor(rand()*28),3+Math.floor(rand()*4),3+Math.floor(rand()*4));}}
+  if(type==="amethyst"){for(let i=0;i<14;i++){ctx.fillStyle=i%2?"#d0a3ff":"#6942a1";ctx.fillRect(Math.floor(rand()*28),Math.floor(rand()*28),3+Math.floor(rand()*5),3+Math.floor(rand()*5));}}
+  if(type==="emerald"){for(let i=0;i<14;i++){ctx.fillStyle=i%2?"#6fffb6":"#087d50";ctx.fillRect(Math.floor(rand()*28),Math.floor(rand()*28),3+Math.floor(rand()*4),3+Math.floor(rand()*4));}}
+  if(type==="glass"||type==="ice"){
     ctx.strokeStyle="#e7ffff";ctx.lineWidth=2;ctx.strokeRect(2,2,28,28);ctx.beginPath();ctx.moveTo(5,25);ctx.lineTo(25,5);ctx.stroke();
   }
   const tex=new THREE.CanvasTexture(c);
@@ -308,7 +336,7 @@ function createTexture(type){
   return tex;
 }
 for(const type of Object.keys(names)){
-  materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type), ...(type==="glass"?{transparent:true,opacity:.42}: {})});
+  materials[type]=new THREE.MeshLambertMaterial({map:createTexture(type), ...(["glass","ice"].includes(type)?{transparent:true,opacity:type==="ice"?.72:.42}: {})});
 }
 // Grass blocks use six face materials: green top, dirt bottom, grassy dirt sides.
 function makeGrassFace(kind){
@@ -341,10 +369,22 @@ function addBlock(x,y,z,type){
   scene.add(mesh);blocks.set(k,type);meshes.set(k,mesh);
   return true;
 }
-function removeBlock(x,y,z){
+function blockIsExposed(x,y,z){
+  return !getBlock(x+1,y,z)||!getBlock(x-1,y,z)||!getBlock(x,y+1,z)||!getBlock(x,y-1,z)||!getBlock(x,y,z+1)||!getBlock(x,y,z-1);
+}
+function refreshBlockVisibilityAt(x,y,z){
+  const coords=[[x,y,z],[x+1,y,z],[x-1,y,z],[x,y+1,z],[x,y-1,z],[x,y,z+1],[x,y,z-1]];
+  for(const [bx,by,bz] of coords){const m=meshes.get(blockKey(bx,by,bz));if(m)m.visible=blockIsExposed(bx,by,bz);}
+}
+function optimizeChunkVisibility(cx,cz){
+  const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
+  for(const [k,m] of meshes){const p=m.userData;if(p.x>=minX&&p.x<maxX&&p.z>=minZ&&p.z<maxZ)m.visible=blockIsExposed(p.x,p.y,p.z);}
+}
+function removeBlock(x,y,z,refresh=true){
   const k=blockKey(x,y,z),mesh=meshes.get(k);
   if(!mesh)return false;
   scene.remove(mesh);blocks.delete(k);meshes.delete(k);
+  if(refresh)refreshBlockVisibilityAt(x,y,z);
   return true;
 }
 // Seeded, effectively endless chunk world. Nearby chunks are loaded as you explore.
@@ -386,9 +426,12 @@ function valueNoise(x,z,scale){
 function getBiome(x,z){
   if(WORLD_TYPE==="superflat")return "plains";
   const n=valueNoise(x+731,z-419,96);
-  if(n<.22)return "snowy";
-  if(n>.73)return "desert";
-  if(n>.48)return "forest";
+  if(n<.13)return "snowy";
+  if(n>.88)return "mushroom";
+  if(n>.78)return "desert";
+  if(n>.66)return "cherry";
+  if(n>.53)return "jungle";
+  if(n>.40)return "forest";
   return "plains";
 }
 function terrainHeight(x,z){
@@ -398,15 +441,18 @@ function terrainHeight(x,z){
   const mountain=valueNoise(x+1700,z-2100,72);
   const ridge=Math.max(0,(mountain-.58)*2.4);
   const height=Math.floor(-1+broad*(biome==="desert"?4:9)+medium*(biome==="desert"?1.8:4.5)+detail*1.5+ridge*13);
+  if(biome==="mushroom")return Math.max(1,height-1);
   return biome==="desert"?Math.max(1,height):height;
 }
 function makeTree(x,z){
   const g=terrainHeight(x,z);
-  if(WORLD_TYPE==="superflat"||getBiome(x,z)!=="forest")return;
+  const biome=getBiome(x,z);
+  if(WORLD_TYPE==="superflat"||!["forest","jungle","cherry"].includes(biome))return;
   if(Math.abs(x)<4&&Math.abs(z)<4)return;
   if(g<1)return;
-  const trunk=3+(hashNoise(x+900,z-900)>.65?1:0);
-  for(let y=1;y<=trunk;y++)addBlock(x,g+y,z,"wood");
+  const trunk=(biome==="jungle"?5:biome==="cherry"?4:3)+(hashNoise(x+900,z-900)>.65?1:0);
+  const woodType=biome==="cherry"?"cherry_wood":"wood";
+  for(let y=1;y<=trunk;y++)addBlock(x,g+y,z,woodType);
   for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=trunk-1;dy<=trunk+1;dy++){
     if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-trunk)<=4)addBlock(x+dx,g+dy,z+dz,"leaves");
   }
@@ -420,23 +466,31 @@ const pigLegMat=pixelMaterial("#bd7483",["#d58b99","#a95f70","#e0a0aa"],914,65);
 const pigSnoutMat=pixelMaterial("#f2b5bf",["#ffd0d6","#df8999","#e99aaa"],915,50);
 const pigEyeMat=new THREE.MeshLambertMaterial({color:0x2a2024});
 const pigNostrilMat=new THREE.MeshLambertMaterial({color:0x713b48});
-function spawnMob(x,z){
+const cowBodyMat=pixelMaterial("#e7e0d1",["#ffffff","#b77a4d","#3a2a22","#d6c9b6"],951,90);
+const sheepBodyMat=pixelMaterial("#e9e7e0",["#ffffff","#d4d3ce","#c2c0ba"],952,65);
+const cowHeadMat=pixelMaterial("#dfc6a7",["#f0ddc2","#b77a4d","#3a2a22"],953,55);
+function spawnMob(x,z,kind){
+  kind=kind||(["pig","cow","sheep"][Math.floor(Math.random()*3)]);
   const y=terrainHeight(x,z)+.5;const group=new THREE.Group();
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.85,.55,.5),pigBodyMat);body.position.y=.55;group.add(body);
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.38),pigHeadMat);head.position.set(0,.76,-.38);group.add(head);
+  const bodyMat=kind==="cow"?cowBodyMat:kind==="sheep"?sheepBodyMat:pigBodyMat;
+  const headMat=kind==="cow"?cowHeadMat:kind==="sheep"?sheepBodyMat:pigHeadMat;
+  const body=new THREE.Mesh(new THREE.BoxGeometry(kind==="cow"?1:.85,.55,.5),bodyMat);body.position.y=.55;group.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.38),headMat);head.position.set(0,.76,-.38);group.add(head);
   // Snout projects from the front of the head; two dark pixel nostrils make the face readable.
-  const snout=new THREE.Mesh(new THREE.BoxGeometry(.23,.16,.105),pigSnoutMat);snout.position.set(0,.69,-.615);group.add(snout);
+  const snout=new THREE.Mesh(new THREE.BoxGeometry(.23,.16,.105),kind==="cow"?cowHeadMat:pigSnoutMat);snout.position.set(0,.69,-.615);group.add(snout);
   for(const nx of [-.055,.055]){const nostril=new THREE.Mesh(new THREE.BoxGeometry(.035,.055,.012),pigNostrilMat);nostril.position.set(nx,.69,-.674);group.add(nostril);}
+  if(kind==="cow"){for(const hx of [-.16,.16]){const horn=new THREE.Mesh(new THREE.BoxGeometry(.07,.15,.07),new THREE.MeshLambertMaterial({color:0xe8dfc7}));horn.position.set(hx,.99,-.36);group.add(horn);}}
   // Small upright ears.
   for(const ex of [-.14,.14]){const ear=new THREE.Mesh(new THREE.BoxGeometry(.105,.15,.12),pigHeadMat);ear.position.set(ex,.99,-.36);group.add(ear);}
   // Eyes sit on both visible sides of the head.
   for(const side of [-1,1]){const eye=new THREE.Mesh(new THREE.BoxGeometry(.045,.055,.018),pigEyeMat);eye.position.set(side*.205,.81,-.46);group.add(eye);}
-  for(const lx of [-.25,.25])for(const lz of [-.15,.15]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.14,.3,.14),pigLegMat);leg.position.set(lx,.18,lz);group.add(leg);}
-  group.position.set(x,y,z);scene.add(group);mobs.push({group,x,z,dir:Math.random()*Math.PI*2,changeAt:performance.now()+1000+Math.random()*4000});
+  const legMat=kind==="cow"?cowHeadMat:kind==="sheep"?sheepBodyMat:pigLegMat;
+  for(const lx of [-.25,.25])for(const lz of [-.15,.15]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.14,.3,.14),legMat);leg.position.set(lx,.18,lz);group.add(leg);}
+  group.position.set(x,y,z);scene.add(group);mobs.push({group,x,z,kind,dir:Math.random()*Math.PI*2,changeAt:performance.now()+1000+Math.random()*4000});
 }
 function updateMobs(now,dt){
   // Spawn a few animals once around the starting area; never spam new mobs.
-  if(mobs.length<5&&loadedChunks.size>=1&&now>nextMobSpawn){const angle=Math.random()*Math.PI*2,dist=5+Math.random()*9;const x=Math.round(player.x+Math.cos(angle)*dist),z=Math.round(player.z+Math.sin(angle)*dist);spawnMob(x,z);nextMobSpawn=now+4500;}
+  if(mobs.length<5&&loadedChunks.size>=1&&now>nextMobSpawn){const angle=Math.random()*Math.PI*2,dist=5+Math.random()*9;const x=Math.round(player.x+Math.cos(angle)*dist),z=Math.round(player.z+Math.sin(angle)*dist);spawnMob(x,z,["pig","cow","sheep"][Math.floor(Math.random()*3)]);nextMobSpawn=now+4500;}
   for(const m of mobs){if(now>m.changeAt){m.dir+=(Math.random()-.5)*2.4;m.changeAt=now+1300+Math.random()*3600;}
     if(Math.hypot(m.x-player.x,m.z-player.z)>CHUNK_RADIUS*CHUNK_SIZE+8)continue;
     const nx=m.x+Math.sin(m.dir)*dt*.65,nz=m.z+Math.cos(m.dir)*dt*.65;
@@ -468,6 +522,7 @@ function finishChunk(job){
     }
   }
   loadedChunks.add(ck);
+  optimizeChunkVisibility(cx,cz);
   queuedChunks.delete(ck);
 }
 // Generate only a small batch of terrain columns per frame so chunk creation
@@ -488,16 +543,21 @@ function processChunkQueue(){
     for(let y=BEDROCK_Y;y<=top;y++){
       let type;
       if(y===BEDROCK_Y)type="bedrock";
-      else if(y===top)type=biome==="desert"?"sand":biome==="snowy"?"snow":(top<=0?"sand":"grass");
+      else if(y===top)type=biome==="desert"?"sand":biome==="snowy"?"snow":biome==="mushroom"?"mushroom_block":(top<=0?"sand":"grass");
       else if(biome==="desert"&&y>=top-3)type="sand";
+      else if(biome==="mushroom"&&y>=top-4)type="clay";
       else if(y>=top-2)type="dirt";
       else{
         type="stone";
         const ore=hashNoise(x*13+y*7,z*11-y*5);
-        if(y<-8&&ore>.992)type="diamond";
+        if(y<-11&&ore>.996)type="ancient_debris";
+        else if(y<-8&&ore>.992)type="diamond";
         else if(y<-6&&ore>.976)type="gold";
+        else if(y<-3&&ore>.969)type="amethyst";
+        else if(ore>.957)type="copper";
         else if(ore>.951)type="iron";
         else if(ore>.925)type="coal";
+        if(biome==="jungle"&&ore>.997)type="emerald";
       }
       const cave=valueNoise(x+y*3,z-y*2,5);
       if(WORLD_TYPE!=="superflat"&&y<top-2&&y>BEDROCK_Y&&cave>.79&&hashNoise(x+y,z-y)>.32)continue;
@@ -520,6 +580,11 @@ function unloadChunk(cx,cz){
     if(x>=minX&&x<maxX&&z>=minZ&&z<maxZ){scene.remove(mesh);meshes.delete(k);blocks.delete(k);}
   }
   loadedChunks.delete(ck);
+  // Reveal faces on neighboring chunks that were hidden by the chunk just unloaded.
+  for(let y=BEDROCK_Y;y<48;y++)for(let i=0;i<CHUNK_SIZE;i++){
+    refreshBlockVisibilityAt(minX-1,y,minZ+i);refreshBlockVisibilityAt(maxX,y,minZ+i);
+    refreshBlockVisibilityAt(minX+i,y,minZ-1);refreshBlockVisibilityAt(minX+i,y,maxZ);
+  }
 }
 function updateChunks(force=false){
   const cx=Math.floor(player.x/CHUNK_SIZE),cz=Math.floor(player.z/CHUNK_SIZE);
@@ -606,8 +671,10 @@ try{localStorage.removeItem(START_MODE_KEY);}catch(_){}
 let gameMode=(pendingStartMode==="survival" || (!pendingStartMode && bootSave&&bootSave.mode==="survival"))?"survival":"creative";
 const inventory={};
 for(const type of Object.keys(names))inventory[type]=0;
-inventory.planks=0;inventory.sticks=0;inventory.pork=0;inventory.apple=0;
-for(const item of ["wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel"])if(!Number.isFinite(inventory[item]))inventory[item]=0;
+const stationStorage=bootSave&&bootSave.stationStorage&&typeof bootSave.stationStorage==="object"?JSON.parse(JSON.stringify(bootSave.stationStorage)):{};
+let activeStationKey=null,activeStationType=null;
+inventory.planks=0;inventory.sticks=0;inventory.pork=0;inventory.beef=0;inventory.leather=0;inventory.wool=0;inventory.apple=0;inventory.copper_ingot=0;inventory.iron_ingot=0;inventory.amethyst_shard=0;inventory.emerald_item=0;inventory.shield=0;inventory.iron_helmet=0;inventory.iron_chestplate=0;inventory.iron_leggings=0;inventory.iron_boots=0;
+for(const item of ["wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel","beef","leather","wool","copper_ingot","iron_ingot","amethyst_shard","emerald_item","shield","iron_helmet","iron_chestplate","iron_leggings","iron_boots"])if(!Number.isFinite(inventory[item]))inventory[item]=0;
 if(bootSave&&bootSave.inventory&&typeof bootSave.inventory==="object"){
   for(const key of Object.keys(inventory))if(Number.isFinite(bootSave.inventory[key]))inventory[key]=Math.max(0,Math.floor(bootSave.inventory[key]));
 }
@@ -627,10 +694,10 @@ function refreshModeUI(){
   document.getElementById("hungerIcons").textContent=Array.from({length:10},(_,i)=>i<foodCount?"🍗":"▫️").join("");
   refreshInventoryUI();
 }
-const itemIcons={grass:"🟩",dirt:"🟫",stone:"🪨",sand:"🟨",wood:"🪵",leaves:"🌿",planks:"🪵",cobble:"🧱",bricks:"🧱",glass:"🔹",snow:"❄️",coal:"⚫",iron:"⛏️",gold:"🟡",diamond:"💎",bedrock:"⬛",crafting_table:"🧰",bed:"🛏️",torch:"🔥",chest:"📦",furnace:"🔥",sticks:"🪄",pork:"🍖",apple:"🍎",wooden_pickaxe:"⛏️",stone_pickaxe:"⛏️",wooden_axe:"🪓",wooden_shovel:"🥄"};
+const itemIcons={grass:"🟩",dirt:"🟫",stone:"🪨",sand:"🟨",wood:"🪵",leaves:"🌿",planks:"🪵",cobble:"🧱",bricks:"🧱",glass:"🔹",snow:"❄️",coal:"⚫",iron:"⛏️",gold:"🟡",diamond:"💎",bedrock:"⬛",crafting_table:"🧰",bed:"🛏️",torch:"🔥",chest:"📦",furnace:"🔥",sticks:"🪄",pork:"🍖",beef:"🥩",leather:"🟫",wool:"🧶",apple:"🍎",iron_ingot:"🔩",wooden_pickaxe:"⛏️",stone_pickaxe:"⛏️",wooden_axe:"🪓",wooden_shovel:"🥄",copper:"🟠",amethyst:"🔮",emerald:"💚",obsidian:"🟪",netherrack:"🟥",glowstone:"✨",prismarine:"🌊",ice:"🧊",concrete:"⬜",cherry_wood:"🌸",mangrove_wood:"🪵",mushroom_block:"🍄",clay:"🩶",ancient_debris:"🟤",shield:"🛡️",iron_helmet:"⛑️",iron_chestplate:"🦺",iron_leggings:"👖",iron_boots:"🥾",copper_ingot:"🟠",amethyst_shard:"🔮",emerald_item:"💚"};
 let hotbarTypes=["grass","dirt","stone","wood","planks","cobble","sand","bricks","glass"];
 function refreshInventoryUI(){
-  const labels={...names,planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel"};
+  const labels={...names,planks:"Wooden Planks",sticks:"Sticks",pork:"Porkchop",beef:"Raw Beef",leather:"Leather",wool:"Wool",apple:"Apple",iron_ingot:"Iron Ingot",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel",copper_ingot:"Copper Ingot",amethyst_shard:"Amethyst Shard",emerald_item:"Emerald",shield:"Shield",iron_helmet:"Iron Helmet",iron_chestplate:"Iron Chestplate",iron_leggings:"Iron Leggings",iron_boots:"Iron Boots"};
   const lines=[];
   for(const [type,count] of Object.entries(inventory))if(count>0&&labels[type])lines.push(`${labels[type]}: ${count}`);
   const text=(gameMode==="creative"?"Creative: blocks are unlimited. Switch to Survival to collect and spend items.\n\n":"")+(lines.length?lines.join("\n"):"Your inventory is empty. Break blocks in Survival to collect resources.");
@@ -639,7 +706,7 @@ function refreshInventoryUI(){
   const hotbar=document.getElementById("palette");
   if(hotbar){hotbar.innerHTML="";for(const type of hotbarTypes){const btn=document.createElement("button");btn.className="block-choice"+(type===selected?" selected":"");btn.setAttribute("aria-label","Select "+names[type]);const swatch=document.createElement("span");swatch.className="swatch";swatch.style.backgroundColor="#"+colors[type].toString(16).padStart(6,"0");const label=document.createElement("span");label.textContent=names[type];btn.append(swatch,label);if(gameMode==="survival"){const count=document.createElement("span");count.className="slot-count";count.textContent=inventory[type]||0;btn.append(count);}btn.addEventListener("click",()=>{selected=type;refreshInventoryUI();status.textContent="Selected "+names[type]+".";beep(520,.04,"sine",.025);});hotbar.appendChild(btn);}}
   const grid=document.getElementById("inventoryGrid");
-  if(grid){grid.innerHTML="";const allItems=[...Object.keys(names),"planks","sticks","pork","apple","wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel"];const seen=new Set();for(const type of allItems){if(seen.has(type))continue;seen.add(type);const count=inventory[type]||0;const btn=document.createElement("button");btn.className="inventory-slot";btn.innerHTML="<span class=\"item-icon\"></span><span></span><span class=\"item-count\"></span>";btn.querySelector(".item-icon").textContent=itemIcons[type]||"📦";btn.querySelector("span:nth-child(2)").textContent=names[type]||({planks:"Planks",sticks:"Sticks",pork:"Porkchop",apple:"Apple",wooden_pickaxe:"Wooden Pickaxe",stone_pickaxe:"Stone Pickaxe",wooden_axe:"Wooden Axe",wooden_shovel:"Wooden Shovel"}[type]||type);btn.querySelector(".item-count").textContent=count;const placeable=Object.prototype.hasOwnProperty.call(names,type)&&!(["bedrock"].includes(type));btn.disabled=gameMode==="survival"&&count<1;if(placeable){btn.addEventListener("click",()=>{if(!hotbarTypes.includes(type))hotbarTypes[8]=type;selected=type;refreshInventoryUI();document.getElementById("inventoryMessage").textContent="Equipped "+(names[type]||type)+" in the hotbar.";status.textContent="Selected "+names[type]+".";closeInventory();});}else{btn.title="Inventory item";}grid.appendChild(btn);}}
+  if(grid){grid.innerHTML="";const allItems=[...Object.keys(names),"planks","sticks","pork","beef","leather","wool","apple","wooden_pickaxe","stone_pickaxe","wooden_axe","wooden_shovel","copper_ingot","iron_ingot","amethyst_shard","emerald_item","shield","iron_helmet","iron_chestplate","iron_leggings","iron_boots"];const seen=new Set();for(const type of allItems){if(seen.has(type))continue;seen.add(type);const count=inventory[type]||0;const btn=document.createElement("button");btn.className="inventory-slot";btn.innerHTML="<span class=\"item-icon\"></span><span></span><span class=\"item-count\"></span>";btn.querySelector(".item-icon").textContent=itemIcons[type]||"📦";btn.querySelector("span:nth-child(2)").textContent=labels[type]||type;btn.querySelector(".item-count").textContent=count;const placeable=Object.prototype.hasOwnProperty.call(names,type)&&!(["bedrock"].includes(type));btn.disabled=gameMode==="survival"&&count<1;if(placeable){btn.addEventListener("click",()=>{if(!hotbarTypes.includes(type))hotbarTypes[8]=type;selected=type;refreshInventoryUI();document.getElementById("inventoryMessage").textContent="Equipped "+(names[type]||type)+" in the hotbar.";status.textContent="Selected "+names[type]+".";closeInventory();});}else{btn.title="Inventory item";}grid.appendChild(btn);}}
 }
 function toggleMode(){gameMode=gameMode==="creative"?"survival":"creative";refreshModeUI();status.textContent=gameMode==="survival"?"Survival mode enabled. Watch your hunger!":"Creative mode enabled.";menuMessage.textContent=status.textContent;}
 
@@ -683,6 +750,7 @@ movementPad.addEventListener("lostpointercapture",endJoystick);
 window.addEventListener("keydown",e=>{
   if(craftOverlay.style.display==="block"){if(e.key==="Escape")closeCrafting();return;}
   if(inventoryOverlay.style.display==="block"){if(e.key==="Escape")closeInventory();return;}
+  if(stationOverlay.style.display==="block"){if(e.key==="Escape")closeStation();return;}
   if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
   const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
@@ -762,14 +830,20 @@ function breakBlock(){
   const p=hit.object.userData;
   if(gameMode==="survival"&&p.type==="bedrock"){status.textContent="Bedrock can't be mined in Survival.";return;}
   if(gameMode==="survival"){
-    const oreTypes=["iron","gold","diamond"];
-    const pickTypes=["stone","cobble","bricks","coal"];
+    const oreTypes=["iron","gold","diamond","copper","emerald","ancient_debris"];
+    const pickTypes=["stone","cobble","bricks","coal","amethyst"];
     if(oreTypes.includes(p.type)&&inventory.stone_pickaxe<1){status.textContent="You need a Stone Pickaxe to mine this ore. Craft one in 🧰 Craft.";return;}
     if(pickTypes.includes(p.type)&&inventory.wooden_pickaxe<1&&inventory.stone_pickaxe<1){status.textContent="You need a Pickaxe to mine this block. Craft a Wooden Pickaxe in 🧰 Craft.";return;}
   }
-  removeBlock(p.x,p.y,p.z);worldEdits.set(blockKey(p.x,p.y,p.z),null);
+  const removedKey=blockKey(p.x,p.y,p.z);
+  if(["chest","furnace"].includes(p.type)&&stationStorage[removedKey]){for(const [item,count] of Object.entries(stationStorage[removedKey]))inventory[item]=(inventory[item]||0)+count;delete stationStorage[removedKey];}
+  removeBlock(p.x,p.y,p.z);worldEdits.set(removedKey,null);
   if(gameMode==="survival"){
-    inventory[p.type]=(inventory[p.type]||0)+1;
+    if(p.type==="stone")inventory.cobble=(inventory.cobble||0)+1;
+    else if(p.type==="copper")inventory.copper_ingot=(inventory.copper_ingot||0)+1;
+    else if(p.type==="amethyst")inventory.amethyst_shard=(inventory.amethyst_shard||0)+2;
+    else if(p.type==="emerald")inventory.emerald_item=(inventory.emerald_item||0)+1;
+    else inventory[p.type]=(inventory[p.type]||0)+1;
     // Correct tools reward extra materials, while basic blocks remain collectable by hand.
     if(p.type==="wood"&&inventory.wooden_axe>0)inventory[p.type]++;
     if(["grass","dirt","sand","snow"].includes(p.type)&&inventory.wooden_shovel>0)inventory[p.type]++;
@@ -792,6 +866,7 @@ function placeBlock(){
   if(overlapsPlayer){status.textContent="Move away to place that block.";return;}
   if(gameMode==="survival"&&(inventory[selected]||0)<1){status.textContent=`No ${names[selected]} in your inventory. Break blocks to collect them.`;return;}
   if(addBlock(x,y,z,selected)){
+    refreshBlockVisibilityAt(x,y,z);
     worldEdits.set(blockKey(x,y,z),selected);
     if(gameMode==="survival"){inventory[selected]--;refreshInventoryUI();}
     beep(420,.07,"triangle");status.textContent="Placed "+names[selected]+".";
@@ -800,18 +875,25 @@ function placeBlock(){
 document.getElementById("breakBtn").addEventListener("pointerdown",e=>{e.preventDefault();breakBlock();});
 document.getElementById("placeBtn").addEventListener("pointerdown",e=>{e.preventDefault();placeBlock();});
 function collectNearbyPig(){
+  const aimed=getTarget();
+  if(aimed&&["chest","furnace"].includes(aimed.object.userData.type)){openStation(aimed.object.userData.type,blockKey(aimed.object.userData.x,aimed.object.userData.y,aimed.object.userData.z));return;}
   if(gameMode!=="survival"){status.textContent="Switch to Survival to collect food.";return;}
   let best=-1,bestD=3.2;
   for(let i=0;i<mobs.length;i++){const m=mobs[i],d=Math.hypot(m.x-player.x,m.z-player.z);if(d<bestD){best=i;bestD=d;}}
-  if(best<0){status.textContent="Move closer to a pig to collect pork.";return;}
-  const m=mobs[best];scene.remove(m.group);mobs.splice(best,1);inventory.pork++;refreshInventoryUI();beep(340,.12,"triangle");status.textContent="Collected 1 porkchop! Open Menu to see your inventory.";
+  if(best<0){status.textContent="Move closer to an animal to collect its resources.";return;}
+  const m=mobs[best];scene.remove(m.group);mobs.splice(best,1);
+  if(m.kind==="cow"){inventory.beef=(inventory.beef||0)+1;inventory.leather=(inventory.leather||0)+1;status.textContent="Collected raw beef and leather from a cow.";}
+  else if(m.kind==="sheep"){inventory.wool=(inventory.wool||0)+2;status.textContent="Collected 2 wool from a sheep.";}
+  else{inventory.pork=(inventory.pork||0)+1;status.textContent="Collected a porkchop from a pig.";}
+  refreshInventoryUI();beep(340,.12,"triangle");
 }
 function eatFood(){
   if(gameMode!=="survival"){status.textContent="Food is only needed in Survival.";return;}
   if(hunger>=20){status.textContent="Your hunger is already full.";return;}
   if(inventory.pork>0){inventory.pork--;hunger=Math.min(20,hunger+7);status.textContent="Ate porkchop · hunger +7.";}
+  else if(inventory.beef>0){inventory.beef--;hunger=Math.min(20,hunger+6);status.textContent="Ate raw beef · hunger +6.";}
   else if(inventory.apple>0){inventory.apple--;hunger=Math.min(20,hunger+4);status.textContent="Ate apple · hunger +4.";}
-  else{status.textContent="No food! Collect a nearby pig or break leaves for a chance at an apple.";return;}
+  else{status.textContent="No food! Collect a nearby pig or cow, or break leaves for a chance at an apple.";return;}
   refreshModeUI();beep(620,.12,"sine");
 }
 document.getElementById("useBtn").addEventListener("pointerdown",e=>{e.preventDefault();collectNearbyPig();});
@@ -830,6 +912,15 @@ function craftItem(recipe){
     torch:{needs:[["sticks",1],["coal",1]],gives:[["torch",4]],label:"4 Torches"},
     chest:{needs:[["planks",8]],gives:[["chest",1]],label:"Chest"},
     furnace:{needs:[["cobble",8]],gives:[["furnace",1]],label:"Furnace"},
+    concrete:{needs:[["sand",4],["clay",4]],gives:[["concrete",4]],label:"4 Concrete"},
+    obsidian:{needs:[["stone",4],["amethyst_shard",2]],gives:[["obsidian",1]],label:"Obsidian"},
+    glowstone:{needs:[["amethyst_shard",4]],gives:[["glowstone",1]],label:"Glowstone"},
+    cherry:{needs:[["wood",2]],gives:[["cherry_wood",2]],label:"Cherry Wood"},
+    shield:{needs:[["planks",6],["iron_ingot",1]],gives:[["shield",1]],label:"Shield"},
+    helmet:{needs:[["iron_ingot",5]],gives:[["iron_helmet",1]],label:"Iron Helmet"},
+    chestplate:{needs:[["iron_ingot",8]],gives:[["iron_chestplate",1]],label:"Iron Chestplate"},
+    leggings:{needs:[["iron_ingot",7]],gives:[["iron_leggings",1]],label:"Iron Leggings"},
+    boots:{needs:[["iron_ingot",4]],gives:[["iron_boots",1]],label:"Iron Boots"},
     wooden_pick:{needs:[["planks",3],["sticks",2]],gives:[["wooden_pickaxe",1]],label:"Wooden Pickaxe"},
     stone_pick:{needs:[["cobble",3],["sticks",2]],gives:[["stone_pickaxe",1]],label:"Stone Pickaxe"},
     axe:{needs:[["planks",3],["sticks",2]],gives:[["wooden_axe",1]],label:"Wooden Axe"},
@@ -840,7 +931,7 @@ function craftItem(recipe){
   take(r.needs);r.gives.forEach(([item,count])=>inventory[item]=(inventory[item]||0)+count);
   refreshInventoryUI();beep(500,.1,"triangle");status.textContent="Crafted "+r.label+"!";
 }
-const recipeButtons={craftPlanksBtn:"planks",craftSticksBtn:"sticks",craftTableBtn:"table",craftBedBtn:"bed",craftTorchBtn:"torch",craftChestBtn:"chest",craftFurnaceBtn:"furnace",craftWoodPickBtn:"wooden_pick",craftStonePickBtn:"stone_pick",craftAxeBtn:"axe",craftShovelBtn:"shovel"};
+const recipeButtons={craftPlanksBtn:"planks",craftSticksBtn:"sticks",craftTableBtn:"table",craftBedBtn:"bed",craftTorchBtn:"torch",craftChestBtn:"chest",craftFurnaceBtn:"furnace",craftConcreteBtn:"concrete",craftObsidianBtn:"obsidian",craftGlowstoneBtn:"glowstone",craftCherryBtn:"cherry",craftShieldBtn:"shield",craftHelmetBtn:"helmet",craftChestplateBtn:"chestplate",craftLeggingsBtn:"leggings",craftBootsBtn:"boots",craftWoodPickBtn:"wooden_pick",craftStonePickBtn:"stone_pick",craftAxeBtn:"axe",craftShovelBtn:"shovel"};
 for(const [id,recipe] of Object.entries(recipeButtons))document.getElementById(id).addEventListener("click",()=>craftItem(recipe));
 const craftOverlay=document.getElementById("craftOverlay");
 function openCrafting(){craftOverlay.style.display="block";refreshInventoryUI();}
@@ -857,6 +948,40 @@ function closeInventory(){inventoryOverlay.style.display="none";}
 document.getElementById("inventoryBtn").addEventListener("click",openInventory);
 document.getElementById("closeInventoryBtn").addEventListener("click",closeInventory);
 document.getElementById("inventoryCraftBtn").addEventListener("click",()=>{closeInventory();openCrafting();});
+
+const stationOverlay=document.getElementById("stationOverlay");
+function refreshStationUI(){
+  if(!activeStationKey)return;
+  const storage=stationStorage[activeStationKey]||(stationStorage[activeStationKey]={});
+  const lines=Object.entries(storage).filter(([k,v])=>v>0).map(([k,v])=>`${({planks:"Wooden Planks",cobble:"Cobblestone",pork:"Porkchop",beef:"Raw Beef",iron_ingot:"Iron Ingot",copper_ingot:"Copper Ingot",amethyst_shard:"Amethyst Shard"}[k]||names[k]||k)} × ${v}`);
+  document.getElementById("stationTitle").textContent=activeStationType==="furnace"?"🔥 Furnace":"📦 Chest";
+  document.getElementById("stationDescription").textContent=activeStationType==="furnace"?"Put Iron Ore and Coal into this furnace, then smelt ingots for armor and tools.":"Store items in this chest. Contents are saved with this world.";
+  document.getElementById("stationContents").textContent=lines.length?lines.join("\n"):"Empty";
+  document.getElementById("stationSmeltBtn").style.display=activeStationType==="furnace"?"block":"none";
+}
+function openStation(type,key){
+  activeStationType=type;activeStationKey=key;
+  if(!stationStorage[key])stationStorage[key]={};
+  document.getElementById("stationMessage").textContent="";
+  refreshStationUI();stationOverlay.style.display="block";
+}
+function closeStation(){stationOverlay.style.display="none";activeStationKey=null;activeStationType=null;}
+document.getElementById("stationStoreBtn").addEventListener("click",()=>{
+  if(!activeStationKey)return;const box=stationStorage[activeStationKey];let moved=0;
+  for(const [item,count] of Object.entries(inventory)){if(count>0){box[item]=(box[item]||0)+count;inventory[item]=0;moved+=count;}}
+  refreshInventoryUI();refreshStationUI();document.getElementById("stationMessage").textContent=moved?`Stored ${moved} items.`:"Your inventory is empty.";
+});
+document.getElementById("stationTakeBtn").addEventListener("click",()=>{
+  if(!activeStationKey)return;const box=stationStorage[activeStationKey];let moved=0;
+  for(const [item,count] of Object.entries(box)){if(count>0){inventory[item]=(inventory[item]||0)+count;moved+=count;delete box[item];}}
+  refreshInventoryUI();refreshStationUI();document.getElementById("stationMessage").textContent=moved?`Collected ${moved} items.`:"This station is empty.";
+});
+document.getElementById("stationSmeltBtn").addEventListener("click",()=>{
+  if(!activeStationKey||activeStationType!=="furnace")return;const box=stationStorage[activeStationKey];
+  if((box.iron||0)<1||(box.coal||0)<1){document.getElementById("stationMessage").textContent="Store at least 1 Iron Ore and 1 Coal in the furnace first.";return;}
+  box.iron--;box.coal--;box.iron_ingot=(box.iron_ingot||0)+1;refreshStationUI();document.getElementById("stationMessage").textContent="Smelted 1 Iron Ingot! Take it out when ready.";beep(600,.12,"triangle");
+});
+document.getElementById("stationCloseBtn").addEventListener("click",closeStation);
 
 function toggleCamera(){
   thirdPerson=!thirdPerson;
@@ -935,7 +1060,7 @@ function renderSavedWorlds(){
 }
 function saveWorld(){
   const edits={};for(const [key,value] of worldEdits)edits[key]=value;
-  const data={version:4,seed:WORLD_SEED,mode:gameMode,worldType:WORLD_TYPE,inventory:{...inventory},health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
+  const data={version:5,seed:WORLD_SEED,mode:gameMode,worldType:WORLD_TYPE,inventory:{...inventory},stationStorage:JSON.parse(JSON.stringify(stationStorage)),health,hunger,edits,player:{x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch},savedAt:new Date().toISOString()};
   try{
     let slots=readSlots();
     let slot=slots.find(item=>item.id===activeSlotId);
@@ -1054,7 +1179,7 @@ function updatePlayer(dt){
     if(!collides(player.x,player.y+dy,player.z))player.y+=dy;
     else{if(dy<0)player.grounded=true;player.vy=0;break;}
   }
-  if(player.y < -30){if(gameMode==="survival"){health=Math.max(1,health-5);refreshModeUI();}respawn();}
+  if(player.y < -30){if(gameMode==="survival"){const armor=(inventory.iron_helmet>0?1:0)+(inventory.iron_chestplate>0?2:0)+(inventory.iron_leggings>0?1:0)+(inventory.iron_boots>0?1:0)+(inventory.shield>0?1:0);health=Math.max(1,health-Math.max(1,5-Math.floor(armor/2)));refreshModeUI();}respawn();}
   if(gameMode==="survival"){
     hungerClock+=dt;damageClock+=dt;
     if(hungerClock>=12){hunger=Math.max(0,hunger-1);hungerClock=0;refreshModeUI();}
@@ -1104,9 +1229,28 @@ function updateCamera(){
 }
 
 let previous=performance.now();
+let worldClock=0;
+const daySky=new THREE.Color(0x87ceeb),nightSky=new THREE.Color(0x10182f),skyNow=new THREE.Color();
+let fpsFrames=0,fpsTimer=0,fpsValue=60;
+function updateDayNight(dt){
+  worldClock=(worldClock+dt/240)%1;
+  const daylight=Math.max(0,Math.sin(worldClock*Math.PI*2-Math.PI/2));
+  const light=0.22+daylight*1.78;
+  sun.intensity=0.18+daylight*1.9;
+  scene.children[0].intensity=0.35+daylight*1.55;
+  skyNow.copy(nightSky).lerp(daySky,Math.max(.08,daylight));
+  scene.background.copy(skyNow);
+  scene.fog.color.copy(skyNow);
+  scene.fog.near=CHUNK_RADIUS<=1?28:45;
+  scene.fog.far=Math.max(65,CHUNK_RADIUS*CHUNK_SIZE*2.3);
+  sun.position.set(Math.cos(worldClock*Math.PI*2)*28,Math.max(2,daylight*40),Math.sin(worldClock*Math.PI*2)*28);
+  return daylight;
+}
 function animate(now){
   requestAnimationFrame(animate);
   const dt=Math.min((now-previous)/1000,.035);previous=now;
+  fpsFrames++;fpsTimer+=dt;if(fpsTimer>=1){fpsValue=Math.round(fpsFrames/fpsTimer);fpsFrames=0;fpsTimer=0;}
+  if(gameStarted)updateDayNight(dt);
   if(loadingWorld||gameStarted)processChunkQueue();
   if(gameStarted)updateChunks();
   if(loadingWorld){
@@ -1117,7 +1261,7 @@ function animate(now){
     document.getElementById("loadingMessage").textContent=done<preloadTarget?`Generating chunks · ${done} of ${preloadTarget} ready`:"Finishing spawn area...";
     if(done>=preloadTarget&&!chunkQueue.length&&!activeChunkJob){
       loadingWorld=false;gameStarted=true;document.getElementById("loadingScreen").style.display="none";
-      status.textContent=`World ready · ${loadedChunks.size} chunks loaded · Seed ${WORLD_SEED}`;
+      status.textContent=`World ready · ${loadedChunks.size} chunks · ${fpsValue} FPS · Seed ${WORLD_SEED}`;
       updateChunks(true);
     }
   }
@@ -1127,6 +1271,7 @@ function animate(now){
   }
   for(const cloud of clouds){cloud.group.position.x+=cloud.speed*dt;if(cloud.group.position.x>130)cloud.group.position.x=-130;}
   updateCamera();renderer.render(scene,camera);
+  if(gameStarted&&Math.floor(now/1800)!==Math.floor((now-dt*1000)/1800))status.textContent=`${gameMode.toUpperCase()} · ${loadedChunks.size} chunks · ${fpsValue} FPS · ${WORLD_TYPE.toUpperCase()}`;
 }
 window.addEventListener("resize",()=>{
   camera.aspect=innerWidth/innerHeight;
