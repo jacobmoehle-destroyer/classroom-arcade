@@ -94,7 +94,7 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     </div>
     <div id="actionPad" class="controlCluster">
       <button class="touchButton" id="useButton" data-key=" " aria-label="Use or open door">USE</button>
-      <button class="touchButton attack" id="fireButton" data-key="Control" aria-label="Fire weapon">FIRE</button>
+      <button class="touchButton attack" id="fireButton" data-key="e" aria-label="Fire weapon">SHOOT</button>
       <button class="touchButton" id="runButton" data-key="Shift" aria-label="Run">RUN</button>
       <button class="touchButton special" id="menuButton" data-key="Escape" aria-label="Open menu">MENU</button>
       <button class="touchButton confirm" id="enterButton" data-key="Enter" aria-label="Confirm or select">ENTER</button>
@@ -164,6 +164,7 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     ArrowLeft: { keyCode: 37, code: "ArrowLeft", key: "ArrowLeft" },
     ArrowRight: { keyCode: 39, code: "ArrowRight", key: "ArrowRight" },
     Control: { keyCode: 17, code: "ControlLeft", key: "Control" },
+    e: { keyCode: 17, code: "ControlLeft", key: "Control" },
     Shift: { keyCode: 16, code: "ShiftLeft", key: "Shift" },
     " ": { keyCode: 32, code: "Space", key: " " },
     Escape: { keyCode: 27, code: "Escape", key: "Escape" },
@@ -197,6 +198,24 @@ h1 { margin: 0 0 5px; font-size: 23px; }
     sendKey(key, "keydown");
     sendKey(key, "keyup");
   }
+
+  // Use E on a physical keyboard to fire, while forwarding the game's
+  // traditional fire input (Control) to the DOOM engine.
+  document.addEventListener("keydown", event => {
+    if (!event.isTrusted) return;
+    if (event.code === "KeyE" || event.key.toLowerCase() === "e") {
+      event.preventDefault();
+      if (!event.repeat) sendKey("e", "keydown");
+    }
+  }, true);
+
+  document.addEventListener("keyup", event => {
+    if (!event.isTrusted) return;
+    if (event.code === "KeyE" || event.key.toLowerCase() === "e") {
+      event.preventDefault();
+      sendKey("e", "keyup");
+    }
+  }, true);
 
   function activateMenu() {
     tapKey("Enter");
