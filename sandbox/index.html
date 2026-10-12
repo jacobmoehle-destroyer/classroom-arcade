@@ -1325,17 +1325,17 @@ const nightmareOverlay=document.getElementById("nightmareOverlay");
 const nightmareTitle=document.getElementById("nightmareTitle");
 const nightmareTimer=document.getElementById("nightmareTimer");
 let nightmareActive=false,nightmarePhase="idle",nightmareRollClock=0,nightmarePhaseClock=0;
-let nightmareSaved=null,nightmareGroup=null,herobrineGroup=null;
+let nightmareSaved=null,nightmareGroup=null,herobrineGroup=null,nightmareRevealLight=null;
 let nightmareAudioStarted=false;
 const nightmareMaterials={
-  stone:new THREE.MeshLambertMaterial({color:0x24242a}),
-  floor:new THREE.MeshLambertMaterial({color:0x19191d}),
-  redstone:new THREE.MeshLambertMaterial({color:0x6e0808,emissive:0x310000}),
-  shadow:new THREE.MeshLambertMaterial({color:0x08080a}),
-  shirt:new THREE.MeshLambertMaterial({color:0x35191c}),
-  pants:new THREE.MeshLambertMaterial({color:0x171318}),
-  skin:new THREE.MeshLambertMaterial({color:0x5b3730}),
-  stains:new THREE.MeshLambertMaterial({color:0x310608}),
+  stone:new THREE.MeshLambertMaterial({color:0x45434b}),
+  floor:new THREE.MeshLambertMaterial({color:0x303038}),
+  redstone:new THREE.MeshLambertMaterial({color:0xc52b25,emissive:0x8b100b}),
+  shadow:new THREE.MeshLambertMaterial({color:0x242127}),
+  shirt:new THREE.MeshLambertMaterial({color:0x654047}),
+  pants:new THREE.MeshLambertMaterial({color:0x39313b}),
+  skin:new THREE.MeshLambertMaterial({color:0xa17a70}),
+  stains:new THREE.MeshLambertMaterial({color:0x652026}),
   eyes:new THREE.MeshBasicMaterial({color:0xffffff})
 };
 function buildNightmareTunnel(){
@@ -1351,9 +1351,14 @@ function buildNightmareTunnel(){
       rib.position.set(x,1.25,z);root.add(rib);
       const lamp=new THREE.Mesh(new THREE.BoxGeometry(.26,.12,.24),nightmareMaterials.redstone);
       lamp.position.set(x*.91,2.5,z);root.add(lamp);
-      const light=new THREE.PointLight(0x9a1010,.34,7,2);
+      const light=new THREE.PointLight(0xff382e,.9,10,1.6);
       light.position.set(x*.88,2.45,z);root.add(light);
     }
+  }
+  // Soft neutral fill lights keep the corridor readable on dim screens.
+  for(let z=-96;z<=96;z+=24){
+    const fill=new THREE.PointLight(0x9a8f9f,.48,13,1.8);
+    fill.position.set(0,2.65,z);root.add(fill);
   }
   // A few dead-end alcoves visible through the gloom.
   for(const z of [-72,-32,20,64]){
@@ -1379,8 +1384,8 @@ function buildHerobrine(){
   piece(.27,.58,.28,nightmareMaterials.pants,.17,.56,0).rotation.z=-.1;
   piece(.12,.22,.03,nightmareMaterials.stains,-.15,1.28,-.195);
   piece(.2,.1,.03,nightmareMaterials.stains,.1,1.48,-.205);
-  for(const x of [-.105,.105])piece(.075,.055,.025,nightmareMaterials.eyes,x,1.73,-.202);
-  g.scale.set(1.1,1.08,1.1);scene.add(g);g.visible=false;return g;
+  for(const x of [-.105,.105])piece(.095,.075,.03,nightmareMaterials.eyes,x,1.73,-.222);
+  g.scale.set(1.65,1.65,1.65);scene.add(g);g.visible=false;return g;
 }
 function setNightmareWorldVisible(visible){
   for(const list of chunkRenderMeshes.values())for(const mesh of list)mesh.visible=visible;
@@ -1396,7 +1401,7 @@ function startNightmare(){
     sun:sun.intensity,hemi:scene.children[0].intensity,thirdPerson,gameMode};
   setNightmareWorldVisible(false);
   scene.background.set(0x030203);scene.fog.color.set(0x030203);scene.fog.near=3;scene.fog.far=25;
-  sun.intensity=.025;scene.children[0].intensity=.08;
+  sun.intensity=.12;scene.children[0].intensity=.38;
   if(!nightmareGroup)nightmareGroup=buildNightmareTunnel();else nightmareGroup.visible=true;
   if(!herobrineGroup)herobrineGroup=buildHerobrine();else herobrineGroup.visible=false;
   player.x=0;player.y=0;player.z=92;player.vx=player.vy=player.vz=0;player.yaw=0;player.pitch=0;
@@ -1441,14 +1446,14 @@ function playNightmareSting(){
     const duration=2.65;
     const master=audio.createGain();
     master.gain.setValueAtTime(0.0001,now);
-    master.gain.linearRampToValueAtTime(0.12,now+0.045);
-    master.gain.setValueAtTime(0.12,now+0.22);
+    master.gain.linearRampToValueAtTime(0.28,now+0.045);
+    master.gain.setValueAtTime(0.28,now+0.22);
     master.gain.exponentialRampToValueAtTime(0.0001,now+duration);
     master.connect(audio.destination);
 
     // Main rising-then-falling scream tones, with a fast uneven pitch wobble.
     const screamBus=audio.createGain();
-    screamBus.gain.value=0.62;
+    screamBus.gain.value=0.9;
     const screamFilter=audio.createBiquadFilter();
     screamFilter.type="bandpass";
     screamFilter.frequency.setValueAtTime(1050,now);
@@ -1498,7 +1503,7 @@ function playNightmareSting(){
     noiseFilter.frequency.value=1250;
     const noiseGain=audio.createGain();
     noiseGain.gain.setValueAtTime(0.0001,now);
-    noiseGain.gain.linearRampToValueAtTime(0.16,now+0.035);
+    noiseGain.gain.linearRampToValueAtTime(0.22,now+0.035);
     noiseGain.gain.exponentialRampToValueAtTime(0.0001,now+0.88);
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
@@ -1514,8 +1519,13 @@ function beginHerobrineReveal(){
   nightmareTimer.textContent="";
   nightmareOverlay.classList.add("jumpscare");
   herobrineGroup.visible=true;
-  herobrineGroup.position.set(player.x+Math.sin(player.yaw)*.25,player.y-.02,player.z-1.15);
+  // Place a larger, fully lit figure a little farther ahead so the whole model reads.
+  herobrineGroup.position.set(player.x,player.y-.02,player.z-2.65);
   herobrineGroup.rotation.y=player.yaw+Math.PI;
+  if(nightmareRevealLight)scene.remove(nightmareRevealLight);
+  nightmareRevealLight=new THREE.PointLight(0xffe5dc,3.2,12,1.35);
+  nightmareRevealLight.position.set(player.x,player.y+2.2,player.z-3.3);
+  scene.add(nightmareRevealLight);
   player.yaw=0;player.pitch=0;
   playNightmareSting();
 }
@@ -1523,6 +1533,7 @@ function endNightmare(){
   nightmareActive=false;nightmarePhase="idle";nightmarePhaseClock=0;nightmareRollClock=0;
   if(nightmareGroup)nightmareGroup.visible=false;
   if(herobrineGroup)herobrineGroup.visible=false;
+  if(nightmareRevealLight){scene.remove(nightmareRevealLight);nightmareRevealLight=null;}
   nightmareOverlay.style.display="none";nightmareOverlay.className="";
   if(nightmareSaved){
     player.x=nightmareSaved.x;player.y=nightmareSaved.y;player.z=nightmareSaved.z;
