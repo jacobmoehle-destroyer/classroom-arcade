@@ -1406,6 +1406,28 @@ function startNightmare(){
   nightmareTimer.textContent="Find your way through the tunnel · 60";
   status.textContent="A strange event has begun...";
 }
+// Secret keyboard easter egg: type "herobrian" during active gameplay.
+let herobrineSecretBuffer="";
+let herobrineSecretLastKey=0;
+window.addEventListener("keydown",e=>{
+  if(e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if(!gameStarted || nightmareActive) return;
+  const target=e.target;
+  if(target && (target.isContentEditable || ["INPUT","TEXTAREA","SELECT"].includes(target.tagName))) return;
+  const now=Date.now();
+  if(now-herobrineSecretLastKey>2200) herobrineSecretBuffer="";
+  herobrineSecretLastKey=now;
+  if(e.key.length===1 && /^[a-z]$/i.test(e.key)){
+    herobrineSecretBuffer=(herobrineSecretBuffer+e.key.toLowerCase()).slice(-9);
+    if(herobrineSecretBuffer==="herobrian"){
+      herobrineSecretBuffer="";
+      startNightmare();
+    }
+  }else if(e.key==="Backspace"){
+    herobrineSecretBuffer=herobrineSecretBuffer.slice(0,-1);
+  }
+});
+
 function playNightmareSting(){
   // Original synthetic horror shriek: wavering, metallic, and distorted.
   // Master gain stays capped so the scare comes from its texture, not unsafe volume.
