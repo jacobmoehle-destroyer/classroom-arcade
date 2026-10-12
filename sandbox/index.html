@@ -88,6 +88,7 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
+    <button id="backToArcadeBtn" type="button" title="Return to Classroom Arcade">⬅ Back to Arcade</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
   <div id="status">Loading world...</div>
@@ -1218,6 +1219,7 @@ document.getElementById("mainExitBtn").addEventListener("click",()=>{mainMenuMes
 document.getElementById("saveBtn").addEventListener("click",saveWorld);
 document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
 document.getElementById("menuBtn").addEventListener("click",openMenu);
+document.getElementById("backToArcadeBtn").addEventListener("click",()=>{ window.location.href="../index.html"; });
 document.getElementById("modeBtn").addEventListener("click",toggleMode);
 document.getElementById("modeMenuBtn").addEventListener("click",toggleMode);
 refreshModeUI();
