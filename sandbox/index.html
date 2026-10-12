@@ -131,7 +131,7 @@ button:active,button.selected{background:#27864d}
     <select id="qualitySelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="0.65">Ultra battery saver</option><option value="0.85">Battery saver</option><option value="1">Balanced</option><option value="1.2">High</option></select>
     <label for="distanceSelect" style="display:block;margin:14px 0 5px">Render distance</label>
     <select id="distanceSelect" style="width:100%;padding:10px;border-radius:8px;font-size:15px"><option value="1">Near (3×3 chunks)</option><option value="2">Normal (5×5 chunks)</option><option value="3">Far (7×7 chunks)</option><option value="4">Very Far (9×9 chunks)</option></select>
-    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Performance update: lower default pixel ratio, small chunk-generation batches, configurable render distance, and FPS display. The game preloads 30 nearby chunks before spawning. Use Battery Saver and Near render distance on older iPads/Chromebooks. Saves stay in this browser on this device. Day/night, new biomes, ores, armor, and crafting are included.</p>
+    <p style="font-size:12px;color:#cbd5e1;line-height:1.5">Performance update: instanced chunk rendering reduces separate draw calls, nearby-only block raycasts, lower default pixel ratio, small chunk-generation batches, configurable render distance, and FPS display. The game preloads 30 nearby chunks before spawning. Use Battery Saver and Near render distance on older iPads/Chromebooks. Saves stay in this browser on this device. Day/night, new biomes, ores, armor, and crafting are included.</p>
     <button id="closeMenuBtn" style="width:100%;margin-top:10px">Done</button>
     <div id="menuMessage" style="margin-top:12px;font-size:13px;color:#b8f7c5"></div>
   </div>
@@ -357,16 +357,20 @@ materials.grass=[makeGrassFace("side"),makeGrassFace("side"),makeGrassFace("top"
 
 const geometry=new THREE.BoxGeometry(1,1,1);
 const blocks=new Map(),meshes=new Map();
+// Performance system: blocks are kept as lightweight records, while visible
+// blocks are rendered in per-chunk InstancedMeshes (one draw call per block type).
+const chunkRenderMeshes=new Map(),dirtyChunkKeys=new Set();
 const blockKey=(x,y,z)=>`${x},${y},${z}`;
 function getBlock(x,y,z){return blocks.get(blockKey(x,y,z));}
-
+function markChunkDirty(cx,cz){dirtyChunkKeys.add(`${cx},${cz}`);}
+function markBlockChunkDirty(x,z){markChunkDirty(Math.floor(x/CHUNK_SIZE),Math.floor(z/CHUNK_SIZE));}
 function addBlock(x,y,z,type){
   x=Math.round(x);y=Math.round(y);z=Math.round(z);
   const k=blockKey(x,y,z);
   if(blocks.has(k))return false;
-  const mesh=new THREE.Mesh(geometry,materials[type]||materials.grass);
-  mesh.position.set(x,y,z);mesh.userData={x,y,z,type};
-  scene.add(mesh);blocks.set(k,type);meshes.set(k,mesh);
+  // Lightweight metadata object; it is not added to the Three.js scene.
+  const record={userData:{x,y,z,type},visible:true};
+  blocks.set(k,type);meshes.set(k,record);markBlockChunkDirty(x,z);
   return true;
 }
 function blockIsExposed(x,y,z){
@@ -374,16 +378,62 @@ function blockIsExposed(x,y,z){
 }
 function refreshBlockVisibilityAt(x,y,z){
   const coords=[[x,y,z],[x+1,y,z],[x-1,y,z],[x,y+1,z],[x,y-1,z],[x,y,z+1],[x,y,z-1]];
-  for(const [bx,by,bz] of coords){const m=meshes.get(blockKey(bx,by,bz));if(m)m.visible=blockIsExposed(bx,by,bz);}
+  for(const [bx,by,bz] of coords){
+    const m=meshes.get(blockKey(bx,by,bz));if(m)m.visible=blockIsExposed(bx,by,bz);
+    markBlockChunkDirty(bx,bz);
+  }
 }
-function optimizeChunkVisibility(cx,cz){
+function optimizeChunkVisibility(cx,cz){markChunkDirty(cx,cz);markChunkDirty(cx-1,cz);markChunkDirty(cx+1,cz);markChunkDirty(cx,cz-1);markChunkDirty(cx,cz+1);}
+function removeChunkRenderMeshes(ck){
+  const list=chunkRenderMeshes.get(ck)||[];
+  for(const mesh of list)scene.remove(mesh);
+  chunkRenderMeshes.delete(ck);
+}
+function rebuildChunkMesh(cx,cz){
+  const ck=`${cx},${cz}`;
+  removeChunkRenderMeshes(ck);
   const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
-  for(const [k,m] of meshes){const p=m.userData;if(p.x>=minX&&p.x<maxX&&p.z>=minZ&&p.z<maxZ)m.visible=blockIsExposed(p.x,p.y,p.z);}
+  const byType=new Map();
+  for(const [key,type] of blocks){
+    const record=meshes.get(key);if(!record)continue;
+    const p=record.userData;
+    if(p.x<minX||p.x>=maxX||p.z<minZ||p.z>=maxZ||!blockIsExposed(p.x,p.y,p.z))continue;
+    if(!byType.has(type))byType.set(type,[]);
+    byType.get(type).push({key,x:p.x,y:p.y,z:p.z});
+  }
+  const renderList=[];
+  const matrix=new THREE.Matrix4();
+  for(const [type,items] of byType){
+    if(!items.length)continue;
+    const instanced=new THREE.InstancedMesh(geometry,materials[type]||materials.grass,items.length);
+    instanced.name=`chunk ${ck} ${type}`;
+    instanced.userData={chunkKey:ck,blockType:type,instanceKeys:items.map(item=>item.key)};
+    for(let i=0;i<items.length;i++){
+      const item=items[i];matrix.makeTranslation(item.x,item.y,item.z);instanced.setMatrixAt(i,matrix);
+    }
+    instanced.instanceMatrix.needsUpdate=true;
+    instanced.computeBoundingSphere();scene.add(instanced);renderList.push(instanced);
+  }
+  chunkRenderMeshes.set(ck,renderList);
+}
+function flushDirtyChunkMeshes(){
+  if(!dirtyChunkKeys.size)return;
+  // Rebuild only loaded chunks. Unloaded/queued chunks stay dirty until loaded.
+  for(const ck of [...dirtyChunkKeys]){
+    if(!loadedChunks.has(ck))continue;
+    const [cx,cz]=ck.split(',').map(Number);
+    rebuildChunkMesh(cx,cz);dirtyChunkKeys.delete(ck);
+  }
+}
+function getNearbyRenderMeshes(){
+  const cx=Math.floor(player.x/CHUNK_SIZE),cz=Math.floor(player.z/CHUNK_SIZE),out=[];
+  for(let x=cx-1;x<=cx+1;x++)for(let z=cz-1;z<=cz+1;z++)out.push(...(chunkRenderMeshes.get(`${x},${z}`)||[]));
+  return out;
 }
 function removeBlock(x,y,z,refresh=true){
-  const k=blockKey(x,y,z),mesh=meshes.get(k);
-  if(!mesh)return false;
-  scene.remove(mesh);blocks.delete(k);meshes.delete(k);
+  const k=blockKey(x,y,z),record=meshes.get(k);
+  if(!record)return false;
+  blocks.delete(k);meshes.delete(k);markBlockChunkDirty(x,z);
   if(refresh)refreshBlockVisibilityAt(x,y,z);
   return true;
 }
@@ -575,16 +625,18 @@ function processChunkQueue(){
 function unloadChunk(cx,cz){
   const ck=chunkKey(cx,cz);if(!loadedChunks.has(ck))return;
   const minX=cx*CHUNK_SIZE,maxX=minX+CHUNK_SIZE,minZ=cz*CHUNK_SIZE,maxZ=minZ+CHUNK_SIZE;
-  for(const [k,mesh] of meshes){
-    const x=mesh.userData.x,z=mesh.userData.z;
-    if(x>=minX&&x<maxX&&z>=minZ&&z<maxZ){scene.remove(mesh);meshes.delete(k);blocks.delete(k);}
+  for(const [k,record] of meshes){
+    const x=record.userData.x,z=record.userData.z;
+    if(x>=minX&&x<maxX&&z>=minZ&&z<maxZ){meshes.delete(k);blocks.delete(k);}
   }
+  removeChunkRenderMeshes(ck);dirtyChunkKeys.delete(ck);
   loadedChunks.delete(ck);
   // Reveal faces on neighboring chunks that were hidden by the chunk just unloaded.
   for(let y=BEDROCK_Y;y<48;y++)for(let i=0;i<CHUNK_SIZE;i++){
     refreshBlockVisibilityAt(minX-1,y,minZ+i);refreshBlockVisibilityAt(maxX,y,minZ+i);
     refreshBlockVisibilityAt(minX+i,y,minZ-1);refreshBlockVisibilityAt(minX+i,y,maxZ);
   }
+  markChunkDirty(cx-1,cz);markChunkDirty(cx+1,cz);markChunkDirty(cx,cz-1);markChunkDirty(cx,cz+1);
 }
 function updateChunks(force=false){
   const cx=Math.floor(player.x/CHUNK_SIZE),cz=Math.floor(player.z/CHUNK_SIZE);
@@ -821,13 +873,19 @@ renderer.domElement.addEventListener("click",()=>{
 const raycaster=new THREE.Raycaster(),center=new THREE.Vector2(0,0);
 function getTarget(){
   raycaster.setFromCamera(center,camera);raycaster.far=6;
-  const hits=raycaster.intersectObjects([...meshes.values()],false);
-  return hits.length?hits[0]:null;
+  const hits=raycaster.intersectObjects(getNearbyRenderMeshes(),false);
+  if(!hits.length)return null;
+  const hit=hits[0];
+  const key=hit.object.userData.instanceKeys?.[hit.instanceId];
+  const record=key?meshes.get(key):null;
+  if(!record)return null;
+  hit.blockData=record.userData;
+  return hit;
 }
 function breakBlock(){
   const hit=getTarget();
   if(!hit){status.textContent="Aim at a block within reach.";return;}
-  const p=hit.object.userData;
+  const p=hit.blockData||hit.object.userData;
   if(gameMode==="survival"&&p.type==="bedrock"){status.textContent="Bedrock can't be mined in Survival.";return;}
   if(gameMode==="survival"){
     const oreTypes=["iron","gold","diamond","copper","emerald","ancient_debris"];
@@ -857,7 +915,7 @@ let selected="grass";
 function placeBlock(){
   const hit=getTarget();
   if(!hit||!hit.face){status.textContent="Aim at a block within reach.";return;}
-  const p=hit.object.userData;
+  const p=hit.blockData||hit.object.userData;
   const n=hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
   const x=Math.round(p.x+n.x),y=Math.round(p.y+n.y),z=Math.round(p.z+n.z);
   const overlapsPlayer=x+.5>player.x-player.radius&&x-.5<player.x+player.radius&&
@@ -876,7 +934,7 @@ document.getElementById("breakBtn").addEventListener("pointerdown",e=>{e.prevent
 document.getElementById("placeBtn").addEventListener("pointerdown",e=>{e.preventDefault();placeBlock();});
 function collectNearbyPig(){
   const aimed=getTarget();
-  if(aimed&&["chest","furnace"].includes(aimed.object.userData.type)){openStation(aimed.object.userData.type,blockKey(aimed.object.userData.x,aimed.object.userData.y,aimed.object.userData.z));return;}
+  if(aimed&&["chest","furnace"].includes((aimed.blockData||aimed.object.userData).type)){const p=aimed.blockData||aimed.object.userData;openStation(p.type,blockKey(p.x,p.y,p.z));return;}
   if(gameMode!=="survival"){status.textContent="Switch to Survival to collect food.";return;}
   let best=-1,bestD=3.2;
   for(let i=0;i<mobs.length;i++){const m=mobs[i],d=Math.hypot(m.x-player.x,m.z-player.z);if(d<bestD){best=i;bestD=d;}}
@@ -1221,7 +1279,7 @@ function updateCamera(){
   const desired=target.clone().add(behind);
   const rayDirection=desired.clone().sub(target).normalize();
   raycaster.set(target,rayDirection);raycaster.far=4.5;
-  const hits=raycaster.intersectObjects([...meshes.values()],false);
+  const hits=raycaster.intersectObjects(getNearbyRenderMeshes(),false);
   if(hits.length&&hits[0].distance<4.5){
     desired.copy(target).add(rayDirection.multiplyScalar(Math.max(.5,hits[0].distance-.25)));
   }
@@ -1253,6 +1311,7 @@ function animate(now){
   if(gameStarted)updateDayNight(dt);
   if(loadingWorld||gameStarted)processChunkQueue();
   if(gameStarted)updateChunks();
+  flushDirtyChunkMeshes();
   if(loadingWorld){
     const done=Math.min(loadedChunks.size,preloadTarget);
     const pct=Math.floor(done/preloadTarget*100);
