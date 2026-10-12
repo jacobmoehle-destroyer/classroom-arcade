@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,6 +64,14 @@ h1 { margin: 0 0 5px; font-size: 23px; }
   #movementPad { left: 5px; bottom: 5px; }
   #actionPad { right: 5px; bottom: 5px; }
 }
+
+#keyboardGuide { width: min(480px, 100%); margin: 12px auto; padding: 12px; text-align: left; background: #1b1b1b; border: 1px solid #333; border-radius: 8px; }
+#keyboardGuide h2 { margin: 0 0 9px; font-size: 16px; text-align: center; }
+.keyGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: 12px; }
+#keyboardGuide p { margin: 10px 0 0; color: #aaa; font-size: 11px; }
+kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5px; text-align: center; color: #fff; background: #333; border: 1px solid #555; border-radius: 4px; font: bold 11px monospace; }
+@media (max-width: 360px) { .keyGrid { grid-template-columns: 1fr; } }
+
 </style>
 </head>
 <body>
@@ -108,6 +115,24 @@ h1 { margin: 0 0 5px; font-size: 23px; }
   <button id="fullscreenButton" type="button">Fullscreen</button>
 </div>
 <pre id="console">Dwasm output will appear here.</pre>
+
+<section id="keyboardGuide" aria-label="Keyboard controls">
+  <h2>Keyboard Controls</h2>
+  <div class="keyGrid">
+    <span><kbd>↑</kbd> / <kbd>W</kbd> Move forward</span>
+    <span><kbd>↓</kbd> / <kbd>S</kbd> Move backward</span>
+    <span><kbd>←</kbd> Turn left</span>
+    <span><kbd>→</kbd> Turn right</span>
+    <span><kbd>E</kbd> Shoot</span>
+    <span><kbd>Space</kbd> Use / open doors</span>
+    <span><kbd>Shift</kbd> Run</span>
+    <span><kbd>Tab</kbd> Toggle automap</span>
+    <span><kbd>Esc</kbd> Menu</span>
+    <span><kbd>Enter</kbd> Confirm / select</span>
+  </div>
+  <p>Tip: You can also use the on-screen buttons. Hold <kbd>E</kbd> to keep firing.</p>
+</section>
+
 
 <script>
 (() => {
