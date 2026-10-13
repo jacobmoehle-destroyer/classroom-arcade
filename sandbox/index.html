@@ -1363,6 +1363,8 @@ const nightmareTimer=document.getElementById("nightmareTimer");
 let nightmareActive=false,nightmarePhase="idle",nightmareRollClock=0,nightmarePhaseClock=0;
 let nightmareSaved=null,nightmareGroup=null,herobrineGroup=null,nightmareRevealLight=null;
 let portalGroup=null,level94Group=null,level94Monsters=[],level94Redirecting=false;
+let level94Houses=[],playerHiding=false,hidingHouse=null,dreamcoreGroup=null,dreamcoreAudio=null;
+let dreamcorePortal=null;
 let level94RumbleContext=null;
 let nightmareAudioStarted=false;
 const nightmareMaterials={
@@ -1430,7 +1432,7 @@ function buildLevel94(){
   const roofMats=[0x6d4140,0x4c5158,0x7d6b58].map(color=>new THREE.MeshLambertMaterial({color}));
   const windowMat=new THREE.MeshLambertMaterial({color:0x263c48});
   let seed=94094;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  for(let i=0;i<145;i++){
+  for(let i=0;i<260;i++){
     let x=(rand()-.5)*1350,z=(rand()-.5)*1350;
     if(Math.abs(x)<24&&Math.abs(z)<24){x+=rand()<.5?42:-42;z+=36;}
     const g=new THREE.Group(),w=5+rand()*4,d=5+rand()*4,h=3.5+rand()*2.2;
@@ -1439,7 +1441,23 @@ function buildLevel94(){
     const door=new THREE.Mesh(new THREE.BoxGeometry(.8,1.8,.08),new THREE.MeshLambertMaterial({color:0x49382c}));door.position.set(0,.9,d/2+.045);g.add(door);
     for(const wx of [-w*.25,w*.25]){const win=new THREE.Mesh(new THREE.BoxGeometry(.85,.85,.08),windowMat);win.position.set(wx,h*.62,d/2+.05);g.add(win);}
     g.position.set(x,level94Height(x,z),z);g.rotation.y=rand()*Math.PI*2;root.add(g);
+    level94Houses.push({group:g,x,z,y:level94Height(x,z),rotation:g.rotation.y,w,d,h});
   }
+  // A huge water tower with a strange portal beneath its legs.
+  const tower=new THREE.Group();tower.name="giant-water-tower";
+  const metal=new THREE.MeshLambertMaterial({color:0x59666b}),tankMat=new THREE.MeshLambertMaterial({color:0x778f91});
+  const legs=[[-8,-8],[8,-8],[-8,8],[8,8]];
+  for(const [lx,lz] of legs){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.7,.95,24,8),metal);leg.position.set(lx,12,lz);tower.add(leg);}
+  const tank=new THREE.Mesh(new THREE.CylinderGeometry(12,10,15,16),tankMat);tank.position.y=30;tower.add(tank);
+  const cap=new THREE.Mesh(new THREE.ConeGeometry(12,5,16),new THREE.MeshLambertMaterial({color:0x465b61}));cap.position.y=40;tower.add(cap);
+  tower.position.set(100,level94Height(100,-100),-100);root.add(tower);
+  const tp=new THREE.Group();tp.name="dreamcore-portal";
+  const pr=new THREE.Mesh(new THREE.TorusGeometry(3.2,.32,12,48),new THREE.MeshBasicMaterial({color:0xffb8ec}));
+  pr.position.set(100,level94Height(100,-100)+.1,-100);tp.add(pr);
+  const pc=new THREE.Mesh(new THREE.CircleGeometry(3,40),new THREE.MeshBasicMaterial({color:0x9d79ff,side:THREE.DoubleSide}));
+  pc.position.set(100,level94Height(100,-100)+.12,-100);pc.rotation.x=-Math.PI/2;tp.add(pc);
+  const pl=new THREE.PointLight(0xffa7ef,5,35);pl.position.set(100,level94Height(100,-100)+2,-100);tp.add(pl);
+  root.add(tp);dreamcorePortal={x:100,z:-100,y:level94Height(100,-100),group:tp};
   const black=new THREE.MeshLambertMaterial({color:0x030406}),headMat=new THREE.MeshBasicMaterial({color:0x080a0e});
   for(let i=0;i<12;i++){
     const g=new THREE.Group();
@@ -1453,6 +1471,45 @@ function buildLevel94(){
     level94Monsters.push({group:g,x,z,speed:5.8+rand()*.35,phase:rand()*6.28});
   }
   level94Group=root;scene.add(root);root.visible=false;
+}
+function buildDreamcore(){
+  if(dreamcoreGroup){dreamcoreGroup.visible=true;return;}
+  const root=new THREE.Group();root.name="dreamcore-no-exit";
+  const geo=new THREE.PlaneGeometry(1800,1800,100,100);geo.rotateX(-Math.PI/2);
+  const p=geo.attributes.position;
+  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,2+Math.sin(x*.009)*10+Math.cos(z*.012)*7+Math.sin((x+z)*.008)*5);}
+  geo.computeVertexNormals();root.add(new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x78ad55})));
+  // Oversized pastel flowers with unmistakable eyes in their centers.
+  for(let i=0;i<280;i++){
+    const x=(Math.random()-.5)*1450,z=(Math.random()-.5)*1450,y=2+Math.sin(x*.009)*10+Math.cos(z*.012)*7+Math.sin((x+z)*.008)*5;
+    const flower=new THREE.Group();flower.position.set(x,y,z);
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,2.8,6),new THREE.MeshLambertMaterial({color:0x367c3b}));stem.position.y=1.4;flower.add(stem);
+    const colors=[0xffc6e7,0xffe6a6,0xc8c4ff,0xffffff,0xf6a8a8],col=colors[i%colors.length];
+    for(let j=0;j<7;j++){const a=j*Math.PI*2/7,petal=new THREE.Mesh(new THREE.SphereGeometry(.72,10,8),new THREE.MeshLambertMaterial({color:col}));petal.scale.set(1,.48,.7);petal.position.set(Math.cos(a)*.85,3+Math.sin(a)*.85,0);flower.add(petal);}
+    const eyeWhite=new THREE.Mesh(new THREE.SphereGeometry(.62,12,10),new THREE.MeshBasicMaterial({color:0xffffff}));eyeWhite.position.set(0,3,.22);flower.add(eyeWhite);
+    const pupil=new THREE.Mesh(new THREE.SphereGeometry(.23,10,8),new THREE.MeshBasicMaterial({color:0x17152b}));pupil.position.set(.08,3,.76);flower.add(pupil);root.add(flower);
+  }
+  // Soft clouds with eyes floating above the hills.
+  for(let i=0;i<36;i++){
+    const x=(Math.random()-.5)*1300,z=(Math.random()-.5)*1300,y=65+Math.random()*65,c=new THREE.Group();
+    for(let j=0;j<6;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(7+Math.random()*5,12,10),new THREE.MeshLambertMaterial({color:0xfff9f7}));puff.position.set((j-2.5)*7,Math.sin(j)*3,0);c.add(puff);}
+    for(const ex of [-2.3,2.3]){const ew=new THREE.Mesh(new THREE.SphereGeometry(1.9,12,10),new THREE.MeshBasicMaterial({color:0xffffff}));ew.position.set(ex,-1,8);c.add(ew);const ep=new THREE.Mesh(new THREE.SphereGeometry(.75,10,8),new THREE.MeshBasicMaterial({color:0x22233b}));ep.position.set(ex+.25,-1,9.65);c.add(ep);}
+    c.position.set(x,y,z);root.add(c);
+  }
+  dreamcoreGroup=root;scene.add(root);root.visible=false;
+}
+function enterDreamcore(){
+  buildDreamcore();level94Group.visible=false;dreamcoreGroup.visible=true;
+  nightmarePhase="dreamcore";player.x=0;player.z=0;player.y=level94Height(0,0);player.vy=0;
+  scene.background.set(0x5a9fe8);scene.fog.color.set(0x8ab9ed);scene.fog.near=250;scene.fog.far=1500;
+  sun.intensity=1.65;scene.children[0].intensity=1.6;
+  nightmareTitle.textContent="A PLACE TO STAY";nightmareTimer.textContent="The flowers are watching. The clouds know you're here.";
+  status.textContent="Dreamcore · the portal is gone behind you";
+  if(soundOn){
+    try{if(!dreamcoreAudio){dreamcoreAudio=new Audio(new URL("./dreamcore.mp3",document.baseURI).href);dreamcoreAudio.loop=true;dreamcoreAudio.volume=.72;}
+      dreamcoreAudio.currentTime=0;const q=dreamcoreAudio.play();if(q&&q.catch)q.catch(()=>{status.textContent="Dreamcore music needs dreamcore.mp3 in the sandbox folder and Sound On.";});
+    }catch(_){}
+  }
 }
 function buildHerobrine(){
   const g=new THREE.Group();g.name="herobrine";
@@ -1502,6 +1559,14 @@ let herobrineSecretBuffer="";
 let herobrineSecretLastKey=0;
 window.addEventListener("keydown",e=>{
   if(e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if(nightmareActive && e.key.toLowerCase()==="e" && nightmarePhase==="level94"){
+    if(playerHiding){playerHiding=false;hidingHouse=null;status.textContent="You stepped back outside.";return;}
+    let nearest=null,nearestD=10;
+    for(const h of level94Houses){const d=Math.hypot(player.x-h.x,player.z-h.z);if(d<nearestD){nearest=h;nearestD=d;}}
+    if(nearest){playerHiding=true;hidingHouse=nearest;player.x=nearest.x+Math.sin(nearest.rotation)*(nearest.d/2-.65);player.z=nearest.z+Math.cos(nearest.rotation)*(nearest.d/2-.65);player.y=nearest.y+nearest.h*.62;player.yaw=nearest.rotation+Math.PI;player.pitch=0;status.textContent="You're hidden inside. Press E to leave.";nightmareTimer.textContent="Quiet. Watch through the window...";e.preventDefault();}
+    else if(dreamcorePortal&&Math.hypot(player.x-dreamcorePortal.x,player.z-dreamcorePortal.z)<12){enterDreamcore();e.preventDefault();}
+    return;
+  }
   if(!gameStarted || nightmareActive) return;
   const target=e.target;
   if(target && (target.isContentEditable || ["INPUT","TEXTAREA","SELECT"].includes(target.tagName))) return;
@@ -1594,7 +1659,7 @@ function enterLevel94(){
   nightmarePhase="falling";nightmarePhaseClock=0;
   if(nightmareGroup)nightmareGroup.visible=false;
   if(portalGroup)portalGroup.visible=false;
-  buildLevel94();level94Group.visible=true;level94Monsters.forEach(m=>m.group.visible=true);
+  buildLevel94();level94Group.visible=true;level94Monsters.forEach(m=>m.group.visible=true);playerHiding=false;hidingHouse=null;
   scene.background.set(0x8bc7f0);scene.fog.color.set(0x8bc7f0);scene.fog.near=180;scene.fog.far=1100;
   sun.intensity=2.1;scene.children[0].intensity=1.8;
   player.x=0;player.z=0;player.y=95;player.vy=0;player.vx=player.vz=0;player.yaw=0;player.pitch=0;thirdPerson=false;avatar.visible=false;
@@ -1624,6 +1689,9 @@ function endNightmare(){
   nightmareActive=false;nightmarePhase="idle";nightmarePhaseClock=0;nightmareRollClock=0;
   if(nightmareGroup)nightmareGroup.visible=false;
   if(level94Group)level94Group.visible=false;
+  if(dreamcoreGroup)dreamcoreGroup.visible=false;
+  if(dreamcoreAudio){dreamcoreAudio.pause();dreamcoreAudio.currentTime=0;}
+  playerHiding=false;hidingHouse=null;
   if(herobrineGroup)herobrineGroup.visible=false;
   if(nightmareRevealLight){scene.remove(nightmareRevealLight);nightmareRevealLight=null;}
   nightmareOverlay.style.display="none";nightmareOverlay.className="";
@@ -1682,7 +1750,11 @@ function updateNightmare(dt){
     player.x+=(side*cos+f*sin)*speed*dt;player.z+=(-side*sin+f*cos)*speed*dt;
     player.x=THREE.MathUtils.clamp(player.x,-790,790);player.z=THREE.MathUtils.clamp(player.z,-790,790);
     const ground=level94Height(player.x,player.z);player.y=ground;
-    for(const m of level94Monsters){
+    if(playerHiding&&hidingHouse){player.x=hidingHouse.x+Math.sin(hidingHouse.rotation)*(hidingHouse.d/2-.65);player.z=hidingHouse.z+Math.cos(hidingHouse.rotation)*(hidingHouse.d/2-.65);player.y=hidingHouse.y+hidingHouse.h*.62;nightmareTimer.textContent="Hidden inside. Press E to leave and return to the hills.";}
+    if(!playerHiding && dreamcorePortal&&Math.hypot(player.x-dreamcorePortal.x,player.z-dreamcorePortal.z)<18){
+      nightmareTimer.textContent="A portal glows beneath the water tower. Press E to enter.";
+    }else{nightmareTimer.textContent="Find the huge water tower. Press E at a house door to hide.";}
+    if(!playerHiding)for(const m of level94Monsters){
       const dx=player.x-m.x,dz=player.z-m.z,dist=Math.hypot(dx,dz);
       if(dist<145&&dist>.01){
         const step=m.speed*dt;m.x+=dx/dist*step;m.z+=dz/dist*step;
@@ -1691,6 +1763,19 @@ function updateNightmare(dt){
       if(dist<3.6){level94Caught();break;}
     }
     nightmareTimer.textContent="Keep moving. The figures are hunting you.";
+  }else if(nightmarePhase==="dreamcore"){
+    let f=0,side=0;
+    if(keys.has("w")||keys.has("arrowup"))f--;
+    if(keys.has("s")||keys.has("arrowdown"))f++;
+    if(keys.has("a")||keys.has("arrowleft"))side--;
+    if(keys.has("d")||keys.has("arrowright"))side++;
+    f-=touch.forward;f+=touch.back;side-=touch.left;side+=touch.right;
+    const len=Math.hypot(f,side);if(len>0){f/=len;side/=len;}
+    const speed=keys.has("shift")?7:4.5,sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
+    player.x=THREE.MathUtils.clamp(player.x+(side*cos+f*sin)*speed*dt,-880,880);
+    player.z=THREE.MathUtils.clamp(player.z+(-side*sin+f*cos)*speed*dt,-880,880);
+    player.y=2+Math.sin(player.x*.009)*10+Math.cos(player.z*.012)*7+Math.sin((player.x+player.z)*.008)*5;
+    nightmareTimer.textContent="Everything feels peaceful. Nothing leads out.";
   }else if(nightmarePhase==="caught"){
     // The redirect timer is running; keep the jumpscare visible.
   }
