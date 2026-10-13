@@ -240,6 +240,37 @@ button:hover{background:#30383a;border-color:#9aa19b}
  #camStatus{left:37%;bottom:4%;font-size:8px;max-width:28%}
 }
 
+
+/* UPDATE 4: reliable camera clicks, keyboard navigation, and touchscreen support */
+#cameraPanel{z-index:50;touch-action:manipulation;}
+#camScene{z-index:1;pointer-events:none;}
+#camScene:before,#camScene:after{pointer-events:none;}
+#cameraMap{z-index:20;pointer-events:auto;isolation:isolate;touch-action:manipulation;}
+.camPick{z-index:21;pointer-events:auto;touch-action:manipulation;min-width:0;cursor:pointer;}
+#camExit{display:none;}
+#camTouchNav{position:absolute;z-index:30;left:3%;right:3%;bottom:2%;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:auto;}
+#camTouchNav button{min-height:44px;padding:10px 13px;background:linear-gradient(#343b35,#101411);border:1px solid #9aa38f;box-shadow:0 3px 12px #000;touch-action:manipulation;cursor:pointer;}
+#camTouchNav #camExit{display:block;position:static;width:auto;height:auto;flex:1;max-width:240px;background:linear-gradient(#492925,#170d0c);border-color:#bd8177;font-weight:bold;}
+#camPrev,#camNext{min-width:88px;}
+#camStatus{z-index:25;bottom:calc(2% + 56px);left:3%;max-width:48%;pointer-events:none;}
+#cameraMap:before{pointer-events:none;}
+button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+@media(max-width:600px){
+ #cameraMap{right:3%;bottom:15%;width:47%;height:30%;min-height:112px;max-height:170px;}
+ .camPick{height:24%;font-size:9px;padding:2px 1px;}
+ .camPick small{font-size:7px;}
+ #camTouchNav{left:2%;right:2%;bottom:2%;gap:5px;}
+ #camTouchNav button{min-height:46px;padding:8px 6px;font-size:10px;}
+ #camPrev,#camNext{min-width:66px;}
+ #camTouchNav #camExit{max-width:none;}
+ #camStatus{left:3%;bottom:calc(2% + 55px);font-size:8px;max-width:43%;}
+}
+@media(max-height:480px){
+ #cameraMap{min-height:90px;height:29%;bottom:17%;}
+ #camTouchNav button{min-height:38px;padding:5px;font-size:10px;}
+ #camStatus{bottom:calc(2% + 46px);}
+}
+
 </style>
 </head>
 <body>
@@ -266,8 +297,13 @@ button:hover{background:#30383a;border-color:#9aa19b}
   </div>
   <div id="cameraPanel">
    <div id="camScene"><div id="camRoom"></div><div id="camCharacters"></div><div id="camLabel">CAM 1A — SHOW STAGE</div></div>
-   <div id="cameraMap"></div><div id="camStatus">SIGNAL: OK · AUDIO: LOW · NIGHT FEED</div>
-   <button id="camExit">LOWER<br>MONITOR</button>
+   <div id="cameraMap" aria-label="Camera selection map"></div>
+   <div id="camStatus">SIGNAL: OK · AUDIO: LOW · NIGHT FEED</div>
+   <div id="camTouchNav" aria-label="Touch camera controls">
+    <button id="camPrev" aria-label="Previous camera">◀ PREV</button>
+    <button id="camExit">LOWER MONITOR ✕</button>
+    <button id="camNext" aria-label="Next camera">NEXT ▶</button>
+   </div>
   </div>
   <div id="message"></div>
  </div>
@@ -278,7 +314,7 @@ button:hover{background:#30383a;border-color:#9aa19b}
   <p>A quiet job. Six hours. Cameras that never show the whole story.</p>
   <button class="primary" id="startBtn">START NIGHT 1</button>
   <button id="howBtn">HOW TO PLAY</button>
-  <p class="tiny">Original browser prototype. Headphones recommended. Audio starts after you press Start.</p>
+  <p class="tiny">Keyboard + touchscreen controls. SPACE/F/M opens the monitor; tap the camera map to switch feeds.</p><p class="tiny">Original browser prototype. Audio starts after you press Start.</p>
   <p class="tiny">Inspired by classic office-and-camera survival horror; original CSS-built visuals and synthesized audio.</p>
  </div></div>
 </div>
@@ -294,7 +330,7 @@ const els = {
  leftHall:$('leftHall'),rightHall:$('rightHall'),leftThreat:$('leftThreat'),rightThreat:$('rightThreat'),
  cameraButton:$('cameraButton'),cameraPanel:$('cameraPanel'),camExit:$('camExit'),camScene:$('camScene'),
  camRoom:$('camRoom'),camCharacters:$('camCharacters'),camLabel:$('camLabel'),cameraMap:$('cameraMap'),
- camStatus:$('camStatus'),message:$('message'),jumpscare:$('jumpscare'),officeHint:$('officeHint')
+ camStatus:$('camStatus'),camPrev:$('camPrev'),camNext:$('camNext'),jumpscareAudio:$('jumpscareAudio'),message:$('message'),jumpscare:$('jumpscare'),officeHint:$('officeHint')
 };
 const rooms=[
  {id:'1A',name:'SHOW STAGE',short:'STAGE'},
@@ -333,7 +369,7 @@ function initNight(n){
  ]};
  // Difficulty ramps across nights without making early nights unfair.
  state.shiftSeconds=180;
- els.overlay.classList.add('hidden');els.jumpscare.classList.remove('show');els.cameraPanel.classList.remove('open');
+ els.overlay.classList.add('hidden');els.jumpscare.classList.remove('show');els.cameraPanel.classList.remove('open');try{els.jumpscareAudio.pause();els.jumpscareAudio.currentTime=0;}catch(e){}
  els.night.textContent='NIGHT '+n;els.officeHint.textContent='KEEP WATCH. CONSERVE POWER.';
  els.message.classList.remove('show');
  render();
@@ -346,7 +382,13 @@ function setLight(side){if(!state?.running||state.blackout||state.camera||state.
 function toggleCamera(){if(!state?.running||state.blackout||state.gameOver)return;state.camera=!state.camera;state.lights.left=state.lights.right=false;sound('click');render();}
 function makeCamMap(){
  els.cameraMap.innerHTML='';
- rooms.forEach(r=>{const b=document.createElement('button');b.className='camPick'+(state.cam===r.id?' selected':'');b.innerHTML='CAM '+r.id+'<small>'+r.short+'</small>';b.onclick=()=>{state.cam=r.id;sound('click');renderCamera();};els.cameraMap.appendChild(b);});
+ rooms.forEach(r=>{const b=document.createElement('button');b.type='button';b.dataset.cam=r.id;b.setAttribute('aria-label','Switch to camera '+r.id+' '+r.name);b.className='camPick'+(state.cam===r.id?' selected':'');b.innerHTML='CAM '+r.id+'<small>'+r.short+'</small>';els.cameraMap.appendChild(b);});
+}
+function cycleCamera(direction){
+ if(!state?.running||!state.camera||state.blackout||state.gameOver)return;
+ const index=rooms.findIndex(r=>r.id===state.cam);
+ state.cam=rooms[(index+direction+rooms.length)%rooms.length].id;
+ sound('click',.08);renderCamera();
 }
 function renderCamera(){
  els.camLabel.textContent='CAM '+state.cam+' — '+rooms.find(r=>r.id===state.cam).name;
@@ -429,6 +471,7 @@ function beginBlackout(){
 function lose(reason){
  if(state.gameOver)return;state.gameOver=true;state.running=false;clearInterval(loopId);sound('stinger',.34);
  els.jumpscare.classList.add('show');
+ try{els.jumpscareAudio.pause();els.jumpscareAudio.currentTime=0;const playPromise=els.jumpscareAudio.play();if(playPromise&&playPromise.catch)playPromise.catch(()=>{});}catch(e){}
  setTimeout(()=>{
   els.jumpscare.classList.remove('show');els.overlay.classList.remove('hidden');
   const best=Number(localStorage.getItem('nightshiftBest')||1);
@@ -449,24 +492,46 @@ function mainMenu(){
  $('startBtn').onclick=()=>initNight(1);$('howBtn').onclick=howTo;
 }
 function howTo(){
- showMessage('<b>HOW TO SURVIVE</b><br>Use the LEFT / RIGHT LIGHT to check each hallway.<br>Close a door only when something is near it.<br>Open the camera monitor to track movement.<br>Every system uses power. Survive until 6 AM.<br><br><button id="gotIt">GOT IT</button>',0);
+ showMessage('<b>HOW TO SURVIVE</b><br>A / ← = left light · Q = left door<br>D / → = right light · E = right door<br>SPACE / F / M = raise or lower monitor<br>While viewing cameras: ← / → or A / D to switch; 1–8 selects a camera; ESC lowers monitor.<br>On touchscreen, tap the camera map or PREV / NEXT, then LOWER MONITOR.<br>Save power and survive until 6 AM.<br><br><button id="gotIt">GOT IT</button>',0);
  $('gotIt').onclick=()=>els.message.classList.remove('show');
 }
 els.start.onclick=()=>initNight(1);els.how.onclick=howTo;
 els.leftDoorBtn.onclick=()=>setDoor('left');els.rightDoorBtn.onclick=()=>setDoor('right');
 els.leftLight.onclick=()=>setLight('left');els.rightLight.onclick=()=>setLight('right');
-els.cameraButton.onclick=toggleCamera;els.camExit.onclick=toggleCamera;
+els.cameraButton.onclick=toggleCamera;
+els.camExit.onclick=toggleCamera;
+els.camPrev.onclick=()=>cycleCamera(-1);
+els.camNext.onclick=()=>cycleCamera(1);
+// Event delegation means camera buttons keep working even when the map is rebuilt.
+els.cameraMap.addEventListener('click',e=>{
+ const button=e.target.closest('button[data-cam]');
+ if(!button||!state?.running||!state.camera||state.blackout||state.gameOver)return;
+ const id=button.dataset.cam;
+ if(!rooms.some(r=>r.id===id))return;
+ state.cam=id;sound('click',.08);renderCamera();
+});
+// Keyboard: A/Q left light/door, D/E right light/door, Space or F monitor,
+// Escape lowers it. While monitor is open, arrows or A/D cycle cameras and 1-8 select one.
 document.addEventListener('keydown',e=>{
  if(!state?.running)return;
- if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();
+ const code=e.code;
+ if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(code))e.preventDefault();
  if(e.repeat)return;
- switch(e.code){
+ if(state.camera){
+  if(code==='Escape'||code==='Space'||code==='KeyF'){toggleCamera();return;}
+  if(code==='ArrowLeft'||code==='KeyA'){cycleCamera(-1);return;}
+  if(code==='ArrowRight'||code==='KeyD'){cycleCamera(1);return;}
+  const digitMap={'Digit1':'1A','Digit2':'1B','Digit3':'1C','Digit4':'2A','Digit5':'2B','Digit6':'3','Digit7':'4A','Digit8':'4B'};
+  if(digitMap[code]){state.cam=digitMap[code];sound('click',.08);renderCamera();return;}
+  return;
+ }
+ switch(code){
   case 'KeyA':case 'ArrowLeft':setLight('left');break;
   case 'KeyQ':setDoor('left');break;
   case 'KeyD':case 'ArrowRight':setLight('right');break;
   case 'KeyE':setDoor('right');break;
-  case 'Space':toggleCamera();break;
-  case 'Escape':if(state.camera)toggleCamera();break;
+  case 'Space':case 'KeyF':case 'KeyM':toggleCamera();break;
+  case 'Escape':break;
  }
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state?.running){state.lights.left=state.lights.right=false;render();}});
