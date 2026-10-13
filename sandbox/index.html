@@ -66,6 +66,10 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
 #palette{bottom:3px}#survivalHud{bottom:55px!important}#lookHint{display:none}
 }
 
+#analogGrain{display:none;position:fixed;inset:0;z-index:119;pointer-events:none;opacity:.24;mix-blend-mode:soft-light;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.11) 0px,rgba(255,255,255,.11) 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0px,rgba(0,0,0,.12) 1px,transparent 1px,transparent 4px);animation:grainJitter .16s steps(2) infinite}
+#analogGrain:after{content:"";position:absolute;inset:-20%;background-image:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.3) 100%);animation:grainDrift 5s linear infinite}
+@keyframes grainJitter{0%{transform:translate(0,0)}25%{transform:translate(-1%,1%)}50%{transform:translate(1%,-1%)}75%{transform:translate(1%,1%)}100%{transform:translate(-1%,-1%)}}
+@keyframes grainDrift{0%{transform:translate(-1%,-1%)}50%{transform:translate(1%,1%)}100%{transform:translate(-1%,-1%)}}
 #nightmareOverlay{display:none;position:fixed;inset:0;z-index:120;pointer-events:none;color:#fff;text-align:center;font-family:system-ui,Arial,sans-serif;background:transparent}
 #nightmareTitle{position:absolute;top:12%;left:5%;right:5%;font-size:clamp(22px,5vw,44px);font-weight:1000;letter-spacing:3px;text-shadow:0 0 12px #f00,2px 3px 5px #000}
 #nightmareTimer{position:absolute;bottom:12%;left:0;right:0;font-size:clamp(15px,3vw,24px);font-weight:800;text-shadow:0 2px 5px #000}
@@ -241,7 +245,7 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
   </div>
 </div>
 
-<div id="nightmareOverlay" aria-live="assertive">
+<div id="analogGrain" aria-hidden="true"></div>\n<div id="nightmareOverlay" aria-live="assertive">
   <div id="nightmareTint"></div>
   <div id="nightmareTitle">YOU ARE NOT ALONE</div>
   <div id="nightmareTimer">Something is watching...</div>
@@ -1486,19 +1490,26 @@ function buildDreamcore(){
     const stem=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,2.8,6),new THREE.MeshLambertMaterial({color:0x367c3b}));stem.position.y=1.4;flower.add(stem);
     const colors=[0xffc6e7,0xffe6a6,0xc8c4ff,0xffffff,0xf6a8a8],col=colors[i%colors.length];
     for(let j=0;j<7;j++){const a=j*Math.PI*2/7,petal=new THREE.Mesh(new THREE.SphereGeometry(.72,10,8),new THREE.MeshLambertMaterial({color:col}));petal.scale.set(1,.48,.7);petal.position.set(Math.cos(a)*.85,3+Math.sin(a)*.85,0);flower.add(petal);}
-    const eyeWhite=new THREE.Mesh(new THREE.SphereGeometry(.62,12,10),new THREE.MeshBasicMaterial({color:0xffffff}));eyeWhite.position.set(0,3,.22);flower.add(eyeWhite);
-    const pupil=new THREE.Mesh(new THREE.SphereGeometry(.23,10,8),new THREE.MeshBasicMaterial({color:0x17152b}));pupil.position.set(.08,3,.76);flower.add(pupil);root.add(flower);
+    // Oversized daisy-eye: fleshy eyelids, pale sclera, blue-grey iris, dark pupil and catchlight.
+    const lid=new THREE.Mesh(new THREE.SphereGeometry(.83,16,12),new THREE.MeshLambertMaterial({color:0xd8c9a4}));lid.scale.set(1,.68,.42);lid.position.set(0,3,.18);flower.add(lid);
+    const eyeWhite=new THREE.Mesh(new THREE.SphereGeometry(.72,18,14),new THREE.MeshBasicMaterial({color:0xf7f4e8}));eyeWhite.scale.set(1,.72,.55);eyeWhite.position.set(0,3,.34);flower.add(eyeWhite);
+    const iris=new THREE.Mesh(new THREE.SphereGeometry(.49,20,16),new THREE.MeshBasicMaterial({color:0x273e59}));iris.scale.set(1,.98,.48);iris.position.set(.02,3,.69);flower.add(iris);
+    const irisRing=new THREE.Mesh(new THREE.TorusGeometry(.43,.045,8,28),new THREE.MeshBasicMaterial({color:0x71818a}));irisRing.position.set(.02,3,.81);flower.add(irisRing);
+    for(let k=0;k<12;k++){const a=k*Math.PI/6,ray=new THREE.Mesh(new THREE.BoxGeometry(.025,.19,.018),new THREE.MeshBasicMaterial({color:k%2?0x81909a:0x111d2d}));ray.position.set(.02+Math.cos(a)*.29,3+Math.sin(a)*.29,.84);ray.rotation.z=a;flower.add(ray);}
+    const pupil=new THREE.Mesh(new THREE.SphereGeometry(.29,16,12),new THREE.MeshBasicMaterial({color:0x05080c}));pupil.scale.set(1,1,.5);pupil.position.set(.04,3,.88);flower.add(pupil);
+    const glint=new THREE.Mesh(new THREE.SphereGeometry(.075,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));glint.position.set(-.1,3.14,.98);flower.add(glint);root.add(flower);
   }
   // Soft clouds with eyes floating above the hills.
   for(let i=0;i<36;i++){
     const x=(Math.random()-.5)*1300,z=(Math.random()-.5)*1300,y=65+Math.random()*65,c=new THREE.Group();
     for(let j=0;j<6;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(7+Math.random()*5,12,10),new THREE.MeshLambertMaterial({color:0xfff9f7}));puff.position.set((j-2.5)*7,Math.sin(j)*3,0);c.add(puff);}
-    for(const ex of [-2.3,2.3]){const ew=new THREE.Mesh(new THREE.SphereGeometry(1.9,12,10),new THREE.MeshBasicMaterial({color:0xffffff}));ew.position.set(ex,-1,8);c.add(ew);const ep=new THREE.Mesh(new THREE.SphereGeometry(.75,10,8),new THREE.MeshBasicMaterial({color:0x22233b}));ep.position.set(ex+.25,-1,9.65);c.add(ep);}
+    for(const ex of [-2.3,2.3]){const socket=new THREE.Mesh(new THREE.SphereGeometry(2.25,14,12),new THREE.MeshBasicMaterial({color:0xd9d5d0}));socket.scale.set(1,.76,.42);socket.position.set(ex,-1,7.7);c.add(socket);const ew=new THREE.Mesh(new THREE.SphereGeometry(1.9,16,12),new THREE.MeshBasicMaterial({color:0xfffdf3}));ew.scale.set(1,.78,.52);ew.position.set(ex,-1,8.1);c.add(ew);const iris=new THREE.Mesh(new THREE.SphereGeometry(.95,14,12),new THREE.MeshBasicMaterial({color:0x607c91}));iris.scale.set(1,1,.5);iris.position.set(ex+.12,-1,9.05);c.add(iris);const ep=new THREE.Mesh(new THREE.SphereGeometry(.59,12,10),new THREE.MeshBasicMaterial({color:0x10131b}));ep.scale.set(1,1,.5);ep.position.set(ex+.18,-1,9.48);c.add(ep);const shine=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));shine.position.set(ex-.1,-.72,9.72);c.add(shine);}
     c.position.set(x,y,z);root.add(c);
   }
   dreamcoreGroup=root;scene.add(root);root.visible=false;
 }
 function enterDreamcore(){
+  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
   buildDreamcore();level94Group.visible=false;dreamcoreGroup.visible=true;
   nightmarePhase="dreamcore";player.x=0;player.z=0;player.y=level94Height(0,0);player.vy=0;
   scene.background.set(0x5a9fe8);scene.fog.color.set(0x8ab9ed);scene.fog.near=250;scene.fog.far=1500;
@@ -1536,6 +1547,7 @@ function setNightmareWorldVisible(visible){
 function startNightmare(){
   if(nightmareActive||!gameStarted)return;
   nightmareActive=true;nightmarePhase="tunnel";nightmarePhaseClock=0;
+  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
   nightmareSaved={x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch,
     bg:scene.background.clone(),fog:scene.fog.color.clone(),fogNear:scene.fog.near,fogFar:scene.fog.far,
     sun:sun.intensity,hemi:scene.children[0].intensity,thirdPerson,gameMode};
@@ -1657,6 +1669,7 @@ function beginHerobrineReveal(){
 }
 function enterLevel94(){
   nightmarePhase="falling";nightmarePhaseClock=0;
+  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
   if(nightmareGroup)nightmareGroup.visible=false;
   if(portalGroup)portalGroup.visible=false;
   buildLevel94();level94Group.visible=true;level94Monsters.forEach(m=>m.group.visible=true);playerHiding=false;hidingHouse=null;
@@ -1687,6 +1700,7 @@ function level94Caught(){
 }
 function endNightmare(){
   nightmareActive=false;nightmarePhase="idle";nightmarePhaseClock=0;nightmareRollClock=0;
+  document.getElementById("analogGrain").style.display="none";
   if(nightmareGroup)nightmareGroup.visible=false;
   if(level94Group)level94Group.visible=false;
   if(dreamcoreGroup)dreamcoreGroup.visible=false;
@@ -1734,7 +1748,7 @@ function updateNightmare(dt){
   }else if(nightmarePhase==="falling"){
     player.vy-=20*dt;player.y+=player.vy*dt;
     const ground=level94Height(player.x,player.z);
-    if(player.y<=ground){player.y=ground;player.vy=0;nightmarePhase="level94";nightmarePhaseClock=0;
+    if(player.y<=ground){player.y=ground;player.vy=0;const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";nightmarePhase="level94";nightmarePhaseClock=0;
       nightmareTitle.textContent="LEVEL 94";nightmareTimer.textContent="Hills, houses... and something watching";
       nightmareOverlay.classList.remove("jumpscare");
     }
