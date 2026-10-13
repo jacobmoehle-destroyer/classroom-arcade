@@ -80,6 +80,103 @@ button:focus-visible{outline:2px solid white}button:active{filter:brightness(1.4
 #scareMouth{position:absolute;left:25%;right:25%;bottom:8%;height:27%;background:repeating-linear-gradient(0deg,#070808 0 8px,#b7b9ad 8px 13px);border:8px solid #141716;border-radius:15% 15% 45% 45%}
 @keyframes shake{0%{transform:translate(2px,-2px)}25%{transform:translate(-3px,1px)}50%{transform:translate(2px,3px)}75%{transform:translate(-1px,-2px)}}
 @media(max-width:600px){.side-controls{width:18%;top:36%;height:38%}#leftControls{left:0}#rightControls{right:0}#cameraButton{height:48px;bottom:1%}#camScene{left:2%;top:7%;width:66%;height:73%}#cameraMap{right:2%;width:27%;top:7%;height:70%}#camExit{right:2%;width:27%;bottom:5%}#camStatus{font-size:9px}.poster{left:38%;width:24%}#hud{top:8px;left:8px}#clock{top:8px;right:8px}}
+
+/* UPDATE 2: atmospheric visual pass */
+:root{--green:#c5e6b1;--red:#e85d52;--amber:#e2c78c;--panel:#101314;--line:#42494a}
+html,body{background:#030404;color:#e4e3dc}
+button{border-radius:2px;text-shadow:0 1px 2px #000;box-shadow:inset 0 1px rgba(255,255,255,.05),0 4px 12px rgba(0,0,0,.35);transition:background .15s,border-color .15s,transform .15s}
+button:hover{background:#30383a;border-color:#9aa19b}
+#game{background:#050606}
+#scene{background:radial-gradient(ellipse at 50% 36%,#33332d 0,#111615 44%,#030404 100%)}
+#scene:after{background:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 1px,transparent 1px 4px),radial-gradient(ellipse at center,transparent 18%,rgba(0,0,0,.84) 100%)}
+#office{background:
+ radial-gradient(ellipse at 50% 20%,rgba(192,177,126,.13),transparent 34%),
+ linear-gradient(180deg,#171b1a 0%,#242725 47%,#121514 48%,#090b0b 100%);perspective:900px}
+.backwall{left:13%;right:13%;top:0;height:78%;background:
+ repeating-linear-gradient(90deg,transparent 0 17%,rgba(0,0,0,.14) 17.2% 17.5%,transparent 17.7% 34%),
+ linear-gradient(90deg,#090b0b 0%,#202422 16%,#292b26 49%,#1a1d1b 76%,#080a0a 100%);
+ clip-path:polygon(7% 0,93% 0,100% 100%,0 100%);border-bottom:10px solid #383a34;
+ box-shadow:inset 0 -28px 32px rgba(0,0,0,.65),0 10px 30px #000}
+.wall-seam{left:50%;top:0;bottom:24%;border-left:2px solid rgba(0,0,0,.4);box-shadow:1px 0 rgba(190,190,160,.05)}
+.poster{top:12%;left:42%;width:16%;height:20%;border:7px solid #393a32;background:
+ linear-gradient(135deg,rgba(92,86,64,.6),rgba(13,16,15,.98)),
+ repeating-linear-gradient(0deg,transparent 0 8px,rgba(0,0,0,.12) 8px 9px);
+ color:#b5b49c;font-size:clamp(9px,1.25vw,16px);box-shadow:0 8px 20px #000, inset 0 0 20px #000;filter:saturate(.65)}
+.poster b{color:#d0c8a7;text-shadow:0 0 10px rgba(218,207,161,.2)}
+#desk{left:18%;right:18%;bottom:-4%;height:32%;background:
+ linear-gradient(180deg,#49463c 0 4%,#292b27 6%,#141716 48%,#080909 100%);
+ clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);border-top:7px solid #5a594e;
+ box-shadow:0 -10px 28px rgba(0,0,0,.55)}
+#desk:before{content:"";position:absolute;left:8%;right:8%;top:12%;height:3px;background:#080a09;box-shadow:0 7px 0 rgba(120,117,98,.15),0 17px 0 rgba(0,0,0,.3)}
+#desk:after{content:"";position:absolute;left:37%;top:8%;width:26%;height:23%;border:2px solid #414742;background:linear-gradient(135deg,#1d2423,#070909);box-shadow:0 0 18px #000,inset 0 0 18px #000}
+#fan{bottom:24%;left:49%;width:5.5%;min-width:34px;border:4px solid #7a7b6e;background:radial-gradient(circle,#d4d0b9 0 8%,#222725 10% 22%,transparent 24%);box-shadow:0 0 9px #000,0 0 20px rgba(190,180,140,.08)}
+#fan:before,#fan:after{background:conic-gradient(from 0deg,transparent 0 8%,#a4a08d 9% 21%,transparent 22% 42%,#777d73 43% 55%,transparent 56% 75%,#a4a08d 76% 88%,transparent 89%)}
+#cup{bottom:21%;left:31%;width:24px;height:29px;background:linear-gradient(90deg,#62685f,#c0bca7 45%,#5e625b);border:2px solid #343a35;box-shadow:0 3px 5px #000}
+#leftDoor,#rightDoor{top:12%;height:72%;width:16%;background:
+ linear-gradient(90deg,#030404 0%,#131817 20%,#242825 48%,#101312 76%,#030404 100%);
+ border:7px solid #363a35;box-shadow:inset 0 0 26px #000,0 0 0 2px #090a09,0 0 25px #000}
+#leftDoor:before,#rightDoor:before{content:"";position:absolute;inset:5% 9%;border:2px solid rgba(125,130,112,.18);background:repeating-linear-gradient(0deg,transparent 0 22%,rgba(0,0,0,.15) 22.5% 23%,transparent 23.5% 44%)}
+#leftDoor:after,#rightDoor:after{content:"";position:absolute;top:48%;width:7px;height:24px;background:#7c7968;box-shadow:0 0 5px #000}
+#leftDoor:after{right:8%}#rightDoor:after{left:8%}
+#leftDoor.closed,#rightDoor.closed{background:repeating-linear-gradient(0deg,#555a54 0 15px,#292e2b 15px 19px);border-color:#77766a}
+#leftHall,#rightHall{top:16%;height:62%;width:17%;background:radial-gradient(ellipse at 50% 45%,#0b0e0d,#020303 70%);box-shadow:inset 0 0 25px #000}
+#leftHall.lit,#rightHall.lit{background:radial-gradient(ellipse at 50% 40%,#a59a78 0,#68624d 22%,#292b24 60%,#030404 100%);box-shadow:inset 0 0 35px #000,0 0 18px rgba(213,192,130,.2)}
+.threat-body{background:linear-gradient(90deg,#070808,#383b34 48%,#080909);box-shadow:inset 0 0 15px #000}
+.threat-head{background:radial-gradient(ellipse at 50% 35%,#66695c,#242925 62%,#070808);box-shadow:inset 0 -10px 14px #090a09;border:1px solid #171a17}
+.threat-head:before,.threat-head:after{top:40%;height:9%;background:#fff1b8;box-shadow:0 0 6px #fff0b1,0 0 18px #ffdc78}
+.ear{background:linear-gradient(90deg,#111512,#45483b,#101310);border:1px solid #141713}
+#officeHint{top:3.5%;color:#c1c1ae;letter-spacing:.22em;font-size:clamp(9px,1vw,12px);text-shadow:0 0 9px #000,0 2px 4px #000}
+#hud,#clock{color:#d8ded4;text-shadow:0 2px 5px #000,0 0 10px #000}
+#powerbar{height:8px;background:#070909;border-color:#62695d;box-shadow:0 0 7px #000}
+#powerfill{box-shadow:0 0 7px rgba(185,220,159,.25)}
+.side-controls button{background:linear-gradient(180deg,rgba(38,43,40,.96),rgba(8,11,10,.97));border-color:#555d54;border-radius:2px;font-weight:bold;letter-spacing:.08em}
+.side-controls button.active{background:linear-gradient(#612e29,#24110f);border-color:#d06b5b;box-shadow:0 0 16px rgba(220,60,45,.25)}
+.side-controls button.light-on{background:linear-gradient(#6d6340,#302b1c);border-color:#d8c17c;box-shadow:0 0 18px rgba(224,201,126,.2)}
+#cameraButton{background:linear-gradient(180deg,#444940,#171b18 50%,#090b0a);border-color:#777c6b;color:#e6e3d5;letter-spacing:.12em}
+#cameraPanel{background:rgba(2,4,4,.97);backdrop-filter:blur(2px)}
+#camScene{border:5px solid #5d6256;background:#111613;box-shadow:inset 0 0 80px #000,0 0 30px #000}
+#camScene:before{background:repeating-linear-gradient(0deg,rgba(208,220,190,.09) 0 1px,transparent 1px 3px),linear-gradient(90deg,rgba(0,0,0,.24),transparent 25% 75%,rgba(0,0,0,.24))}
+#camRoom{background:linear-gradient(#292d26 0 65%,#101311 65%)}
+#camRoom:before{border:8px solid #45493e;box-shadow:inset 0 0 50px #000,0 0 25px #000}
+#camRoom:after{background:repeating-linear-gradient(90deg,#151917 0 38px,#2a2d26 38px 41px);border-top:4px solid #30352d}
+.cam-figure .threat-head{border-radius:44% 44% 30% 30%}
+#cameraMap{gap:5px}
+.camPick{background:linear-gradient(135deg,#222722,#0b0e0d);border-color:#4e554a;border-radius:1px;letter-spacing:.04em}
+.camPick.selected{border:2px solid #c7d0a0;background:linear-gradient(135deg,#46503c,#20271e);box-shadow:0 0 12px rgba(195,208,145,.13)}
+.camPick small{color:#a9b09d}
+#camExit{background:linear-gradient(#492925,#170d0c);border-color:#8d5a50;letter-spacing:.08em}
+#camStatus{color:#b5b9a6;text-shadow:0 1px 4px #000;letter-spacing:.1em}
+#message{background:rgba(4,6,5,.94);border:1px solid #777a67;box-shadow:0 0 30px #000;color:#e1e0d1}
+#overlay{background:
+ radial-gradient(ellipse at 50% 42%,rgba(60,64,51,.35),transparent 55%),
+ repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),#030404}
+.menu{max-width:650px;padding:clamp(20px,4vw,48px);border:1px solid rgba(151,155,128,.22);background:linear-gradient(145deg,rgba(20,24,20,.84),rgba(3,5,4,.92));box-shadow:0 20px 80px #000,inset 0 0 40px rgba(0,0,0,.6)}
+.eyebrow{color:#aeb49a;letter-spacing:.22em}
+.menu h1{font-size:clamp(40px,8vw,86px);letter-spacing:.12em;line-height:.88;color:#d7d9c9;text-shadow:0 3px 0 #373b32,0 0 24px rgba(193,203,164,.2)}
+.menu p{color:#aeb4a8}
+.menu button{min-width:180px;padding:13px 18px;background:linear-gradient(#282e29,#0d100e);border-color:#596154}
+.menu button.primary{background:linear-gradient(#d4d8c3,#a8b09a);color:#0a0c09;border-color:#f0f1dd;text-shadow:none}
+.menu button.primary:hover{background:#eef0df}
+#jumpscare{background:radial-gradient(ellipse at center,#171a16,#000 72%)}
+#scareFace{background:radial-gradient(ellipse at 50% 35%,#a6a99a 0,#575d51 35%,#1a1e19 65%,#020303 82%);box-shadow:0 0 80px rgba(194,198,160,.3);border:2px solid #30362d}
+#scareFace:before,#scareFace:after{background:#fff3c1;box-shadow:0 0 20px 10px rgba(255,235,166,.8)}
+#scareMouth{border-color:#111510;background:repeating-linear-gradient(0deg,#060807 0 7px,#a4a795 7px 11px)}
+@media(max-width:600px){
+ .backwall{left:10%;right:10%}.poster{left:39%;width:22%;height:18%;top:13%}
+ #desk{left:13%;right:13%;height:29%}#fan{left:48%;bottom:22%}
+ #leftDoor,#rightDoor{width:16%;height:72%;top:15%}
+ .side-controls{width:17%;top:37%;height:34%;gap:6px}
+ .side-controls button{font-size:10px;min-height:48px}
+ #cameraButton{width:52%;height:48px;font-size:11px}
+ #camScene{left:2%;top:7%;width:66%;height:73%}
+ #cameraMap{right:2%;width:27%;top:7%;height:70%;gap:3px}
+ .camPick{font-size:9px;padding:2px}.camPick small{font-size:8px}
+ #camExit{right:2%;width:27%;bottom:5%;height:12%;font-size:10px}
+ #camStatus{font-size:8px;left:2%;bottom:2%}
+ #hud{top:8px;left:8px;font-size:11px}#clock{top:8px;right:8px;font-size:14px}
+ .menu{padding:24px 16px}.eyebrow{font-size:9px;letter-spacing:.13em}
+}
+
 </style>
 </head>
 <body>
