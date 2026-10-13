@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,8 +17,6 @@ button:active,button.selected{background:#27864d}
 #brand{background:#17202dee;border-radius:10px;padding:9px;font-size:13px;font-weight:900}
 #top button{font-size:11px;padding:9px}
 #craftBtn{background:#6a4a18ee!important;border-color:#ffe29a!important}
-#touchToggleBtn{background:#355b78ee!important;border-color:#a9d9ff!important}
-body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.touch-controls-hidden #jump{display:none!important}
 #craftOverlay{display:none;position:fixed;inset:0;z-index:40;background:#07101beF;color:white;overflow:auto;padding:16px;touch-action:auto}
 #craftPanel{max-width:560px;margin:5vh auto;background:#17202d;border:1px solid #ffffff33;border-radius:18px;padding:18px;box-shadow:0 12px 40px #0008}
 .recipe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -46,19 +45,19 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
 
 #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
 #help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
-#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:112px;height:112px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
-#stick{position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
+#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+#stick{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
 #movement:after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%);border-radius:50%;background:#ffffff55;pointer-events:none}
 #actions{position:fixed;z-index:10;right:max(14px,env(safe-area-inset-right));bottom:88px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
-#actions button{width:62px;height:38px;padding:3px;font-size:9px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
-#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:238px;width:62px;height:56px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#actions button{width:76px;height:46px;padding:4px;font-size:10px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:288px;width:78px;height:70px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
 #lookHint{position:fixed;z-index:5;bottom:65px;left:50%;transform:translateX(-50%);background:#17202ddd;padding:5px 9px;border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none}
 @media(max-width:650px){
 #brand{font-size:11px}#top{gap:4px}#top button{padding:8px 6px;font-size:10px}
 #help{top:105px;max-width:145px;font-size:10px}#status{top:62px;font-size:11px}
-#movement{left:6px;bottom:72px;transform:scale(.78);transform-origin:bottom left}
-#actions{right:6px;bottom:68px}#actions button{width:55px;height:33px;font-size:8px}
-#jump{right:10px;bottom:206px;width:54px;height:49px}
+#movement{left:6px;bottom:84px;transform:scale(.82);transform-origin:bottom left}
+#actions{right:6px;bottom:76px}#actions button{width:65px;height:39px;font-size:9px}
+#jump{right:10px;bottom:270px;width:68px;height:62px}
 #palette{gap:2px}.block-choice{min-width:0;font-size:8px}#survivalHud{bottom:57px!important}
 }
 @media(orientation:landscape) and (max-height:500px){
@@ -66,10 +65,6 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
 #palette{bottom:3px}#survivalHud{bottom:55px!important}#lookHint{display:none}
 }
 
-#analogGrain{display:none;position:fixed;inset:0;z-index:119;pointer-events:none;opacity:.24;mix-blend-mode:soft-light;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.11) 0px,rgba(255,255,255,.11) 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0px,rgba(0,0,0,.12) 1px,transparent 1px,transparent 4px);animation:grainJitter .16s steps(2) infinite}
-#analogGrain:after{content:"";position:absolute;inset:-20%;background-image:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.3) 100%);animation:grainDrift 5s linear infinite}
-@keyframes grainJitter{0%{transform:translate(0,0)}25%{transform:translate(-1%,1%)}50%{transform:translate(1%,-1%)}75%{transform:translate(1%,1%)}100%{transform:translate(-1%,-1%)}}
-@keyframes grainDrift{0%{transform:translate(-1%,-1%)}50%{transform:translate(1%,1%)}100%{transform:translate(-1%,-1%)}}
 #nightmareOverlay{display:none;position:fixed;inset:0;z-index:120;pointer-events:none;color:#fff;text-align:center;font-family:system-ui,Arial,sans-serif;background:transparent}
 #nightmareTitle{position:absolute;top:12%;left:5%;right:5%;font-size:clamp(22px,5vw,44px);font-weight:1000;letter-spacing:3px;text-shadow:0 0 12px #f00,2px 3px 5px #000}
 #nightmareTimer{position:absolute;bottom:12%;left:0;right:0;font-size:clamp(15px,3vw,24px);font-weight:800;text-shadow:0 2px 5px #000}
@@ -87,13 +82,11 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
     <button id="cameraBtn">🎥 First Person</button>
     <button id="soundBtn">🔊 Sound: On</button>
     <button id="modeBtn">🛠 Creative</button>
-    <button id="craftBtn">🧰 Craft (C)</button>
-    <button id="inventoryBtn">🎒 Inventory (I)</button>
-    <button id="touchToggleBtn" aria-pressed="true">Touch Controls: On</button>
+    <button id="craftBtn">🧰 Craft</button>
+    <button id="inventoryBtn">🎒 Inventory</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
-    <button id="backToArcadeBtn" type="button" title="Return to Classroom Arcade">⬅ Back to Arcade</button>
     <button id="resetBtn">↻ Respawn</button>
   </div>
   <div id="status">Loading world...</div>
@@ -245,7 +238,7 @@ body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.to
   </div>
 </div>
 
-<div id="analogGrain" aria-hidden="true"></div>\n<div id="nightmareOverlay" aria-live="assertive">
+<div id="nightmareOverlay" aria-live="assertive">
   <div id="nightmareTint"></div>
   <div id="nightmareTitle">YOU ARE NOT ALONE</div>
   <div id="nightmareTimer">Something is watching...</div>
@@ -806,14 +799,6 @@ function updateJoystick(e){
   touch.left=Math.max(0,-nx);touch.right=Math.max(0,nx);
   touch.forward=Math.max(0,-ny);touch.back=Math.max(0,ny);
 }
-const touchToggleBtn=document.getElementById("touchToggleBtn");
-function toggleTouchControls(){
-  const hidden=document.body.classList.toggle("touch-controls-hidden");
-  touchToggleBtn.textContent=hidden?"Touch Controls: Off (H)":"Touch Controls: On (H)";
-  touchToggleBtn.setAttribute("aria-pressed",String(!hidden));
-  if(hidden)resetJoystick();
-}
-touchToggleBtn.addEventListener("click",toggleTouchControls);
 movementPad.addEventListener("pointerdown",e=>{
   e.preventDefault();joystick.active=true;joystick.pointerId=e.pointerId;
   try{movementPad.setPointerCapture(e.pointerId);}catch(_){}
@@ -833,12 +818,7 @@ window.addEventListener("keydown",e=>{
   if(inventoryOverlay.style.display==="block"){if(e.key==="Escape")closeInventory();return;}
   if(stationOverlay.style.display==="block"){if(e.key==="Escape")closeStation();return;}
   if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
-  const k=e.key.toLowerCase();
-  if(k==="h"){toggleTouchControls();return;}
-  if(k==="c"){openCrafting();return;}
-  if(k==="i"){openInventory();return;}
-  if(k==="m"){openMenu();return;}
-  keys.add(k);
+  const k=e.key.toLowerCase();keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
   if(k===" "&&!e.repeat)jump();
   if(k==="f")breakBlock();
@@ -1224,7 +1204,6 @@ document.getElementById("mainExitBtn").addEventListener("click",()=>{mainMenuMes
 document.getElementById("saveBtn").addEventListener("click",saveWorld);
 document.getElementById("saveMenuBtn").addEventListener("click",saveWorld);
 document.getElementById("menuBtn").addEventListener("click",openMenu);
-document.getElementById("backToArcadeBtn").addEventListener("click",()=>{ window.location.href="../index.html"; });
 document.getElementById("modeBtn").addEventListener("click",toggleMode);
 document.getElementById("modeMenuBtn").addEventListener("click",toggleMode);
 refreshModeUI();
@@ -1366,10 +1345,6 @@ const nightmareTitle=document.getElementById("nightmareTitle");
 const nightmareTimer=document.getElementById("nightmareTimer");
 let nightmareActive=false,nightmarePhase="idle",nightmareRollClock=0,nightmarePhaseClock=0;
 let nightmareSaved=null,nightmareGroup=null,herobrineGroup=null,nightmareRevealLight=null;
-let portalGroup=null,level94Group=null,level94Monsters=[],level94Redirecting=false;
-let level94Houses=[],playerHiding=false,hidingHouse=null,dreamcoreGroup=null,dreamcoreAudio=null;
-let dreamcorePortal=null;
-let level94RumbleContext=null;
 let nightmareAudioStarted=false;
 const nightmareMaterials={
   stone:new THREE.MeshLambertMaterial({color:0x45434b}),
@@ -1413,114 +1388,7 @@ function buildNightmareTunnel(){
       sideWall.position.set(side*5.7,.9,z+1.1);sideWall.rotation.y=side*.12;root.add(sideWall);
     }
   }
-  const portal=new THREE.Group();portal.name="level-94-portal";
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(2.05,.24,12,48),new THREE.MeshBasicMaterial({color:0xffffff}));
-  ring.position.set(0,1.25,-111.2);portal.add(ring);
-  const core=new THREE.Mesh(new THREE.PlaneGeometry(3.75,4.6),new THREE.MeshBasicMaterial({color:0xf4fbff,transparent:true,opacity:.97,side:THREE.DoubleSide}));
-  core.position.set(0,1.15,-111.25);portal.add(core);
-  const aura=new THREE.PointLight(0xffffff,9,75,1.1);aura.position.set(0,1.4,-108);portal.add(aura);
-  for(let i=0;i<3;i++){const halo=new THREE.Mesh(new THREE.TorusGeometry(2.05+i*.38,.045,8,48),new THREE.MeshBasicMaterial({color:0xc9efff,transparent:true,opacity:.68-i*.15}));halo.position.set(0,1.25,-111.15+i*.03);portal.add(halo);}
-  root.add(portal);portalGroup=portal;
   scene.add(root);return root;
-}
-function level94Height(x,z){return 1.5+Math.sin(x*.035+z*.012)*3.1+Math.cos(z*.027-x*.014)*2.3+Math.sin((x+z)*.018)*1.7;}
-function buildLevel94(){
-  if(level94Group){level94Group.visible=true;return;}
-  const root=new THREE.Group();root.name="backrooms-level-94-hills";
-  const groundGeo=new THREE.PlaneGeometry(1600,1600,120,120);groundGeo.rotateX(-Math.PI/2);
-  const pos=groundGeo.attributes.position;
-  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);pos.setY(i,level94Height(x,z));}
-  groundGeo.computeVertexNormals();
-  root.add(new THREE.Mesh(groundGeo,new THREE.MeshLambertMaterial({color:0x4d9840})));
-  const houseMats=[0xe4dfcf,0xb8c8d3,0xc8b6a1,0x9caeb5].map(color=>new THREE.MeshLambertMaterial({color}));
-  const roofMats=[0x6d4140,0x4c5158,0x7d6b58].map(color=>new THREE.MeshLambertMaterial({color}));
-  const windowMat=new THREE.MeshLambertMaterial({color:0x263c48});
-  let seed=94094;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  for(let i=0;i<260;i++){
-    let x=(rand()-.5)*1350,z=(rand()-.5)*1350;
-    if(Math.abs(x)<24&&Math.abs(z)<24){x+=rand()<.5?42:-42;z+=36;}
-    const g=new THREE.Group(),w=5+rand()*4,d=5+rand()*4,h=3.5+rand()*2.2;
-    const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),houseMats[Math.floor(rand()*houseMats.length)]);body.position.y=h/2;g.add(body);
-    const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.76,2.6,4),roofMats[Math.floor(rand()*roofMats.length)]);roof.rotation.y=Math.PI/4;roof.position.y=h+1.05;g.add(roof);
-    const door=new THREE.Mesh(new THREE.BoxGeometry(.8,1.8,.08),new THREE.MeshLambertMaterial({color:0x49382c}));door.position.set(0,.9,d/2+.045);g.add(door);
-    for(const wx of [-w*.25,w*.25]){const win=new THREE.Mesh(new THREE.BoxGeometry(.85,.85,.08),windowMat);win.position.set(wx,h*.62,d/2+.05);g.add(win);}
-    g.position.set(x,level94Height(x,z),z);g.rotation.y=rand()*Math.PI*2;root.add(g);
-    level94Houses.push({group:g,x,z,y:level94Height(x,z),rotation:g.rotation.y,w,d,h});
-  }
-  // A huge water tower with a strange portal beneath its legs.
-  const tower=new THREE.Group();tower.name="giant-water-tower";
-  const metal=new THREE.MeshLambertMaterial({color:0x59666b}),tankMat=new THREE.MeshLambertMaterial({color:0x778f91});
-  const legs=[[-8,-8],[8,-8],[-8,8],[8,8]];
-  for(const [lx,lz] of legs){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.7,.95,24,8),metal);leg.position.set(lx,12,lz);tower.add(leg);}
-  const tank=new THREE.Mesh(new THREE.CylinderGeometry(12,10,15,16),tankMat);tank.position.y=30;tower.add(tank);
-  const cap=new THREE.Mesh(new THREE.ConeGeometry(12,5,16),new THREE.MeshLambertMaterial({color:0x465b61}));cap.position.y=40;tower.add(cap);
-  tower.position.set(100,level94Height(100,-100),-100);root.add(tower);
-  const tp=new THREE.Group();tp.name="dreamcore-portal";
-  const pr=new THREE.Mesh(new THREE.TorusGeometry(3.2,.32,12,48),new THREE.MeshBasicMaterial({color:0xffb8ec}));
-  pr.position.set(100,level94Height(100,-100)+.1,-100);tp.add(pr);
-  const pc=new THREE.Mesh(new THREE.CircleGeometry(3,40),new THREE.MeshBasicMaterial({color:0x9d79ff,side:THREE.DoubleSide}));
-  pc.position.set(100,level94Height(100,-100)+.12,-100);pc.rotation.x=-Math.PI/2;tp.add(pc);
-  const pl=new THREE.PointLight(0xffa7ef,5,35);pl.position.set(100,level94Height(100,-100)+2,-100);tp.add(pl);
-  root.add(tp);dreamcorePortal={x:100,z:-100,y:level94Height(100,-100),group:tp};
-  const black=new THREE.MeshLambertMaterial({color:0x030406}),headMat=new THREE.MeshBasicMaterial({color:0x080a0e});
-  for(let i=0;i<12;i++){
-    const g=new THREE.Group();
-    const torso=new THREE.Mesh(new THREE.BoxGeometry(2.3,7.2,1.25),black);torso.position.y=9.5;g.add(torso);
-    const head=new THREE.Mesh(new THREE.BoxGeometry(1.8,2.4,1.65),headMat);head.position.y=14.4;g.add(head);
-    for(const side of [-1,1]){
-      const arm=new THREE.Mesh(new THREE.BoxGeometry(.55,8.5,.58),black);arm.position.set(side*1.55,8.5,0);arm.rotation.z=side*.08;g.add(arm);
-      const leg=new THREE.Mesh(new THREE.BoxGeometry(.72,7.4,.8),black);leg.position.set(side*.68,3.7,0);g.add(leg);
-    }
-    const x=(rand()-.5)*700,z=(rand()-.5)*700;g.position.set(x,level94Height(x,z),z);root.add(g);
-    level94Monsters.push({group:g,x,z,speed:5.8+rand()*.35,phase:rand()*6.28});
-  }
-  level94Group=root;scene.add(root);root.visible=false;
-}
-function buildDreamcore(){
-  if(dreamcoreGroup){dreamcoreGroup.visible=true;return;}
-  const root=new THREE.Group();root.name="dreamcore-no-exit";
-  const geo=new THREE.PlaneGeometry(1800,1800,100,100);geo.rotateX(-Math.PI/2);
-  const p=geo.attributes.position;
-  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,2+Math.sin(x*.009)*10+Math.cos(z*.012)*7+Math.sin((x+z)*.008)*5);}
-  geo.computeVertexNormals();root.add(new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x78ad55})));
-  // Oversized pastel flowers with unmistakable eyes in their centers.
-  for(let i=0;i<280;i++){
-    const x=(Math.random()-.5)*1450,z=(Math.random()-.5)*1450,y=2+Math.sin(x*.009)*10+Math.cos(z*.012)*7+Math.sin((x+z)*.008)*5;
-    const flower=new THREE.Group();flower.position.set(x,y,z);
-    const stem=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,2.8,6),new THREE.MeshLambertMaterial({color:0x367c3b}));stem.position.y=1.4;flower.add(stem);
-    const colors=[0xffc6e7,0xffe6a6,0xc8c4ff,0xffffff,0xf6a8a8],col=colors[i%colors.length];
-    for(let j=0;j<7;j++){const a=j*Math.PI*2/7,petal=new THREE.Mesh(new THREE.SphereGeometry(.72,10,8),new THREE.MeshLambertMaterial({color:col}));petal.scale.set(1,.48,.7);petal.position.set(Math.cos(a)*.85,3+Math.sin(a)*.85,0);flower.add(petal);}
-    // Oversized daisy-eye: fleshy eyelids, pale sclera, blue-grey iris, dark pupil and catchlight.
-    const lid=new THREE.Mesh(new THREE.SphereGeometry(.83,16,12),new THREE.MeshLambertMaterial({color:0xd8c9a4}));lid.scale.set(1,.68,.42);lid.position.set(0,3,.18);flower.add(lid);
-    const eyeWhite=new THREE.Mesh(new THREE.SphereGeometry(.72,18,14),new THREE.MeshBasicMaterial({color:0xf7f4e8}));eyeWhite.scale.set(1,.72,.55);eyeWhite.position.set(0,3,.34);flower.add(eyeWhite);
-    const iris=new THREE.Mesh(new THREE.SphereGeometry(.49,20,16),new THREE.MeshBasicMaterial({color:0x273e59}));iris.scale.set(1,.98,.48);iris.position.set(.02,3,.69);flower.add(iris);
-    const irisRing=new THREE.Mesh(new THREE.TorusGeometry(.43,.045,8,28),new THREE.MeshBasicMaterial({color:0x71818a}));irisRing.position.set(.02,3,.81);flower.add(irisRing);
-    for(let k=0;k<12;k++){const a=k*Math.PI/6,ray=new THREE.Mesh(new THREE.BoxGeometry(.025,.19,.018),new THREE.MeshBasicMaterial({color:k%2?0x81909a:0x111d2d}));ray.position.set(.02+Math.cos(a)*.29,3+Math.sin(a)*.29,.84);ray.rotation.z=a;flower.add(ray);}
-    const pupil=new THREE.Mesh(new THREE.SphereGeometry(.29,16,12),new THREE.MeshBasicMaterial({color:0x05080c}));pupil.scale.set(1,1,.5);pupil.position.set(.04,3,.88);flower.add(pupil);
-    const glint=new THREE.Mesh(new THREE.SphereGeometry(.075,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));glint.position.set(-.1,3.14,.98);flower.add(glint);root.add(flower);
-  }
-  // Soft clouds with eyes floating above the hills.
-  for(let i=0;i<36;i++){
-    const x=(Math.random()-.5)*1300,z=(Math.random()-.5)*1300,y=65+Math.random()*65,c=new THREE.Group();
-    for(let j=0;j<6;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(7+Math.random()*5,12,10),new THREE.MeshLambertMaterial({color:0xfff9f7}));puff.position.set((j-2.5)*7,Math.sin(j)*3,0);c.add(puff);}
-    for(const ex of [-2.3,2.3]){const socket=new THREE.Mesh(new THREE.SphereGeometry(2.25,14,12),new THREE.MeshBasicMaterial({color:0xd9d5d0}));socket.scale.set(1,.76,.42);socket.position.set(ex,-1,7.7);c.add(socket);const ew=new THREE.Mesh(new THREE.SphereGeometry(1.9,16,12),new THREE.MeshBasicMaterial({color:0xfffdf3}));ew.scale.set(1,.78,.52);ew.position.set(ex,-1,8.1);c.add(ew);const iris=new THREE.Mesh(new THREE.SphereGeometry(.95,14,12),new THREE.MeshBasicMaterial({color:0x607c91}));iris.scale.set(1,1,.5);iris.position.set(ex+.12,-1,9.05);c.add(iris);const ep=new THREE.Mesh(new THREE.SphereGeometry(.59,12,10),new THREE.MeshBasicMaterial({color:0x10131b}));ep.scale.set(1,1,.5);ep.position.set(ex+.18,-1,9.48);c.add(ep);const shine=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));shine.position.set(ex-.1,-.72,9.72);c.add(shine);}
-    c.position.set(x,y,z);root.add(c);
-  }
-  dreamcoreGroup=root;scene.add(root);root.visible=false;
-}
-function enterDreamcore(){
-  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
-  buildDreamcore();level94Group.visible=false;dreamcoreGroup.visible=true;
-  nightmarePhase="dreamcore";player.x=0;player.z=0;player.y=level94Height(0,0);player.vy=0;
-  scene.background.set(0x5a9fe8);scene.fog.color.set(0x8ab9ed);scene.fog.near=250;scene.fog.far=1500;
-  sun.intensity=1.65;scene.children[0].intensity=1.6;
-  nightmareTitle.textContent="A PLACE TO STAY";nightmareTimer.textContent="The flowers are watching. The clouds know you're here.";
-  status.textContent="Dreamcore · the portal is gone behind you";
-  if(soundOn){
-    try{if(!dreamcoreAudio){dreamcoreAudio=new Audio(new URL("./dreamcore.mp3",document.baseURI).href);dreamcoreAudio.loop=true;dreamcoreAudio.volume=.72;}
-      dreamcoreAudio.currentTime=0;const q=dreamcoreAudio.play();if(q&&q.catch)q.catch(()=>{status.textContent="Dreamcore music needs dreamcore.mp3 in the sandbox folder and Sound On.";});
-    }catch(_){}
-  }
 }
 function buildHerobrine(){
   const g=new THREE.Group();g.name="herobrine";
@@ -1547,23 +1415,19 @@ function setNightmareWorldVisible(visible){
 function startNightmare(){
   if(nightmareActive||!gameStarted)return;
   nightmareActive=true;nightmarePhase="tunnel";nightmarePhaseClock=0;
-  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
   nightmareSaved={x:player.x,y:player.y,z:player.z,yaw:player.yaw,pitch:player.pitch,
     bg:scene.background.clone(),fog:scene.fog.color.clone(),fogNear:scene.fog.near,fogFar:scene.fog.far,
     sun:sun.intensity,hemi:scene.children[0].intensity,thirdPerson,gameMode};
   setNightmareWorldVisible(false);
-  scene.background.set(0x030203);scene.fog.color.set(0x030203);scene.fog.near=3;scene.fog.far=260;
+  scene.background.set(0x030203);scene.fog.color.set(0x030203);scene.fog.near=3;scene.fog.far=25;
   sun.intensity=.12;scene.children[0].intensity=.38;
   if(!nightmareGroup)nightmareGroup=buildNightmareTunnel();else nightmareGroup.visible=true;
-  if(portalGroup)portalGroup.visible=true;
-  if(level94Group)level94Group.visible=false;
-  level94Monsters.forEach(m=>m.group.visible=false);level94Redirecting=false;
   if(!herobrineGroup)herobrineGroup=buildHerobrine();else herobrineGroup.visible=false;
   player.x=0;player.y=0;player.z=92;player.vx=player.vy=player.vz=0;player.yaw=0;player.pitch=0;
   avatar.visible=false;keys.clear();resetJoystick();
   nightmareOverlay.style.display="block";nightmareOverlay.className="";
   nightmareTitle.textContent="WHERE ARE YOU?";
-  nightmareTimer.textContent="Follow the blinding white portal at the end of the tunnel";
+  nightmareTimer.textContent="Find your way through the tunnel · 60";
   status.textContent="A strange event has begun...";
 }
 // Secret keyboard easter egg: type "herobrian" during active gameplay.
@@ -1571,14 +1435,6 @@ let herobrineSecretBuffer="";
 let herobrineSecretLastKey=0;
 window.addEventListener("keydown",e=>{
   if(e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
-  if(nightmareActive && e.key.toLowerCase()==="e" && nightmarePhase==="level94"){
-    if(playerHiding){playerHiding=false;hidingHouse=null;status.textContent="You stepped back outside.";return;}
-    let nearest=null,nearestD=10;
-    for(const h of level94Houses){const d=Math.hypot(player.x-h.x,player.z-h.z);if(d<nearestD){nearest=h;nearestD=d;}}
-    if(nearest){playerHiding=true;hidingHouse=nearest;player.x=nearest.x+Math.sin(nearest.rotation)*(nearest.d/2-.65);player.z=nearest.z+Math.cos(nearest.rotation)*(nearest.d/2-.65);player.y=nearest.y+nearest.h*.62;player.yaw=nearest.rotation+Math.PI;player.pitch=0;status.textContent="You're hidden inside. Press E to leave.";nightmareTimer.textContent="Quiet. Watch through the window...";e.preventDefault();}
-    else if(dreamcorePortal&&Math.hypot(player.x-dreamcorePortal.x,player.z-dreamcorePortal.z)<12){enterDreamcore();e.preventDefault();}
-    return;
-  }
   if(!gameStarted || nightmareActive) return;
   const target=e.target;
   if(target && (target.isContentEditable || ["INPUT","TEXTAREA","SELECT"].includes(target.tagName))) return;
@@ -1597,59 +1453,21 @@ window.addEventListener("keydown",e=>{
 });
 
 let nightmareScreamAudio=null;
-let nightmareAudioUnlocked=false;
-function prepareNightmareAudio(){
-  if(nightmareAudioUnlocked)return;
-  try{
-    if(!nightmareScreamAudio){
-      nightmareScreamAudio=new Audio(new URL("./slendy1.mp3",document.baseURI).href);
-      nightmareScreamAudio.preload="auto";
-      nightmareScreamAudio.volume=0.65;
-    }
-    // iPad Safari often blocks audio until an actual user gesture. Start and
-    // immediately pause a muted copy during the first tap/key interaction.
-    nightmareScreamAudio.muted=true;
-    const p=nightmareScreamAudio.play();
-    if(p&&typeof p.then==="function"){
-      p.then(()=>{
-        nightmareScreamAudio.pause();
-        nightmareScreamAudio.currentTime=0;
-        nightmareScreamAudio.muted=false;
-        nightmareAudioUnlocked=true;
-      }).catch(()=>{
-        nightmareScreamAudio.muted=false;
-      });
-    }else{
-      nightmareScreamAudio.pause();
-      nightmareScreamAudio.currentTime=0;
-      nightmareScreamAudio.muted=false;
-      nightmareAudioUnlocked=true;
-    }
-  }catch(_){}
-}
-window.addEventListener("pointerdown",prepareNightmareAudio,{once:true,passive:true});
-window.addEventListener("keydown",prepareNightmareAudio,{once:true});
 function playNightmareSting(){
+  // Play the user-provided Slendy-style sound from the same /sandbox/ folder.
+  // Keep the in-page level moderate; the device volume still controls loudness.
   if(!soundOn)return;
   try{
     if(!nightmareScreamAudio){
-      nightmareScreamAudio=new Audio(new URL("./slendy1.mp3",document.baseURI).href);
+      nightmareScreamAudio=new Audio("./slendy1.mp3");
       nightmareScreamAudio.preload="auto";
       nightmareScreamAudio.volume=0.65;
     }
-    nightmareScreamAudio.muted=false;
-    nightmareScreamAudio.volume=0.65;
     nightmareScreamAudio.pause();
     nightmareScreamAudio.currentTime=0;
     const playback=nightmareScreamAudio.play();
-    if(playback&&typeof playback.then==="function"){
-      playback.catch(()=>{
-        status.textContent="Herobrine audio was blocked or couldn't load. Check that sandbox/slendy1.mp3 exists and tap the page once with Sound On.";
-      });
-    }
-  }catch(_){
-    status.textContent="Herobrine audio couldn't start. Check that sandbox/slendy1.mp3 exists.";
-  }
+    if(playback && typeof playback.catch==="function")playback.catch(()=>{});
+  }catch(_){}
 }
 function beginHerobrineReveal(){
   nightmarePhase="reveal";nightmarePhaseClock=0;
@@ -1667,45 +1485,9 @@ function beginHerobrineReveal(){
   player.yaw=0;player.pitch=0;
   playNightmareSting();
 }
-function enterLevel94(){
-  nightmarePhase="falling";nightmarePhaseClock=0;
-  const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";
-  if(nightmareGroup)nightmareGroup.visible=false;
-  if(portalGroup)portalGroup.visible=false;
-  buildLevel94();level94Group.visible=true;level94Monsters.forEach(m=>m.group.visible=true);playerHiding=false;hidingHouse=null;
-  scene.background.set(0x8bc7f0);scene.fog.color.set(0x8bc7f0);scene.fog.near=180;scene.fog.far=1100;
-  sun.intensity=2.1;scene.children[0].intensity=1.8;
-  player.x=0;player.z=0;player.y=95;player.vy=0;player.vx=player.vz=0;player.yaw=0;player.pitch=0;thirdPerson=false;avatar.visible=false;
-  nightmareTitle.textContent="LEVEL 94";nightmareTimer.textContent="Falling into the hills... you will survive";
-  status.textContent="Level 94 · find a route through the hills and houses";
-}
-function playLevel94Rumble(){
-  try{
-    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-    if(!level94RumbleContext)level94RumbleContext=new AC();
-    const ctx=level94RumbleContext;if(ctx.state==="suspended")ctx.resume();
-    const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
-    osc.type="sawtooth";osc.frequency.setValueAtTime(72,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(31,ctx.currentTime+1.4);
-    filter.type="lowpass";filter.frequency.value=145;
-    gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.12);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.8);
-    osc.connect(filter);filter.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+1.85);
-  }catch(_){}
-}
-function level94Caught(){
-  if(level94Redirecting)return;
-  level94Redirecting=true;nightmarePhase="caught";nightmarePhaseClock=0;nightmareOverlay.classList.add("jumpscare");
-  nightmareTitle.textContent="CAUGHT";nightmareTimer.textContent="Returning to Classroom Arcade...";
-  playLevel94Rumble();
-  setTimeout(()=>{window.location.href=new URL("../index.html",document.baseURI).href;},2400);
-}
 function endNightmare(){
   nightmareActive=false;nightmarePhase="idle";nightmarePhaseClock=0;nightmareRollClock=0;
-  document.getElementById("analogGrain").style.display="none";
   if(nightmareGroup)nightmareGroup.visible=false;
-  if(level94Group)level94Group.visible=false;
-  if(dreamcoreGroup)dreamcoreGroup.visible=false;
-  if(dreamcoreAudio){dreamcoreAudio.pause();dreamcoreAudio.currentTime=0;}
-  playerHiding=false;hidingHouse=null;
   if(herobrineGroup)herobrineGroup.visible=false;
   if(nightmareRevealLight){scene.remove(nightmareRevealLight);nightmareRevealLight=null;}
   nightmareOverlay.style.display="none";nightmareOverlay.className="";
@@ -1733,65 +1515,28 @@ function updateNightmare(dt){
   }
   nightmarePhaseClock+=dt;
   if(nightmarePhase==="tunnel"){
-    let f=0,side=0;
+    // Free movement inside the temporary corridor, with solid side bounds.
+    let f=0,s=0;
     if(keys.has("w")||keys.has("arrowup"))f--;
     if(keys.has("s")||keys.has("arrowdown"))f++;
-    if(keys.has("a")||keys.has("arrowleft"))side--;
-    if(keys.has("d")||keys.has("arrowright"))side++;
-    f-=touch.forward;f+=touch.back;side-=touch.left;side+=touch.right;
-    const len=Math.hypot(f,side);if(len>0){f/=len;side/=len;}
-    const speed=keys.has("shift")?5.2:3.8,sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
-    player.x=THREE.MathUtils.clamp(player.x+(side*cos+f*sin)*speed*dt,-3.15,3.15);
-    player.z=THREE.MathUtils.clamp(player.z+(-side*sin+f*cos)*speed*dt,-116,116);player.y=0;
-    nightmareTimer.textContent="Reach the glowing portal · "+Math.max(0,Math.ceil((player.z+111)/3))+"m";
-    if(player.z<=-108)enterLevel94();
-  }else if(nightmarePhase==="falling"){
-    player.vy-=20*dt;player.y+=player.vy*dt;
-    const ground=level94Height(player.x,player.z);
-    if(player.y<=ground){player.y=ground;player.vy=0;const grain=document.getElementById("analogGrain");grain.style.display="block";grain.style.opacity=".24";nightmarePhase="level94";nightmarePhaseClock=0;
-      nightmareTitle.textContent="LEVEL 94";nightmareTimer.textContent="Hills, houses... and something watching";
-      nightmareOverlay.classList.remove("jumpscare");
+    if(keys.has("a")||keys.has("arrowleft"))s--;
+    if(keys.has("d")||keys.has("arrowright"))s++;
+    f-=touch.forward;f+=touch.back;s-=touch.left;s+=touch.right;
+    const len=Math.hypot(f,s);if(len>0){f/=len;s/=len;}
+    const speed=keys.has("shift")?5.2:3.8;
+    const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
+    player.x=THREE.MathUtils.clamp(player.x+(s*cos+f*sin)*speed*dt,-3.15,3.15);
+    player.z=THREE.MathUtils.clamp(player.z+(-s*sin+f*cos)*speed*dt,-116,116);
+    player.y=0;
+    nightmareTimer.textContent=`Keep moving · ${Math.max(0,Math.ceil(60-nightmarePhaseClock))}`;
+    if(nightmarePhaseClock>=60)beginHerobrineReveal();
+  }else if(nightmarePhase==="reveal"){
+    if(nightmarePhaseClock>=5){
+      nightmarePhase="fading";nightmarePhaseClock=0;nightmareOverlay.classList.remove("jumpscare");nightmareOverlay.classList.add("fading");
+      nightmareTitle.textContent="YOU SHOULDN'T HAVE BEEN HERE";
     }
-  }else if(nightmarePhase==="level94"){
-    let f=0,side=0;
-    if(keys.has("w")||keys.has("arrowup"))f--;
-    if(keys.has("s")||keys.has("arrowdown"))f++;
-    if(keys.has("a")||keys.has("arrowleft"))side--;
-    if(keys.has("d")||keys.has("arrowright"))side++;
-    f-=touch.forward;f+=touch.back;side-=touch.left;side+=touch.right;
-    const len=Math.hypot(f,side);if(len>0){f/=len;side/=len;}
-    const speed=keys.has("shift")?7.2:5.2,sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
-    player.x+=(side*cos+f*sin)*speed*dt;player.z+=(-side*sin+f*cos)*speed*dt;
-    player.x=THREE.MathUtils.clamp(player.x,-790,790);player.z=THREE.MathUtils.clamp(player.z,-790,790);
-    const ground=level94Height(player.x,player.z);player.y=ground;
-    if(playerHiding&&hidingHouse){player.x=hidingHouse.x+Math.sin(hidingHouse.rotation)*(hidingHouse.d/2-.65);player.z=hidingHouse.z+Math.cos(hidingHouse.rotation)*(hidingHouse.d/2-.65);player.y=hidingHouse.y+hidingHouse.h*.62;nightmareTimer.textContent="Hidden inside. Press E to leave and return to the hills.";}
-    if(!playerHiding && dreamcorePortal&&Math.hypot(player.x-dreamcorePortal.x,player.z-dreamcorePortal.z)<18){
-      nightmareTimer.textContent="A portal glows beneath the water tower. Press E to enter.";
-    }else{nightmareTimer.textContent="Find the huge water tower. Press E at a house door to hide.";}
-    if(!playerHiding)for(const m of level94Monsters){
-      const dx=player.x-m.x,dz=player.z-m.z,dist=Math.hypot(dx,dz);
-      if(dist<145&&dist>.01){
-        const step=m.speed*dt;m.x+=dx/dist*step;m.z+=dz/dist*step;
-        m.group.position.set(m.x,level94Height(m.x,m.z),m.z);m.group.rotation.y=Math.atan2(dx,dz);
-      }
-      if(dist<3.6){level94Caught();break;}
-    }
-    nightmareTimer.textContent="Keep moving. The figures are hunting you.";
-  }else if(nightmarePhase==="dreamcore"){
-    let f=0,side=0;
-    if(keys.has("w")||keys.has("arrowup"))f--;
-    if(keys.has("s")||keys.has("arrowdown"))f++;
-    if(keys.has("a")||keys.has("arrowleft"))side--;
-    if(keys.has("d")||keys.has("arrowright"))side++;
-    f-=touch.forward;f+=touch.back;side-=touch.left;side+=touch.right;
-    const len=Math.hypot(f,side);if(len>0){f/=len;side/=len;}
-    const speed=keys.has("shift")?7:4.5,sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
-    player.x=THREE.MathUtils.clamp(player.x+(side*cos+f*sin)*speed*dt,-880,880);
-    player.z=THREE.MathUtils.clamp(player.z+(-side*sin+f*cos)*speed*dt,-880,880);
-    player.y=2+Math.sin(player.x*.009)*10+Math.cos(player.z*.012)*7+Math.sin((player.x+player.z)*.008)*5;
-    nightmareTimer.textContent="Everything feels peaceful. Nothing leads out.";
-  }else if(nightmarePhase==="caught"){
-    // The redirect timer is running; keep the jumpscare visible.
+  }else if(nightmarePhase==="fading"){
+    if(nightmarePhaseClock>=1.2)endNightmare();
   }
 }
 
