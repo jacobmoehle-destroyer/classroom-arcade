@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +16,8 @@ button:active,button.selected{background:#27864d}
 #brand{background:#17202dee;border-radius:10px;padding:9px;font-size:13px;font-weight:900}
 #top button{font-size:11px;padding:9px}
 #craftBtn{background:#6a4a18ee!important;border-color:#ffe29a!important}
+#touchToggleBtn{background:#355b78ee!important;border-color:#a9d9ff!important}
+body.touch-controls-hidden #movement,body.touch-controls-hidden #actions,body.touch-controls-hidden #jump{display:none!important}
 #craftOverlay{display:none;position:fixed;inset:0;z-index:40;background:#07101beF;color:white;overflow:auto;padding:16px;touch-action:auto}
 #craftPanel{max-width:560px;margin:5vh auto;background:#17202d;border:1px solid #ffffff33;border-radius:18px;padding:18px;box-shadow:0 12px 40px #0008}
 .recipe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -45,19 +46,19 @@ button:active,button.selected{background:#27864d}
 
 #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;pointer-events:none}
 #help{position:absolute;right:9px;top:75px;max-width:190px;background:#17202ddd;padding:8px;border-radius:10px;font-size:11px;line-height:1.5}
-#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:138px;height:138px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
-#stick{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
+#movement{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:98px;width:112px;height:112px;border:2px solid #ffffff55;border-radius:50%;background:#17202d88;box-shadow:0 4px 16px #0005;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+#stick{position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);border:2px solid #ffffffbb;border-radius:50%;background:#dce8f0cc;box-shadow:0 2px 8px #0006;pointer-events:none}
 #movement:after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;transform:translate(-50%,-50%);border-radius:50%;background:#ffffff55;pointer-events:none}
 #actions{position:fixed;z-index:10;right:max(14px,env(safe-area-inset-right));bottom:88px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
-#actions button{width:76px;height:46px;padding:4px;font-size:10px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
-#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:288px;width:78px;height:70px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#actions button{width:62px;height:38px;padding:3px;font-size:9px;touch-action:manipulation;box-shadow:0 3px 10px #0005}
+#jump{position:fixed;z-index:11;right:max(18px,env(safe-area-inset-right));bottom:238px;width:62px;height:56px;border-radius:50%;background:#267c45ee;border:2px solid #ffffffbb;pointer-events:auto;touch-action:manipulation;box-shadow:0 3px 10px #0005}
 #lookHint{position:fixed;z-index:5;bottom:65px;left:50%;transform:translateX(-50%);background:#17202ddd;padding:5px 9px;border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none}
 @media(max-width:650px){
 #brand{font-size:11px}#top{gap:4px}#top button{padding:8px 6px;font-size:10px}
 #help{top:105px;max-width:145px;font-size:10px}#status{top:62px;font-size:11px}
-#movement{left:6px;bottom:84px;transform:scale(.82);transform-origin:bottom left}
-#actions{right:6px;bottom:76px}#actions button{width:65px;height:39px;font-size:9px}
-#jump{right:10px;bottom:270px;width:68px;height:62px}
+#movement{left:6px;bottom:72px;transform:scale(.78);transform-origin:bottom left}
+#actions{right:6px;bottom:68px}#actions button{width:55px;height:33px;font-size:8px}
+#jump{right:10px;bottom:206px;width:54px;height:49px}
 #palette{gap:2px}.block-choice{min-width:0;font-size:8px}#survivalHud{bottom:57px!important}
 }
 @media(orientation:landscape) and (max-height:500px){
@@ -82,8 +83,8 @@ button:active,button.selected{background:#27864d}
     <button id="cameraBtn">🎥 First Person</button>
     <button id="soundBtn">🔊 Sound: On</button>
     <button id="modeBtn">🛠 Creative</button>
-    <button id="craftBtn">🧰 Craft</button>
-    <button id="inventoryBtn">🎒 Inventory</button>
+    <button id="craftBtn">🧰 Craft (C)</button>
+    <button id="inventoryBtn">🎒 Inventory (I)</button>\n    <button id="touchToggleBtn" aria-pressed="true">Touch Controls: On</button>
     <button id="fullscreenBtn">⛶ Fullscreen</button>
     <button id="saveBtn">💾 Save</button>
     <button id="menuBtn">☰ Menu</button>
@@ -799,6 +800,14 @@ function updateJoystick(e){
   touch.left=Math.max(0,-nx);touch.right=Math.max(0,nx);
   touch.forward=Math.max(0,-ny);touch.back=Math.max(0,ny);
 }
+const touchToggleBtn=document.getElementById("touchToggleBtn");
+function toggleTouchControls(){
+  const hidden=document.body.classList.toggle("touch-controls-hidden");
+  touchToggleBtn.textContent=hidden?"Touch Controls: Off (H)":"Touch Controls: On (H)";
+  touchToggleBtn.setAttribute("aria-pressed",String(!hidden));
+  if(hidden)resetJoystick();
+}
+touchToggleBtn.addEventListener("click",toggleTouchControls);
 movementPad.addEventListener("pointerdown",e=>{
   e.preventDefault();joystick.active=true;joystick.pointerId=e.pointerId;
   try{movementPad.setPointerCapture(e.pointerId);}catch(_){}
@@ -818,7 +827,12 @@ window.addEventListener("keydown",e=>{
   if(inventoryOverlay.style.display==="block"){if(e.key==="Escape")closeInventory();return;}
   if(stationOverlay.style.display==="block"){if(e.key==="Escape")closeStation();return;}
   if(menuOverlay.style.display==="block"){if(e.key==="Escape")closeMenu();return;}
-  const k=e.key.toLowerCase();keys.add(k);
+  const k=e.key.toLowerCase();
+  if(k==="h"){toggleTouchControls();return;}
+  if(k==="c"){openCrafting();return;}
+  if(k==="i"){openInventory();return;}
+  if(k==="m"){openMenu();return;}
+  keys.add(k);
   if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
   if(k===" "&&!e.repeat)jump();
   if(k==="f")breakBlock();
@@ -848,18 +862,19 @@ function beep(freq,duration,wave="square",volume=.04){
     osc.start();osc.stop(audio.currentTime+duration);
   }catch(_){}
 }
-// Secret movement ritual: five jump presses within five seconds summon Herobrine.
+// Secret movement ritual: 20 jump presses within ten seconds summon Herobrine.
+// The timer starts with the first jump; if the player is too slow, the count resets.
 let jumpRitualCount=0;
 let jumpRitualStartedAt=0;
 function registerJumpRitual(){
   if(!gameStarted||nightmareActive)return;
   const now=performance.now();
-  if(!jumpRitualStartedAt||now-jumpRitualStartedAt>5000){
+  if(!jumpRitualStartedAt||now-jumpRitualStartedAt>10000){
     jumpRitualStartedAt=now;
     jumpRitualCount=0;
   }
   jumpRitualCount++;
-  if(jumpRitualCount>=5){
+  if(jumpRitualCount>=20){
     jumpRitualCount=0;
     jumpRitualStartedAt=0;
     status.textContent="You performed the secret jump ritual...";
@@ -1453,21 +1468,59 @@ window.addEventListener("keydown",e=>{
 });
 
 let nightmareScreamAudio=null;
-function playNightmareSting(){
-  // Play the user-provided Slendy-style sound from the same /sandbox/ folder.
-  // Keep the in-page level moderate; the device volume still controls loudness.
-  if(!soundOn)return;
+let nightmareAudioUnlocked=false;
+function prepareNightmareAudio(){
+  if(nightmareAudioUnlocked)return;
   try{
     if(!nightmareScreamAudio){
-      nightmareScreamAudio=new Audio("./slendy1.mp3");
+      nightmareScreamAudio=new Audio(new URL("./slendy1.mp3",document.baseURI).href);
       nightmareScreamAudio.preload="auto";
       nightmareScreamAudio.volume=0.65;
     }
+    // iPad Safari often blocks audio until an actual user gesture. Start and
+    // immediately pause a muted copy during the first tap/key interaction.
+    nightmareScreamAudio.muted=true;
+    const p=nightmareScreamAudio.play();
+    if(p&&typeof p.then==="function"){
+      p.then(()=>{
+        nightmareScreamAudio.pause();
+        nightmareScreamAudio.currentTime=0;
+        nightmareScreamAudio.muted=false;
+        nightmareAudioUnlocked=true;
+      }).catch(()=>{
+        nightmareScreamAudio.muted=false;
+      });
+    }else{
+      nightmareScreamAudio.pause();
+      nightmareScreamAudio.currentTime=0;
+      nightmareScreamAudio.muted=false;
+      nightmareAudioUnlocked=true;
+    }
+  }catch(_){}
+}
+window.addEventListener("pointerdown",prepareNightmareAudio,{once:true,passive:true});
+window.addEventListener("keydown",prepareNightmareAudio,{once:true});
+function playNightmareSting(){
+  if(!soundOn)return;
+  try{
+    if(!nightmareScreamAudio){
+      nightmareScreamAudio=new Audio(new URL("./slendy1.mp3",document.baseURI).href);
+      nightmareScreamAudio.preload="auto";
+      nightmareScreamAudio.volume=0.65;
+    }
+    nightmareScreamAudio.muted=false;
+    nightmareScreamAudio.volume=0.65;
     nightmareScreamAudio.pause();
     nightmareScreamAudio.currentTime=0;
     const playback=nightmareScreamAudio.play();
-    if(playback && typeof playback.catch==="function")playback.catch(()=>{});
-  }catch(_){}
+    if(playback&&typeof playback.then==="function"){
+      playback.catch(()=>{
+        status.textContent="Herobrine audio was blocked or couldn't load. Check that sandbox/slendy1.mp3 exists and tap the page once with Sound On.";
+      });
+    }
+  }catch(_){
+    status.textContent="Herobrine audio couldn't start. Check that sandbox/slendy1.mp3 exists.";
+  }
 }
 function beginHerobrineReveal(){
   nightmarePhase="reveal";nightmarePhaseClock=0;
