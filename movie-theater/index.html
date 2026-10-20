@@ -50,7 +50,32 @@ let raw = [
 const $=id=>document.getElementById(id);let letter='all';const driveMap=Object.create(null);const normalize=s=>String(s||'').trim().toLocaleLowerCase().replace(/[^a-z0-9]+/g,'');const quickCategories=[["all","Everything"],["Movies","Movies"],["TV Shows","TV Shows"],["Anime Movies","Anime Movies"],["Anime Shows","Anime Shows"],["Websites","Websites"]];function drawQuicknav(){const nav=$("quicknav");nav.innerHTML="";quickCategories.forEach(([value,label])=>{const b=document.createElement("button");b.textContent=label;b.className=$("category").value===value?"active":"";b.onclick=()=>{$("category").value=value;letter="all";drawLetters();drawQuicknav();render()};nav.appendChild(b)})}
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function drawLetters(){const all=['all','#',...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];$('letters').innerHTML='';all.forEach(l=>{const b=document.createElement('button');b.textContent=l==='all'?'All':l;b.className=letter===l?'active':'';b.onclick=()=>{letter=l;drawLetters();render()};$('letters').appendChild(b)})}
-function render(){const q=$('q').value.trim().toLocaleLowerCase();const cat=$('category').value;const list=raw.filter(([c,l,n])=>(cat==='all'||c===cat)&&(letter==='all'||l===letter)&&(!q||n.toLocaleLowerCase().includes(q)||c.toLocaleLowerCase().includes(q)));$('count').textContent=list.length+' catalog entries'+(q?' matching “'+$('q').value.trim()+'”':'');const recent=raw.filter(([c,l,n])=>/\b(?:2025|2026)\b/.test(n));$('recentSection').classList.toggle('hidden',!!q||cat!=='all'||letter!=='all'||!recent.length);$('recentCards').innerHTML=recent.map(([c,l,n,id])=>'<article class="movie"><div class="kind">'+esc(c)+' · '+esc(l)+'</div><div class="name">'+esc(n)+'</div>'+(id||driveMap[normalize(n)]?'<button class="watch" type="button" data-drive-id="'+esc(id||driveMap[normalize(n)])+'" data-title="'+esc(n)+'">▶ Watch here</button>':'<div class="hint">Drive link not mapped yet</div>')+'</article>').join('');if(!list.length){$('catalog').innerHTML='<div class="empty">No matching titles. Try a shorter search or choose All categories.</div>';return}const groups=new Map();list.sort((a,b)=>a[1].localeCompare(b[1])||a[2].localeCompare(b[2]));list.forEach(item=>{const key=item[0]+' · '+(item[1]==='#'?'# / Numbers':item[1]);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item)});$('catalog').innerHTML=[...groups].map(([key,items])=>'<section class="group"><h2>'+esc(key)+' <span style="font-size:.75rem;color:var(--muted)">('+items.length+')</span></h2><div class="cards">'+items.map(([c,l,n,id])=>{const fileId=id||driveMap[normalize(n)];return '<article class="movie"><div class="kind">'+esc(c)+'</div><div class="name">'+esc(n)+'</div>'+(fileId?'<button class="watch" type="button" data-drive-id="'+esc(fileId)+'" data-title="'+esc(n)+'">▶ Watch here</button>':'<div class="hint">Drive link not mapped yet</div>')+'</article>'}).join('')+'</div></section>').join('');bindWatchButtons()
+function render(){
+ const q=$('q').value.trim().toLocaleLowerCase();
+ const cat=$('category').value;
+ const list=raw.filter(([c,l,n])=>(cat==='all'||c===cat)&&(letter==='all'||l===letter)&&(!q||n.toLocaleLowerCase().includes(q)||c.toLocaleLowerCase().includes(q)));
+ $('count').textContent=list.length+' catalog entries'+(q?' matching “'+$('q').value.trim()+'”':'');
+ const recent=raw.filter(([c,l,n])=>/\\b(?:2025|2026)\\b/.test(n));
+ $('recentSection').classList.toggle('hidden',!!q||cat!=='all'||letter!=='all'||!recent.length);
+ $('recentCards').innerHTML=recent.map(([c,l,n,id])=>{
+   const fileId=id||driveMap[normalize(n)];
+   const action=fileId?'<button class="watch" type="button" data-drive-id="'+esc(fileId)+'" data-title="'+esc(n)+'">▶ Watch here</button>':'<div class="hint">Drive link not mapped yet</div>';
+   return '<article class="movie"><div class="kind">'+esc(c)+' · '+esc(l)+'</div><div class="name">'+esc(n)+'</div>'+action+'</article>';
+ }).join('');
+ if(!list.length){$('catalog').innerHTML='<div class="empty">No matching titles. Try a shorter search or choose All categories.</div>';return}
+ const groups=new Map();
+ list.sort((a,b)=>a[1].localeCompare(b[1])||a[2].localeCompare(b[2]));
+ list.forEach(item=>{const key=item[0]+' · '+(item[1]==='#'?'# / Numbers':item[1]);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item)});
+ $('catalog').innerHTML=[...groups].map(([key,items])=>{
+   const cards=items.map(([c,l,n,id])=>{
+     const fileId=id||driveMap[normalize(n)];
+     const action=fileId?'<button class="watch" type="button" data-drive-id="'+esc(fileId)+'" data-title="'+esc(n)+'">▶ Watch here</button>':'<div class="hint">Drive link not mapped yet</div>';
+     return '<article class="movie"><div class="kind">'+esc(c)+'</div><div class="name">'+esc(n)+'</div>'+action+'</article>';
+   }).join('');
+   return '<section class="group"><h2>'+esc(key)+' <span style="font-size:.75rem;color:var(--muted)">('+items.length+')</span></h2><div class="cards">'+cards+'</div></section>';
+ }).join('');
+ bindWatchButtons();
+}
 function playDrive(id,title){$('playerTitle').textContent=title;$('drivePlayer').src='https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';$('playerSection').classList.remove('hidden');$('playerSection').scrollIntoView({behavior:'smooth',block:'start'})}
 function bindWatchButtons(){document.querySelectorAll('button.watch[data-drive-id]').forEach(b=>b.addEventListener('click',()=>playDrive(b.dataset.driveId,b.dataset.title)))}
 $('closePlayer').onclick=()=>{$('drivePlayer').src='about:blank';$('playerSection').classList.add('hidden')};
