@@ -87,7 +87,8 @@
         <div style="position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:#b9c4da;">Choose a search result above or paste a video link.</div>
       </div>
       <div class="actions">
-        <button class="secondary" id="tryYoutube" type="button">Try official YouTube player</button>
+        <button class="secondary" id="tryYoutube" type="button">Try standard YouTube player</button>
+        <button class="secondary" id="tryNoCookie" type="button">Try privacy-enhanced player</button>
         <a class="button secondary" href="../">← Back to Classroom Arcade</a>
       </div>
       <p class="muted">If one player does not work, try the other player option. Some videos disable embedding, and network restrictions may block either service.</p>
@@ -127,6 +128,7 @@
       const player = document.getElementById("player");
       const status = document.getElementById("status");
       const tryYoutube = document.getElementById("tryYoutube");
+      const tryNoCookie = document.getElementById("tryNoCookie");
       let activeVideoId = "";
       let activeCommunityUrl = "";
 
@@ -186,8 +188,8 @@
 
       function playOfficialVideo(id) {
         activeVideoId = id;
-        setPlayer("https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id), "Official YouTube video player", "");
-        status.textContent = "Trying the official embedded player. It may be blocked by your network or the video owner.";
+        setPlayer("https://www.youtube.com/embed/" + encodeURIComponent(id) + "?playsinline=1&rel=0", "Standard YouTube embedded player", "");
+        status.textContent = "Trying the standard YouTube embed, similar to the official player used in Google Slides. Network restrictions or video settings may still block it.";
       }
 
       function normalizeResult(item, host) {
@@ -336,6 +338,15 @@
           return;
         }
         playOfficialVideo(activeVideoId);
+      });
+
+      tryNoCookie.addEventListener("click", () => {
+        if (!activeVideoId) {
+          status.textContent = "Search for a video or paste its link first.";
+          return;
+        }
+        setPlayer("https://www.youtube-nocookie.com/embed/" + encodeURIComponent(activeVideoId) + "?playsinline=1&rel=0", "Privacy-enhanced YouTube player", "");
+        status.textContent = "Trying YouTube's privacy-enhanced embed. It may still be blocked by your network or the video owner.";
       });
     })();
   </script>
