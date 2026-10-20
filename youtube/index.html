@@ -55,7 +55,7 @@
       <form id="searchForm">
         <div class="inputrow">
           <input id="searchQuery" type="search" placeholder="Try Minecraft, science, music…" required>
-          <button id="searchButton" type="submit">Search here</button>
+          <button id="searchButton" type="button">Search here</button>
         </div>
       </form>
       <p id="searchStatus" role="status" aria-live="polite">Search results will appear below without opening YouTube in a new tab.</p>
@@ -217,42 +217,57 @@
       }
 
       async function runSearch(query) {
+        const cleanQuery = String(query || "").trim();
+        if (!cleanQuery) {
+          searchStatus.textContent = "Type something to search for first.";
+          searchQuery.focus();
+          return;
+        }
+
         results.replaceChildren();
         searchButton.disabled = true;
-        searchStatus.textContent = "Searching community video indexes…";
-        let lastError = null;
-        for (const host of searchHosts) {
+        searchStatus.textContent = "Connecting to video search services…";
+        const attempts = searchHosts.map(async host => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5500);
           try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 7000);
-            let response;
-            try {
-              response = await fetch(host + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=video", {
-                headers: { "Accept": "application/json" },
-                signal: controller.signal
-              });
-            } finally { clearTimeout(timeout); }
-            if (!response.ok) throw new Error("Search service returned " + response.status);
+            const response = await fetch(
+              host + "/api/v1/search?q=" + encodeURIComponent(cleanQuery) + "&type=video",
+              { headers: { "Accept": "application/json" }, signal: controller.signal, mode: "cors" }
+            );
+            if (!response.ok) throw new Error("HTTP " + response.status);
             const data = await response.json();
             if (!Array.isArray(data)) throw new Error("Unexpected search response");
             const cards = data.map(item => makeResult(item, host)).filter(Boolean).slice(0, 18);
-            if (!cards.length) throw new Error("No video results from this service");
-            results.replaceChildren(...cards);
-            searchStatus.textContent = "Showing " + cards.length + " results. Tap “Play here” to load a video below.";
-            searchButton.disabled = false;
-            return;
-          } catch (error) {
-            lastError = error;
+            if (!cards.length) throw new Error("No video results");
+            return { host, cards };
+          } finally {
+            clearTimeout(timeout);
           }
+        });
+
+        try {
+          searchStatus.textContent = "Trying several search services at once (this may take a few seconds)…";
+          const outcomes = await Promise.allSettled(attempts);
+          const success = outcomes.find(outcome => outcome.status === "fulfilled");
+          if (success) {
+            results.replaceChildren(...success.value.cards);
+            searchStatus.textContent = "Found " + success.value.cards.length + " results. Tap “Play here” to try a video in the player below.";
+          } else {
+            searchStatus.textContent = "Search services could not be reached from this browser. This is usually caused by the services being blocked/offline or the browser refusing their requests—not by your search words. Try pasting a video link below. If the page itself never changes to this message, reload the page once.";
+          }
+        } catch (error) {
+          searchStatus.textContent = "Search failed: " + (error && error.message ? error.message : "unknown error") + ". You can still paste a video link below.";
+        } finally {
+          searchButton.disabled = false;
         }
-        searchStatus.textContent = "In-page search could not connect to a video search service. The services may be offline, blocked, or unavailable in this browser. You can still paste a video link below, or try again later.";
-        searchButton.disabled = false;
       }
+
+      searchButton.addEventListener("click", () => runSearch(searchQuery.value));
 
       searchForm.addEventListener("submit", event => {
         event.preventDefault();
-        const query = searchQuery.value.trim();
-        if (query) runSearch(query);
+        runSearch(searchQuery.value);
       });
 
       document.querySelectorAll("[data-query]").forEach(button => {
