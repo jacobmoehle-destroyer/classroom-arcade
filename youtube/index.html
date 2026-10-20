@@ -130,11 +130,15 @@
       let activeVideoId = "";
       let activeCommunityUrl = "";
 
+      // Try several independent public APIs. Different networks and instances
+      // allow different cross-origin requests, so keep trying when one fails.
       const searchHosts = [
-        "https://inv.nadeko.net",
-        "https://yewtu.be",
-        "https://invidious.nerdvpn.de",
-        "https://inv.tux.pizza"
+        { kind: "invidious", base: "https://inv.nadeko.net" },
+        { kind: "invidious", base: "https://yewtu.be" },
+        { kind: "invidious", base: "https://inv.tux.pizza" },
+        { kind: "invidious", base: "https://invidious.nerdvpn.de" },
+        { kind: "piped", base: "https://pipedapi.adminforge.de" },
+        { kind: "piped", base: "https://pipedapi.kavin.rocks" }
       ];
 
       function safeText(value) {
@@ -186,31 +190,62 @@
         status.textContent = "Trying the official embedded player. It may be blocked by your network or the video owner.";
       }
 
-      function makeResult(item, host) {
+      function normalizeResult(item, host) {
+        if (host.kind === "piped") {
+          const rawUrl = safeText(item.url || item.link);
+          const match = rawUrl.match(/[?&]v=([A-Za-z0-9_-]{11})/) ||
+            rawUrl.match(/^\/watch\/([A-Za-z0-9_-]{11})$/);
+          const id = match ? match[1] : safeText(item.videoId || item.video_id);
+          return {
+            id,
+            title: item.title,
+            author: item.uploaderName || item.uploader || item.channel,
+            publishedText: item.uploadedDate || item.uploaded,
+            viewCount: item.views,
+            thumbnail: item.thumbnail || item.thumbnailUrl,
+            host
+          };
+        }
         const id = safeText(item.videoId || item.video_id);
-        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return null;
+        const thumbs = Array.isArray(item.videoThumbnails) ? item.videoThumbnails : [];
+        const chosen = thumbs.find(t => t && t.quality && /medium|high|maxres/i.test(t.quality)) || thumbs[0];
+        return {
+          id, title: item.title, author: item.author, publishedText: item.publishedText,
+          viewCount: item.viewCount, thumbnail: chosen && chosen.url, host
+        };
+      }
+
+      function makeResult(item, host) {
+        const video = normalizeResult(item, host);
+        if (!/^[A-Za-z0-9_-]{11}$/.test(video.id)) return null;
         const card = document.createElement("article");
         card.className = "result";
         const image = document.createElement("img");
         image.className = "thumb";
         image.alt = "";
         image.loading = "lazy";
-        const thumbs = Array.isArray(item.videoThumbnails) ? item.videoThumbnails : [];
-        const chosen = thumbs.find(t => t && t.quality && /medium|high|maxres/i.test(t.quality)) || thumbs[0];
-        image.src = chosen && chosen.url ? chosen.url : "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/hqdefault.jpg";
+        image.src = video.thumbnail || "https://i.ytimg.com/vi/" + encodeURIComponent(video.id) + "/hqdefault.jpg";
         image.onerror = () => { image.style.display = "none"; };
         const body = document.createElement("div");
         body.className = "resultbody";
         const title = document.createElement("h3");
-        title.textContent = safeText(item.title) || "Untitled video";
+        title.textContent = safeText(video.title) || "Untitled video";
         const meta = document.createElement("p");
         meta.className = "meta";
-        const bits = [safeText(item.author), safeText(item.publishedText), formatViews(item.viewCount)].filter(Boolean);
+        const bits = [safeText(video.author), safeText(video.publishedText), formatViews(video.viewCount)].filter(Boolean);
         meta.textContent = bits.join(" · ");
         const play = document.createElement("button");
         play.type = "button";
         play.textContent = "Play here";
-        play.addEventListener("click", () => playCommunityVideo(id, host));
+        play.addEventListener("click", () => {
+          if (video.host.kind === "piped") {
+            activeVideoId = video.id;
+            setPlayer(video.host.base.replace("pipedapi.", "piped.") + "/embed/" + encodeURIComponent(video.id), "Piped video player", "");
+            status.textContent = "Trying an alternate community player. If it stays blank, that service or your network may block playback.";
+          } else {
+            playCommunityVideo(video.id, video.host.base);
+          }
+        });
         body.append(title, meta, play);
         card.append(image, body);
         return card;
@@ -219,33 +254,39 @@
       async function runSearch(query) {
         results.replaceChildren();
         searchButton.disabled = true;
-        searchStatus.textContent = "Searching community video indexes…";
-        let lastError = null;
+        searchStatus.textContent = "Searching available video services…";
         for (const host of searchHosts) {
           try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 7000);
+            const timeout = setTimeout(() => controller.abort(), 6000);
             let response;
+            const endpoint = host.kind === "piped"
+              ? host.base + "/search?q=" + encodeURIComponent(query) + "&filter=videos"
+              : host.base + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=video";
             try {
-              response = await fetch(host + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=video", {
+              response = await fetch(endpoint, {
                 headers: { "Accept": "application/json" },
+                mode: "cors",
                 signal: controller.signal
               });
             } finally { clearTimeout(timeout); }
             if (!response.ok) throw new Error("Search service returned " + response.status);
-            const data = await response.json();
+            const payload = await response.json();
+            const data = host.kind === "piped"
+              ? (Array.isArray(payload) ? payload : payload.items)
+              : payload;
             if (!Array.isArray(data)) throw new Error("Unexpected search response");
             const cards = data.map(item => makeResult(item, host)).filter(Boolean).slice(0, 18);
-            if (!cards.length) throw new Error("No video results from this service");
+            if (!cards.length) throw new Error("No playable results from this service");
             results.replaceChildren(...cards);
             searchStatus.textContent = "Showing " + cards.length + " results. Tap “Play here” to load a video below.";
             searchButton.disabled = false;
             return;
-          } catch (error) {
-            lastError = error;
+          } catch (_) {
+            // Try the next independent provider.
           }
         }
-        searchStatus.textContent = "In-page search could not connect to a video search service. The services may be offline, blocked, or unavailable in this browser. You can still paste a video link below, or try again later.";
+        searchStatus.textContent = "Every in-page search provider failed to respond. This usually means the services are down or blocked by the current network/browser. The page cannot override that restriction. You can still try pasting a video link below.";
         searchButton.disabled = false;
       }
 
