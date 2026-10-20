@@ -4,106 +4,128 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111827">
-  <title>YouTube Theater | Classroom Arcade</title>
+  <title>Video Theater | Classroom Arcade</title>
   <style>
-    :root { color-scheme: dark; --bg:#0b1020; --text:#f4f7ff; --muted:#b9c4da; --accent:#8bd3ff; }
+    :root { color-scheme:dark; --bg:#0b1020; --text:#f4f7ff; --muted:#b9c4da; --accent:#8bd3ff; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%); color:var(--text); }
-    header { padding:30px 16px 18px; text-align:center; }
+    header { padding:28px 16px 18px; text-align:center; }
     h1 { margin:.3rem 0; font-size:clamp(2rem,7vw,3rem); line-height:1.1; }
-    header p { max-width:700px; margin:10px auto; color:var(--muted); }
-    main { width:min(900px,100%); margin:auto; padding:0 14px 36px; }
+    header p { max-width:720px; margin:10px auto; color:var(--muted); }
+    main { width:min(1000px,100%); margin:auto; padding:0 14px 36px; }
     .panel { background:linear-gradient(145deg,#1a2540,#111827); border:1px solid #34415c; border-radius:16px; padding:clamp(14px,3vw,22px); margin-bottom:16px; }
     label { display:block; font-weight:750; margin-bottom:8px; }
     .inputrow { display:flex; flex-wrap:wrap; gap:9px; }
-    input { flex:1 1 260px; min-width:0; padding:12px; color:var(--text); background:#080e1a; border:1px solid #53627c; border-radius:10px; font:inherit; }
+    input,select { flex:1 1 240px; min-width:0; padding:12px; color:var(--text); background:#080e1a; border:1px solid #53627c; border-radius:10px; font:inherit; }
     button,.button { display:inline-block; border:0; border-radius:10px; padding:11px 15px; background:var(--accent); color:#07111f; font:inherit; font-weight:800; text-decoration:none; cursor:pointer; }
-    button:focus-visible,.button:focus-visible,input:focus-visible { outline:3px solid white; outline-offset:2px; }
+    button:disabled { opacity:.55; cursor:wait; }
+    button:focus-visible,.button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible { outline:3px solid white; outline-offset:2px; }
     .secondary { background:#273650; color:var(--text); border:1px solid #53627c; }
     .player { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:#03060b; border:1px solid #34415c; border-radius:12px; }
     .player iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-    #status { min-height:1.5em; margin:10px 0 0; color:var(--muted); overflow-wrap:anywhere; }
+    #status,#searchStatus { min-height:1.5em; margin:10px 0 0; color:var(--muted); overflow-wrap:anywhere; }
     .muted { color:var(--muted); font-size:.92rem; }
-    .quicklinks { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
-    .quicklinks a { display:inline-block; padding:9px 12px; border-radius:10px; color:var(--text); background:#273650; border:1px solid #53627c; text-decoration:none; font-weight:700; }
-    .quicklinks a:hover,.quicklinks a:focus-visible { outline:3px solid white; outline-offset:2px; background:#354867; }
     .hint { border-left:3px solid var(--accent); padding-left:12px; }
-    .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
+    .results { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); gap:12px; margin-top:16px; }
+    .result { min-width:0; overflow:hidden; border:1px solid #3b4964; border-radius:12px; background:#0d1526; display:flex; flex-direction:column; }
+    .thumb { width:100%; aspect-ratio:16/9; object-fit:cover; background:#080e1a; }
+    .resultbody { display:flex; flex:1; flex-direction:column; gap:8px; padding:12px; }
+    .result h3 { margin:0; font-size:1rem; line-height:1.35; overflow-wrap:anywhere; }
+    .meta { margin:0; color:var(--muted); font-size:.85rem; }
+    .result button { margin-top:auto; }
+    .quicklinks,.actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
+    .quicklinks button { background:#273650; color:var(--text); border:1px solid #53627c; }
     footer { padding:0 16px 28px; color:var(--muted); text-align:center; font-size:.9rem; }
+    @media (max-width:480px) { .inputrow button { width:100%; } }
   </style>
 </head>
 <body>
   <header>
     <div>🕹️ Classroom Arcade</div>
-    <h1>▶ YouTube Theater</h1>
-    <p>Paste a YouTube video link to load it in the player below.</p>
+    <h1>▶ Video Theater</h1>
+    <p>Search for videos here, see results on this page, and try playing them in the built-in player.</p>
   </header>
   <main>
-    <section class="panel" aria-label="Choose a video">
-      <label for="videoUrl">YouTube video URL or video ID</label>
-      <form id="videoForm">
-        <div class="inputrow">
-          <input id="videoUrl" name="videoUrl" type="text" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=..." aria-describedby="inputHelp">
-          <button type="submit">Load video</button>
-        </div>
-      </form>
-      <p id="inputHelp" class="muted">You can also paste a youtu.be link. This page does not download videos or upload your links to a server.</p>
-      <p id="status" role="status" aria-live="polite">No video loaded yet.</p>
-    </section>
-    <section class="panel" aria-label="Search YouTube">
-      <label for="searchQuery">Find a video on YouTube</label>
+    <section class="panel" aria-label="Search for videos">
+      <label for="searchQuery">Search videos</label>
       <form id="searchForm">
         <div class="inputrow">
-          <input id="searchQuery" type="search" placeholder="Search videos, e.g. Minecraft tutorial" aria-describedby="searchHelp" required>
-          <button type="submit">Search videos ↗</button>
+          <input id="searchQuery" type="search" placeholder="Try Minecraft, science, music…" required>
+          <button id="searchButton" type="submit">Search here</button>
         </div>
       </form>
-      <p id="searchHelp" class="muted">Search opens YouTube results in a new tab. Choose a video there, then copy its URL and paste it into the player above.</p>
-      <p class="muted hint">The site can’t automatically display YouTube search results or retrieve video URLs without using YouTube’s search service/API. This search uses YouTube’s own results page.</p>
-      <strong>Quick searches</strong>
-      <div class="quicklinks" aria-label="Quick YouTube searches">
-        <a href="https://www.youtube.com/results?search_query=educational+science+videos" target="_blank" rel="noopener noreferrer">🔬 Science</a>
-        <a href="https://www.youtube.com/results?search_query=math+tutorials" target="_blank" rel="noopener noreferrer">➗ Math</a>
-        <a href="https://www.youtube.com/results?search_query=Minecraft+gameplay" target="_blank" rel="noopener noreferrer">🧱 Minecraft</a>
-        <a href="https://www.youtube.com/results?search_query=DOOM+gameplay" target="_blank" rel="noopener noreferrer">💀 DOOM</a>
-        <a href="https://www.youtube.com/results?search_query=game+music" target="_blank" rel="noopener noreferrer">🎵 Music</a>
-        <a href="https://www.youtube.com/results?search_query=funny+animal+videos" target="_blank" rel="noopener noreferrer">🐈 Animals</a>
+      <p id="searchStatus" role="status" aria-live="polite">Search results will appear below without opening YouTube in a new tab.</p>
+      <div class="quicklinks" aria-label="Quick searches">
+        <button type="button" data-query="educational science videos">🔬 Science</button>
+        <button type="button" data-query="math tutorials">➗ Math</button>
+        <button type="button" data-query="Minecraft gameplay">🧱 Minecraft</button>
+        <button type="button" data-query="DOOM gameplay">💀 DOOM</button>
+        <button type="button" data-query="game music">🎵 Music</button>
+        <button type="button" data-query="funny animal videos">🐈 Animals</button>
       </div>
+      <div id="results" class="results" aria-label="Search results"></div>
+      <p class="muted hint">This tries community video frontends to search and play videos without opening YouTube directly. These services can be unavailable or blocked on some networks. It cannot guarantee access around a school or network filter.</p>
     </section>
+
+    <section class="panel" aria-label="Load a video link">
+      <label for="videoUrl">Or paste a YouTube video link or video ID</label>
+      <form id="videoForm">
+        <div class="inputrow">
+          <input id="videoUrl" name="videoUrl" type="text" inputmode="url" autocomplete="url" placeholder="Paste a YouTube link or 11-character video ID">
+          <button type="submit">Load in player</button>
+        </div>
+      </form>
+      <p id="status" role="status" aria-live="polite">No video loaded yet.</p>
+    </section>
+
     <section class="panel" aria-label="Video player">
       <div class="player" id="player">
-        <div style="position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:#b9c4da;">Your selected video will appear here.</div>
+        <div style="position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:#b9c4da;">Choose a search result above or paste a video link.</div>
       </div>
       <div class="actions">
-        <a class="button secondary" id="openYoutube" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Open YouTube separately ↗</a>
+        <button class="secondary" id="tryYoutube" type="button">Try official YouTube player</button>
         <a class="button secondary" href="../">← Back to Classroom Arcade</a>
       </div>
+      <p class="muted">If one player does not work, try the other player option. Some videos disable embedding, and network restrictions may block either service.</p>
     </section>
     <section class="panel">
-      <strong>Playback and access notes</strong>
-      <p class="muted">This uses YouTube’s official embedded player. Some videos block embedding, require sign-in, have age or region limits, or may not play on restricted networks. Embedding a video does not bypass a school filter. If the player is blocked, ask your network administrator to approve YouTube or use an approved video service.</p>
-      <p class="muted">When you load a video, your browser connects directly to YouTube.</p>
+      <strong>About access</strong>
+      <p class="muted">This page does not remove network restrictions. It uses third-party community services for in-page search; their availability, privacy practices, and video support can vary. Avoid entering personal information. If your school intentionally blocks video services, ask a teacher or network administrator about an approved option.</p>
     </section>
   </main>
-  <footer>Classroom Arcade · YouTube is a third-party service and is not affiliated with this project.</footer>
+  <footer>Classroom Arcade · Unofficial video interface; not affiliated with YouTube.</footer>
   <script>
     (() => {
       "use strict";
-      const form = document.getElementById("videoForm");
-      const input = document.getElementById("videoUrl");
-      const player = document.getElementById("player");
-      const status = document.getElementById("status");
-      const openYoutube = document.getElementById("openYoutube");
       const searchForm = document.getElementById("searchForm");
       const searchQuery = document.getElementById("searchQuery");
+      const searchButton = document.getElementById("searchButton");
+      const searchStatus = document.getElementById("searchStatus");
+      const results = document.getElementById("results");
+      const videoForm = document.getElementById("videoForm");
+      const videoUrl = document.getElementById("videoUrl");
+      const player = document.getElementById("player");
+      const status = document.getElementById("status");
+      const tryYoutube = document.getElementById("tryYoutube");
+      let activeVideoId = "";
+      let activeCommunityUrl = "";
 
-      searchForm.addEventListener("submit", event => {
-        event.preventDefault();
-        const query = searchQuery.value.trim();
-        if (!query) return;
-        const searchUrl = "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
-        window.open(searchUrl, "_blank", "noopener,noreferrer");
-      });
+      const searchHosts = [
+        "https://inv.nadeko.net",
+        "https://yewtu.be",
+        "https://invidious.nerdvpn.de",
+        "https://inv.tux.pizza"
+      ];
+
+      function safeText(value) {
+        return String(value == null ? "" : value);
+      }
+
+      function formatViews(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n) || n < 0) return "";
+        try { return n.toLocaleString() + " views"; } catch (_) { return ""; }
+      }
 
       function getVideoId(raw) {
         const value = raw.trim();
@@ -120,22 +142,122 @@
         return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
       }
 
-      form.addEventListener("submit", event => {
+      function setPlayer(src, title, communityUrl) {
+        const frame = document.createElement("iframe");
+        frame.title = title || "Video player";
+        frame.src = src;
+        frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        frame.referrerPolicy = "strict-origin-when-cross-origin";
+        frame.allowFullscreen = true;
+        player.replaceChildren(frame);
+        activeCommunityUrl = communityUrl || "";
+      }
+
+      function playCommunityVideo(id, host) {
+        activeVideoId = id;
+        setPlayer(host + "/embed/" + encodeURIComponent(id), "Community video player", host);
+        status.textContent = "Trying the community player. If it stays blank, the service or network may not support it.";
+        tryYoutube.textContent = "Try official YouTube player";
+      }
+
+      function playOfficialVideo(id) {
+        activeVideoId = id;
+        setPlayer("https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id), "Official YouTube video player", "");
+        status.textContent = "Trying the official embedded player. It may be blocked by your network or the video owner.";
+      }
+
+      function makeResult(item, host) {
+        const id = safeText(item.videoId || item.video_id);
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return null;
+        const card = document.createElement("article");
+        card.className = "result";
+        const image = document.createElement("img");
+        image.className = "thumb";
+        image.alt = "";
+        image.loading = "lazy";
+        const thumbs = Array.isArray(item.videoThumbnails) ? item.videoThumbnails : [];
+        const chosen = thumbs.find(t => t && t.quality && /medium|high|maxres/i.test(t.quality)) || thumbs[0];
+        image.src = chosen && chosen.url ? chosen.url : "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/hqdefault.jpg";
+        image.onerror = () => { image.style.display = "none"; };
+        const body = document.createElement("div");
+        body.className = "resultbody";
+        const title = document.createElement("h3");
+        title.textContent = safeText(item.title) || "Untitled video";
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        const bits = [safeText(item.author), safeText(item.publishedText), formatViews(item.viewCount)].filter(Boolean);
+        meta.textContent = bits.join(" · ");
+        const play = document.createElement("button");
+        play.type = "button";
+        play.textContent = "Play here";
+        play.addEventListener("click", () => playCommunityVideo(id, host));
+        body.append(title, meta, play);
+        card.append(image, body);
+        return card;
+      }
+
+      async function runSearch(query) {
+        results.replaceChildren();
+        searchButton.disabled = true;
+        searchStatus.textContent = "Searching community video indexes…";
+        let lastError = null;
+        for (const host of searchHosts) {
+          try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 7000);
+            let response;
+            try {
+              response = await fetch(host + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=video", {
+                headers: { "Accept": "application/json" },
+                signal: controller.signal
+              });
+            } finally { clearTimeout(timeout); }
+            if (!response.ok) throw new Error("Search service returned " + response.status);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error("Unexpected search response");
+            const cards = data.map(item => makeResult(item, host)).filter(Boolean).slice(0, 18);
+            if (!cards.length) throw new Error("No video results from this service");
+            results.replaceChildren(...cards);
+            searchStatus.textContent = "Showing " + cards.length + " results. Tap “Play here” to load a video below.";
+            searchButton.disabled = false;
+            return;
+          } catch (error) {
+            lastError = error;
+          }
+        }
+        searchStatus.textContent = "In-page search could not connect to a video search service. The services may be offline, blocked, or unavailable in this browser. You can still paste a video link below, or try again later.";
+        searchButton.disabled = false;
+      }
+
+      searchForm.addEventListener("submit", event => {
         event.preventDefault();
-        const id = getVideoId(input.value);
+        const query = searchQuery.value.trim();
+        if (query) runSearch(query);
+      });
+
+      document.querySelectorAll("[data-query]").forEach(button => {
+        button.addEventListener("click", () => {
+          searchQuery.value = button.dataset.query;
+          runSearch(button.dataset.query);
+        });
+      });
+
+      videoForm.addEventListener("submit", event => {
+        event.preventDefault();
+        const id = getVideoId(videoUrl.value);
         if (!id) {
-          status.textContent = "Please enter a valid YouTube video link or 11-character video ID.";
+          status.textContent = "Please enter a valid YouTube video link or an 11-character video ID.";
           return;
         }
-        const embed = document.createElement("iframe");
-        embed.title = "YouTube video player";
-        embed.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id);
-        embed.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-        embed.referrerPolicy = "strict-origin-when-cross-origin";
-        embed.allowFullscreen = true;
-        player.replaceChildren(embed);
-        openYoutube.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
-        status.textContent = "Video loaded. If playback is blocked, the network or video owner may not allow embedded playback.";
+        playOfficialVideo(id);
+      });
+
+      tryYoutube.addEventListener("click", () => {
+        if (!activeVideoId) {
+          status.textContent = "Search for a video or paste its link first.";
+          return;
+        }
+        playOfficialVideo(activeVideoId);
       });
     })();
   </script>
