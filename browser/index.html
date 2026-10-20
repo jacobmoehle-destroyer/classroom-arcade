@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17130a">
+<title>Classroom Arcade Browser</title>
+<style>
+:root{color-scheme:dark;--bg:#100e08;--panel:#19150c;--panel2:#211a0c;--line:#62430a;--gold:#ffa900;--text:#eee7d8;--muted:#b7ad98;--field:#151108}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}button,input{font:inherit}button{cursor:pointer;color:inherit}.app{min-height:100dvh;background:radial-gradient(circle at 20px 20px,transparent 0 18px,#563a092f 19px 20px,transparent 21px) 0 0/40px 40px,radial-gradient(ellipse at center,#211806 0,#100e08 75%);display:flex;flex-direction:column}.tabs{display:flex;gap:6px;align-items:center;padding:10px 14px 0;border-bottom:1px solid #503707;overflow-x:auto;scrollbar-width:thin}.tab{display:flex;align-items:center;gap:10px;min-width:125px;max-width:230px;padding:10px 12px;background:#19140b;border:1px solid #4d3408;border-bottom:0;border-radius:12px 12px 0 0;color:var(--muted);white-space:nowrap}.tab.active{background:#3a2808;color:var(--gold);border-color:var(--gold)}.tabname{overflow:hidden;text-overflow:ellipsis;flex:1}.close{border:0;background:transparent;color:inherit;padding:0 2px}.plus,.tool{border:1px solid #4d3408;background:#171209;border-radius:12px;min-width:42px;min-height:42px}.toolbar{display:flex;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid #503707;background:#100e08d9;position:relative;z-index:2}.address{display:flex;align-items:center;gap:8px;flex:1;min-width:80px;border:1px solid #62430a;border-radius:16px;background:#19140b;padding:0 12px}.address input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);padding:13px 0}.tool:hover,.plus:hover,.tab:hover{border-color:var(--gold)}.layout{display:grid;grid-template-columns:220px minmax(0,1fr);flex:1;min-height:0}.sidebar{padding:18px 12px 20px 18px}.brand{font-size:12px;letter-spacing:.2em;color:var(--gold);font-weight:800;padding:4px 10px 18px}.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid transparent;border-radius:12px;padding:12px;background:transparent;color:var(--muted)}.nav button.active,.nav button:hover{background:#3a290d;color:var(--gold);border-color:#4d3408}.sidebottom{margin-top:18px;border-top:1px solid #4d3408;padding-top:12px}.main{min-width:0;display:flex;flex-direction:column;min-height:65vh}.home{margin:auto;width:min(800px,100%);padding:42px 24px 64px;text-align:center}.logo{font-size:clamp(2.3rem,7vw,4rem);font-weight:300;letter-spacing:.24em;color:var(--gold);margin:8px 0 30px}.search{display:flex;gap:10px;max-width:650px;margin:0 auto 24px;padding:8px;border:1px solid #62430a;background:#19140be8;border-radius:16px}.search input{min-width:0;flex:1;background:transparent;border:0;outline:0;padding:12px;color:var(--text)}.primary{background:var(--gold);color:#211500;border:0;border-radius:10px;font-weight:800;padding:10px 15px}.quick{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:18px 0 30px}.quick button,.bookmark{border:1px solid #4d3408;border-radius:12px;background:#19140b;padding:11px 14px;color:var(--muted)}.quick button:hover,.bookmark:hover{border-color:var(--gold);color:var(--gold)}.section{text-align:left;max-width:700px;margin:28px auto 0}.section h2{font-size:1rem;color:var(--gold)}.bookmarks{display:flex;gap:8px;flex-wrap:wrap}.note{color:var(--muted);font-size:.86rem;max-width:640px;margin:18px auto}.viewer{display:none;flex:1;min-height:55vh;background:#f4f4f4;position:relative}.viewer iframe{width:100%;height:100%;min-height:65vh;border:0;background:#fff}.viewerbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#1a150b;border-bottom:1px solid #62430a;padding:8px 12px;color:var(--muted);font-size:.85rem}.viewerbar button{background:#211a0c;border:1px solid #62430a;border-radius:8px;padding:7px 10px}.warning{padding:12px 16px;background:#251b09;color:#d4c5a5;border-top:1px solid #62430a;font-size:.85rem}.settings{display:none;padding:28px;max-width:760px;width:100%;margin:0 auto}.settings h2{color:var(--gold)}.settingrow{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 0;border-bottom:1px solid #4d3408}.settingrow p{margin:3px 0;color:var(--muted);font-size:.88rem}.settingrow input{width:20px;height:20px;accent-color:var(--gold)}.settings button.danger{background:#321b10;border:1px solid #7e3d15;padding:10px 12px;border-radius:9px}.status{color:var(--muted);font-size:.82rem;min-height:1.2em;margin:8px}.hidden{display:none!important}footer{padding:10px;text-align:center;color:#8c816c;font-size:.75rem}@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{padding:8px 10px;border-bottom:1px solid #503707}.brand{display:none}.nav{display:flex;overflow-x:auto}.nav button{white-space:nowrap;padding:9px 12px}.sidebottom{display:none}.toolbar{gap:5px;padding:8px}.tool{min-width:36px;min-height:38px}.toolbar .optional{display:none}.home{padding:32px 14px}.logo{letter-spacing:.13em}.search{gap:4px}.search .primary{padding:9px}.viewer iframe{min-height:65vh}.tabs{padding-left:7px}.tab{min-width:112px;padding:9px}.settings{padding:20px 15px}} 
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs" id="tabs" aria-label="Browser tabs"></div>
+  <div class="toolbar">
+    <button class="tool" id="back" title="Back" aria-label="Back">‹</button>
+    <button class="tool" id="forward" title="Forward" aria-label="Forward">›</button>
+    <button class="tool" id="reload" title="Reload" aria-label="Reload">⟳</button>
+    <button class="tool" id="home" title="Home" aria-label="Home">⌂</button>
+    <form class="address" id="addressForm"><span aria-hidden="true">✦</span><input id="address" autocomplete="url" placeholder="Search or enter URL" aria-label="Search or enter URL"><button class="hidden" type="submit">Go</button></form>
+    <button class="tool optional" id="bookmarkCurrent" title="Bookmark this page" aria-label="Bookmark">☆</button>
+    <button class="tool optional" id="fullscreen" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+    <button class="tool" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">CLASSROOM ARCADE</div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-view="home">⌂ <span>Home</span></button>
+        <button data-url="../">🎮 <span>Play</span></button>
+        <button data-view="bookmarks">▦ <span>Bookmarks</span></button>
+        <button data-url="../youtube/">▶ <span>Watch</span></button>
+        <button data-view="browse">◎ <span>Browse</span></button>
+      </nav>
+      <div class="sidebottom"><button class="tool" id="privacyBtn" style="width:100%">◈ Privacy settings</button></div>
+    </aside>
+    <main class="main">
+      <section class="home" id="homeView">
+        <div class="logo">classroom</div>
+        <form class="search" id="homeSearch"><span style="align-self:center;color:var(--gold);padding-left:8px">⌕</span><input id="homeQuery" placeholder="Search or enter URL…" aria-label="Search or enter URL"><button class="primary" type="submit">Go ↗</button></form>
+        <div class="quick">
+          <button data-url="../">🎮 Arcade</button><button data-url="../youtube/">▶ Video Theater</button><button data-url="../doom/">💀 DOOM</button><button data-url="https://www.wikipedia.org/">🌐 Wikipedia</button>
+        </div>
+        <p class="note">A simple browser-style workspace. Bookmarks and optional history stay in this browser on this device.</p>
+        <div class="section" id="bookmarkSection"><h2>☆ YOUR BOOKMARKS</h2><div class="bookmarks" id="bookmarkList"></div></div>
+        <div class="section"><h2>⌁ PRIVACY FIRST</h2><p class="note" style="text-align:left;margin:0">No account or tracking analytics are built into this page. Your internet provider, network administrator, and websites you visit may still see network activity.</p></div>
+      </section>
+      <section class="settings" id="settingsView">
+        <h2>⚙ Browser settings</h2>
+        <p style="color:var(--muted)">These settings are stored locally in this browser. Clearing site data in your browser may erase them.</p>
+        <div class="settingrow"><div><strong>Save browsing history</strong><p>Keep a small list of pages on this device only.</p></div><input type="checkbox" id="historyToggle"></div>
+        <div class="settingrow"><div><strong>Remember bookmarks</strong><p>Save bookmarks on this device using local storage.</p></div><input type="checkbox" id="bookmarkToggle" checked></div>
+        <div class="settingrow"><div><strong>Clear local history</strong><p>Delete history saved by this page.</p></div><button class="danger" id="clearHistory">Clear history</button></div>
+        <div class="settingrow"><div><strong>Clear bookmarks</strong><p>Remove saved bookmarks from this device.</p></div><button class="danger" id="clearBookmarks">Clear bookmarks</button></div>
+        <p id="settingsStatus" class="status" role="status"></p>
+        <div class="section"><h2>About website viewing</h2><p class="note" style="text-align:left;margin:0">Many websites block being shown inside another page. If a site refuses to load, use “Open outside” to open it in a regular browser tab. This page is not a VPN or proxy and cannot override network restrictions.</p></div>
+      </section>
+      <section class="home hidden" id="bookmarksView"><h2 style="color:var(--gold)">☆ Bookmarks</h2><p class="note">Saved on this device only.</p><div class="bookmarks" id="allBookmarks"></div></section>
+      <section class="home hidden" id="browseView"><div class="logo" style="font-size:2rem">Browse</div><p class="note">Enter a web address or search in the bar above. You can also try these links:</p><div class="quick"><button data-url="https://www.wikipedia.org/">Wikipedia</button><button data-url="https://www.mozilla.org/">Mozilla</button><button data-url="https://www.google.com/">Google</button><button data-url="https://duckduckgo.com/">DuckDuckGo</button></div></section>
+      <section class="viewer" id="viewerView"><div style="position:absolute;inset:0;display:flex;flex-direction:column"><div class="viewerbar"><span id="pageTitle">Website viewer</span><span style="flex:1"></span><button id="openOutside">Open outside ↗</button><button id="backHome">Home</button></div><iframe id="webframe" title="Website viewer" referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads allow-presentation" allow="fullscreen; autoplay; encrypted-media; picture-in-picture"></iframe><div class="warning" id="viewerWarning">If this site is blank or refuses to load, it may block embedding. Try “Open outside”.</div></div></section>
+    </main>
+  </div>
+  <footer>Classroom Arcade Browser · Private-by-design demo · Not a VPN or proxy</footer>
+</div>
+<script>
+(() => {
+ const $=id=>document.getElementById(id);
+ const safeGet=(key,fallback)=>{try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}};
+ const safeSet=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
+ let settings=safeGet('cab-settings',{saveHistory:false,saveBookmarks:true});
+ let bookmarks=safeGet('cab-bookmarks',[]);
+ let historyList=settings.saveHistory?safeGet('cab-history',[]):[];
+ let tabs=[{id:1,title:'New Tab',url:'',view:'home',back:[],forward:[]}],activeId=1,nextId=2;
+ const active=()=>tabs.find(t=>t.id===activeId)||tabs[0];
+ function normalize(input){
+  let value=(input||'').trim();if(!value)return '';
+  if(/^https?:\/\//i.test(value)){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol))return '';return u.href}catch{return ''}}
+  if(/^(localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?([/].*)?$/i.test(value))return 'http://'+value;
+  if(/^[\w.-]+\.[a-z]{2,}(:\d+)?([/?#].*)?$/i.test(value))return 'https://'+value;
+  return 'https://duckduckgo.com/?q='+encodeURIComponent(value);
+ }
+ function showView(view){
+  ['homeView','settingsView','bookmarksView','browseView','viewerView'].forEach(id=>$(id).classList.add('hidden'));
+  $(view==='home'?'homeView':view==='settings'?'settingsView':view==='bookmarks'?'bookmarksView':view==='browse'?'browseView':'viewerView').classList.remove('hidden');
+  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ }
+ function renderTabs(){
+  $('tabs').innerHTML='';
+  tabs.forEach(t=>{const b=document.createElement('button');b.className='tab'+(t.id===activeId?' active':'');b.innerHTML='<span>◉</span><span class="tabname"></span><span class="close" role="button" aria-label="Close tab">×</span>';b.querySelector('.tabname').textContent=t.title;b.addEventListener('click',e=>{if(e.target.classList.contains('close')){closeTab(t.id);return}activeId=t.id;renderTabs();restoreTab()});$('tabs').appendChild(b)});
+  const plus=document.createElement('button');plus.className='plus';plus.textContent='+';plus.title='New tab';plus.onclick=newTab;$('tabs').appendChild(plus);
+ }
+ function renderBookmarks(){
+  const fill=el=>{el.innerHTML='';if(!bookmarks.length){const p=document.createElement('span');p.className='note';p.textContent='No bookmarks yet. Open a page and tap ☆.';el.appendChild(p);return}
+   bookmarks.forEach(bm=>{const b=document.createElement('button');b.className='bookmark';b.textContent='☆ '+bm.title;b.title=bm.url;b.onclick=()=>navigate(bm.url);el.appendChild(b)})};
+  fill($('bookmarkList'));fill($('allBookmarks'));
+ }
+ function setTitle(title,url){const t=active();t.title=title||'Website';t.url=url||'';renderTabs();$('address').value=url||'';$('pageTitle').textContent=title||url||'Website viewer'}
+ function navigate(raw,push=true){
+  const url=normalize(raw);if(!url){return}
+  const t=active();if(push&&t.url){t.back.push(t.url);t.forward=[]}
+  t.url=url;t.view='viewer';$('address').value=url;showView('viewer');$('webframe').src=url;setTitle(new URL(url).hostname,url);
+  $('viewerWarning').textContent='If this site is blank or refuses to load, it may block embedding. Try “Open outside”.';
+  if(settings.saveHistory){historyList.unshift({url,title:new URL(url).hostname,at:Date.now()});historyList=historyList.slice(0,80);safeSet('cab-history',historyList)}
+  renderTabs();
+ }
+ function restoreTab(){const t=active();$('address').value=t.url||'';if(t.view==='viewer'&&t.url){showView('viewer');$('webframe').src=t.url;setTitle(t.title,t.url)}else showView(t.view||'home')}
+ function newTab(){tabs.push({id:nextId++,title:'New Tab',url:'',view:'home',back:[],forward:[]});activeId=tabs[tabs.length-1].id;renderTabs();restoreTab()}
+ function closeTab(id){if(tabs.length===1){tabs[0]={id:tabs[0].id,title:'New Tab',url:'',view:'home',back:[],forward:[]};restoreTab();renderTabs();return}const i=tabs.findIndex(t=>t.id===id);tabs=tabs.filter(t=>t.id!==id);if(activeId===id)activeId=tabs[Math.max(0,i-1)].id;renderTabs();restoreTab()}
+ function goHome(){active().url='';active().view='home';active().title='New Tab';$('webframe').src='about:blank';$('address').value='';showView('home');renderTabs()}
+ $('addressForm').addEventListener('submit',e=>{e.preventDefault();navigate($('address').value)});
+ $('homeSearch').addEventListener('submit',e=>{e.preventDefault();navigate($('homeQuery').value)});
+ $('back').onclick=()=>{const t=active();if(t.back.length){t.forward.push(t.url);t.url=t.back.pop();t.view='viewer';restoreTab()}};
+ $('forward').onclick=()=>{const t=active();if(t.forward.length){t.back.push(t.url);t.url=t.forward.pop();t.view='viewer';restoreTab()}};
+ $('reload').onclick=()=>{if(active().url){$('webframe').src=active().url}else goHome()};
+ $('home').onclick=goHome;$('backHome').onclick=goHome;
+ $('openOutside').onclick=()=>{if(active().url)window.open(active().url,'_blank','noopener,noreferrer')};
+ $('fullscreen').onclick=()=>{const v=$('viewerView');if(v.requestFullscreen)v.requestFullscreen().catch(()=>{})};
+ $('settingsBtn').onclick=()=>showView('settings');$('privacyBtn').onclick=()=>showView('settings');
+ $('bookmarkCurrent').onclick=()=>{const t=active();if(!t.url)return;const idx=bookmarks.findIndex(b=>b.url===t.url);if(idx>=0)bookmarks.splice(idx,1);else bookmarks.unshift({url:t.url,title:t.title||new URL(t.url).hostname});if(settings.saveBookmarks)safeSet('cab-bookmarks',bookmarks);renderBookmarks();$('bookmarkCurrent').textContent=idx>=0?'☆':'★'};
+ $('historyToggle').checked=!!settings.saveHistory;$('bookmarkToggle').checked=!!settings.saveBookmarks;
+ $('historyToggle').onchange=()=>{settings.saveHistory=$('historyToggle').checked;if(!settings.saveHistory){historyList=[];try{localStorage.removeItem('cab-history')}catch{}}else safeSet('cab-history',historyList);safeSet('cab-settings',settings)};
+ $('bookmarkToggle').onchange=()=>{settings.saveBookmarks=$('bookmarkToggle').checked;if(settings.saveBookmarks)safeSet('cab-bookmarks',bookmarks);else try{localStorage.removeItem('cab-bookmarks')}catch{}safeSet('cab-settings',settings)};
+ $('clearHistory').onclick=()=>{historyList=[];try{localStorage.removeItem('cab-history')}catch{}$('settingsStatus').textContent='Local history cleared.'};
+ $('clearBookmarks').onclick=()=>{bookmarks=[];try{localStorage.removeItem('cab-bookmarks')}catch{}renderBookmarks();$('settingsStatus').textContent='Local bookmarks cleared.'};
+ document.querySelectorAll('[data-url]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.url)));
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+ renderTabs();renderBookmarks();showView('home');
+})();
+</script>
+</body>
+</html>
