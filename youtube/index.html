@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>YouTube Theater | Classroom Arcade</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --text:#f4f7ff; --muted:#b9c4da; --accent:#8bd3ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%); color:var(--text); }
+    header { padding:30px 16px 18px; text-align:center; }
+    h1 { margin:.3rem 0; font-size:clamp(2rem,7vw,3rem); line-height:1.1; }
+    header p { max-width:700px; margin:10px auto; color:var(--muted); }
+    main { width:min(900px,100%); margin:auto; padding:0 14px 36px; }
+    .panel { background:linear-gradient(145deg,#1a2540,#111827); border:1px solid #34415c; border-radius:16px; padding:clamp(14px,3vw,22px); margin-bottom:16px; }
+    label { display:block; font-weight:750; margin-bottom:8px; }
+    .inputrow { display:flex; flex-wrap:wrap; gap:9px; }
+    input { flex:1 1 260px; min-width:0; padding:12px; color:var(--text); background:#080e1a; border:1px solid #53627c; border-radius:10px; font:inherit; }
+    button,.button { display:inline-block; border:0; border-radius:10px; padding:11px 15px; background:var(--accent); color:#07111f; font:inherit; font-weight:800; text-decoration:none; cursor:pointer; }
+    button:focus-visible,.button:focus-visible,input:focus-visible { outline:3px solid white; outline-offset:2px; }
+    .secondary { background:#273650; color:var(--text); border:1px solid #53627c; }
+    .player { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:#03060b; border:1px solid #34415c; border-radius:12px; }
+    .player iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    #status { min-height:1.5em; margin:10px 0 0; color:var(--muted); overflow-wrap:anywhere; }
+    .muted { color:var(--muted); font-size:.92rem; }
+    .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
+    footer { padding:0 16px 28px; color:var(--muted); text-align:center; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🕹️ Classroom Arcade</div>
+    <h1>▶ YouTube Theater</h1>
+    <p>Paste a YouTube video link to load it in the player below.</p>
+  </header>
+  <main>
+    <section class="panel" aria-label="Choose a video">
+      <label for="videoUrl">YouTube video URL or video ID</label>
+      <form id="videoForm">
+        <div class="inputrow">
+          <input id="videoUrl" name="videoUrl" type="text" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=..." aria-describedby="inputHelp">
+          <button type="submit">Load video</button>
+        </div>
+      </form>
+      <p id="inputHelp" class="muted">You can also paste a youtu.be link. This page does not download videos or upload your links to a server.</p>
+      <p id="status" role="status" aria-live="polite">No video loaded yet.</p>
+    </section>
+    <section class="panel" aria-label="Video player">
+      <div class="player" id="player">
+        <div style="position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:#b9c4da;">Your selected video will appear here.</div>
+      </div>
+      <div class="actions">
+        <a class="button secondary" id="openYoutube" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Open YouTube separately ↗</a>
+        <a class="button secondary" href="../">← Back to Classroom Arcade</a>
+      </div>
+    </section>
+    <section class="panel">
+      <strong>Playback and access notes</strong>
+      <p class="muted">This uses YouTube’s official embedded player. Some videos block embedding, require sign-in, have age or region limits, or may not play on restricted networks. Embedding a video does not bypass a school filter. If the player is blocked, ask your network administrator to approve YouTube or use an approved video service.</p>
+      <p class="muted">When you load a video, your browser connects directly to YouTube.</p>
+    </section>
+  </main>
+  <footer>Classroom Arcade · YouTube is a third-party service and is not affiliated with this project.</footer>
+  <script>
+    (() => {
+      "use strict";
+      const form = document.getElementById("videoForm");
+      const input = document.getElementById("videoUrl");
+      const player = document.getElementById("player");
+      const status = document.getElementById("status");
+      const openYoutube = document.getElementById("openYoutube");
+
+      function getVideoId(raw) {
+        const value = raw.trim();
+        if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
+        let url;
+        try { url = new URL(value); } catch (_) { return null; }
+        const host = url.hostname.toLowerCase().replace(/^www\./, "");
+        let id = "";
+        if (host === "youtu.be") id = url.pathname.split("/").filter(Boolean)[0] || "";
+        else if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+          if (url.pathname === "/watch") id = url.searchParams.get("v") || "";
+          else if (/^\/(embed|shorts|live)\//.test(url.pathname)) id = url.pathname.split("/")[2] || "";
+        } else return null;
+        return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const id = getVideoId(input.value);
+        if (!id) {
+          status.textContent = "Please enter a valid YouTube video link or 11-character video ID.";
+          return;
+        }
+        const embed = document.createElement("iframe");
+        embed.title = "YouTube video player";
+        embed.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id);
+        embed.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        embed.referrerPolicy = "strict-origin-when-cross-origin";
+        embed.allowFullscreen = true;
+        player.replaceChildren(embed);
+        openYoutube.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
+        status.textContent = "Video loaded. If playback is blocked, the network or video owner may not allow embedded playback.";
+      });
+    })();
+  </script>
+</body>
+</html>
