@@ -1,1 +1,0 @@
-window.CATALOG_DATA = [];
