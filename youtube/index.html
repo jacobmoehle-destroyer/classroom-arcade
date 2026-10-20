@@ -34,7 +34,11 @@
     .meta { margin:0; color:var(--muted); font-size:.85rem; }
     .result button { margin-top:auto; }
     .quicklinks,.actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
-    .quicklinks button { background:#273650; color:var(--text); border:1px solid #53627c; }
+    .quicklinks button,.video-links a { background:#273650; color:var(--text); border:1px solid #53627c; }
+    .video-links { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:10px; margin-top:14px; }
+    .video-links a { display:block; padding:13px; border-radius:11px; text-decoration:none; font-weight:750; }
+    .video-links a:hover { background:#354867; }
+    .video-links span { display:block; margin-top:3px; color:var(--muted); font-size:.85rem; font-weight:400; }
     footer { padding:0 16px 28px; color:var(--muted); text-align:center; font-size:.9rem; }
     @media (max-width:480px) { .inputrow button { width:100%; } }
   </style>
@@ -88,6 +92,22 @@
       </div>
       <p class="muted">If one player does not work, try the other player option. Some videos disable embedding, and network restrictions may block either service.</p>
     </section>
+
+    <section class="panel" aria-label="Video links">
+      <strong>🎬 Video links & quick picks</strong>
+      <p class="muted">Tap a topic to search for videos here. Results load above without sending you to YouTube's website.</p>
+      <div class="video-links">
+        <a href="#video-links" data-query="NASA space documentary">🚀 Space & NASA videos<span>Space, planets, and discoveries</span></a>
+        <a href="#video-links" data-query="easy science experiments">🧪 Science experiments<span>Fun science and demonstrations</span></a>
+        <a href="#video-links" data-query="Minecraft survival gameplay">🧱 Minecraft<span>Gameplay and builds</span></a>
+        <a href="#video-links" data-query="DOOM 1993 gameplay">💀 DOOM gameplay<span>Classic DOOM videos</span></a>
+        <a href="#video-links" data-query="how computers work for beginners">💻 Computers & technology<span>Learn how tech works</span></a>
+        <a href="#video-links" data-query="relaxing instrumental game music">🎵 Game music<span>Instrumental music and soundtracks</span></a>
+        <a href="#video-links" data-query="ocean wildlife documentary">🐬 Animals & nature<span>Wildlife and ocean videos</span></a>
+        <a href="#video-links" data-query="funny clean animal videos">🐈 Funny animals<span>Lighthearted animal clips</span></a>
+      </div>
+    </section>
+
     <section class="panel">
       <strong>About access</strong>
       <p class="muted">This page does not remove network restrictions. It uses third-party community services for in-page search; their availability, privacy practices, and video support can vary. Avoid entering personal information. If your school intentionally blocks video services, ask a teacher or network administrator about an approved option.</p>
@@ -236,9 +256,12 @@
       });
 
       document.querySelectorAll("[data-query]").forEach(button => {
-        button.addEventListener("click", () => {
-          searchQuery.value = button.dataset.query;
-          runSearch(button.dataset.query);
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          const query = button.dataset.query;
+          searchQuery.value = query;
+          runSearch(query);
+          document.getElementById("searchForm").scrollIntoView({ behavior: "smooth", block: "start" });
         });
       });
 
