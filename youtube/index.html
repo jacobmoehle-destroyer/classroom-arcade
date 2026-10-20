@@ -24,6 +24,10 @@
     .player iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
     #status { min-height:1.5em; margin:10px 0 0; color:var(--muted); overflow-wrap:anywhere; }
     .muted { color:var(--muted); font-size:.92rem; }
+    .quicklinks { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
+    .quicklinks a { display:inline-block; padding:9px 12px; border-radius:10px; color:var(--text); background:#273650; border:1px solid #53627c; text-decoration:none; font-weight:700; }
+    .quicklinks a:hover,.quicklinks a:focus-visible { outline:3px solid white; outline-offset:2px; background:#354867; }
+    .hint { border-left:3px solid var(--accent); padding-left:12px; }
     .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
     footer { padding:0 16px 28px; color:var(--muted); text-align:center; font-size:.9rem; }
   </style>
@@ -45,6 +49,26 @@
       </form>
       <p id="inputHelp" class="muted">You can also paste a youtu.be link. This page does not download videos or upload your links to a server.</p>
       <p id="status" role="status" aria-live="polite">No video loaded yet.</p>
+    </section>
+    <section class="panel" aria-label="Search YouTube">
+      <label for="searchQuery">Find a video on YouTube</label>
+      <form id="searchForm">
+        <div class="inputrow">
+          <input id="searchQuery" type="search" placeholder="Search videos, e.g. Minecraft tutorial" aria-describedby="searchHelp" required>
+          <button type="submit">Search videos ↗</button>
+        </div>
+      </form>
+      <p id="searchHelp" class="muted">Search opens YouTube results in a new tab. Choose a video there, then copy its URL and paste it into the player above.</p>
+      <p class="muted hint">The site can’t automatically display YouTube search results or retrieve video URLs without using YouTube’s search service/API. This search uses YouTube’s own results page.</p>
+      <strong>Quick searches</strong>
+      <div class="quicklinks" aria-label="Quick YouTube searches">
+        <a href="https://www.youtube.com/results?search_query=educational+science+videos" target="_blank" rel="noopener noreferrer">🔬 Science</a>
+        <a href="https://www.youtube.com/results?search_query=math+tutorials" target="_blank" rel="noopener noreferrer">➗ Math</a>
+        <a href="https://www.youtube.com/results?search_query=Minecraft+gameplay" target="_blank" rel="noopener noreferrer">🧱 Minecraft</a>
+        <a href="https://www.youtube.com/results?search_query=DOOM+gameplay" target="_blank" rel="noopener noreferrer">💀 DOOM</a>
+        <a href="https://www.youtube.com/results?search_query=game+music" target="_blank" rel="noopener noreferrer">🎵 Music</a>
+        <a href="https://www.youtube.com/results?search_query=funny+animal+videos" target="_blank" rel="noopener noreferrer">🐈 Animals</a>
+      </div>
     </section>
     <section class="panel" aria-label="Video player">
       <div class="player" id="player">
@@ -70,6 +94,16 @@
       const player = document.getElementById("player");
       const status = document.getElementById("status");
       const openYoutube = document.getElementById("openYoutube");
+      const searchForm = document.getElementById("searchForm");
+      const searchQuery = document.getElementById("searchQuery");
+
+      searchForm.addEventListener("submit", event => {
+        event.preventDefault();
+        const query = searchQuery.value.trim();
+        if (!query) return;
+        const searchUrl = "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
+        window.open(searchUrl, "_blank", "noopener,noreferrer");
+      });
 
       function getVideoId(raw) {
         const value = raw.trim();
