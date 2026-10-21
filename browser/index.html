@@ -102,9 +102,10 @@
  function setTitle(title,url){const t=active();t.title=title||'Website';t.url=url||'';renderTabs();$('address').value=url||'';$('pageTitle').textContent=title||url||'Website viewer'}
  const playerEl=$('mp4Player');
  const videoPlayer=typeof window.videojs==='function'?window.videojs(playerEl,{controls:true,fluid:true,responsive:true,playbackRates:[0.5,0.75,1,1.25,1.5,2],controlBar:{volumePanel:{inline:false}}}):null;
+ const playerContainer=videoPlayer?videoPlayer.el():playerEl;
  function isDirectVideo(url){try{return /\.(mp4|m4v|webm|ogv)$/i.test(new URL(url).pathname)}catch{return false}}
- function displayVideo(url){$('webframe').style.display='none';playerEl.style.display='block';$('viewerWarning').textContent='Direct video file · If playback fails, the host may restrict access or the format may not be supported.';if(videoPlayer){const path=new URL(url).pathname;const type=/\.webm$/i.test(path)?'video/webm':/\.ogv$/i.test(path)?'video/ogg':'video/mp4';videoPlayer.src({src:url,type});videoPlayer.load()}else{playerEl.src=url;playerEl.load()}}
- function displayWebpage(url){if(videoPlayer)videoPlayer.pause();else playerEl.pause();playerEl.style.display='none';$('webframe').style.display='block';$('webframe').src=url;$('viewerWarning').textContent='If this site is blank or refuses to load, it may block embedding. Try “Open outside”.'}
+ function displayVideo(url){$('webframe').style.display='none';playerContainer.style.display='block';$('viewerWarning').textContent='Direct video file · If playback fails, the host may restrict access or the format may not be supported.';if(videoPlayer){const path=new URL(url).pathname;const type=/\.webm$/i.test(path)?'video/webm':/\.ogv$/i.test(path)?'video/ogg':'video/mp4';videoPlayer.src({src:url,type});videoPlayer.load()}else{playerEl.src=url;playerEl.load()}}
+ function displayWebpage(url){if(videoPlayer)videoPlayer.pause();else playerEl.pause();playerContainer.style.display='none';$('webframe').style.display='block';$('webframe').src=url;$('viewerWarning').textContent='If this site is blank or refuses to load, it may block embedding. Try “Open outside”.'}
  function navigate(raw,push=true){
   const url=normalize(raw);if(!url){return}
   const t=active();if(push&&t.url){t.back.push(t.url);t.forward=[]}
