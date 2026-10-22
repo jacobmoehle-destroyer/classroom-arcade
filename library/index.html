@@ -25,6 +25,7 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="dosbox_pure">Classic PC / MS-DOS</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
 <div class="field"><label for="sort">Show</label><select id="sort"><option value="all">All games and systems</option><option value="favorites">Favorites only</option><option value="recent">Recently played</option></select></div>
 </div>
+<div class="filters"><a class="btn" href="#file-scanner">🔎 Jump to file scanner</a></div>
 <div class="filters" aria-label="Genre filters"><button class="active" data-genre="all">All genres</button><button data-genre="arcade">Arcade</button><button data-genre="platformer">Platformer</button><button data-genre="racing">Racing</button><button data-genre="sandbox">Sandbox</button><button data-genre="simulation">Simulation</button><button data-genre="action">Action</button><button data-genre="retro">Retro library</button></div>
 <div id="library" class="grid" aria-live="polite"></div>
 </section>
@@ -39,9 +40,9 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 </div>
 <p id="fileHint">Tip: .CHD or .PBP is usually easier for a single-file PlayStation image; a .CUE may refer to other track files which browsers cannot automatically select together.</p>
 <div class="filters"><button id="loadRom" class="primary">Load selected game</button><button id="stopRom">Close emulator</button><button id="clearRecent">Clear recent list</button></div>
-<div style="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px">
-<h3 style="margin:0 0 5px">Scan a folder for compatible games</h3>
-<p class="notice">Choose a folder (or select multiple files) and this page will check the filenames/extensions in your browser. It cannot silently scan your whole computer. Your files stay on your device.</p>
+<div id="file-scanner" style="margin-top:14px;padding:12px;border:1px solid var(--accent);border-radius:12px;scroll-margin-top:12px">
+<h3 style="margin:0 0 5px">🔎 Scan your game files</h3>
+<p class="notice">Choose a folder (or select multiple files) to find files that look compatible with the emulators above. Pick a result and press “Run this file” to load it into the matching emulator. This checks filenames and extensions only; it does not guarantee a game will run. It cannot scan your whole computer, and your files stay on your device.</p>
 <div class="filters"><label class="btn" for="scanFiles">Choose folder / files to scan</label><input id="scanFiles" type="file" multiple webkitdirectory directory style="max-width:100%;padding:8px" aria-label="Choose a folder or multiple game files to scan"></div>
 <div id="scanSummary" class="notice" role="status">No folder scanned yet.</div>
 <div id="scanResults" class="grid" style="margin-top:10px"></div>
