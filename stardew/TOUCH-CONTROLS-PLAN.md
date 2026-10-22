@@ -19,11 +19,11 @@ References:
 
 ### 1. Trace the real input layer first
 
-Find the SDL/Emscripten input glue and the game's existing action mapping in the runtime. Determine whether movement and actions arrive through SDL keyboard events, controller events, or another mechanism. Do not add visual controls until there is a confirmed route from a touch event to the same input events the game already consumes.
+The published native runtime bundle contains SDL3-related code, while game.js exposes the WasmBootstrap lifecycle but no public keyboard/gamepad injection method. This means the next step is to identify the exact SDL3 event bridge and the game's existing action mapping inside the runtime. Determine whether movement and actions arrive through SDL keyboard events, controller events, or another mechanism. Do not add visual controls until there is a confirmed route from a touch event to the same input events the game already consumes. Dispatching ordinary KeyboardEvents from the wrapper is not a substitute: browsers do not treat synthetic key events as real physical input, and a cross-origin parent cannot reach into the game's document.
 
 ### 2. Add a touch controller at the runtime boundary
 
-Once the input path is confirmed, implement a small, optional touch overlay in the same origin as the game runtime:
+Once the input path is confirmed, implement a small, optional touch overlay in the same origin as the game runtime. Prefer a supported SDL3 controller/event interface if the build exposes one; otherwise add a small, explicit bridge in the native/WebAssembly application rather than relying on browser-generated keyboard events:
 - A virtual left stick or directional pad for movement.
 - Separate action/use, tool, menu/back, and confirm buttons only where the game's real bindings support them.
 - Pointer Events (pointerdown, pointermove, pointerup, pointercancel) with pointer capture so a finger can slide without losing contact.
