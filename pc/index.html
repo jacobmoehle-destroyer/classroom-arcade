@@ -53,17 +53,18 @@ code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:
 const $=id=>document.getElementById(id);let emulator=null,libPromise=null,booting=false;
 function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error)}
 function controls(on){$('stop').disabled=!on;$('reset').disabled=!on;$('saveState').disabled=!on;$('releaseMouse').disabled=!on;$('boot').disabled=on||booting}
-function loadLibrary(){if(libPromise)return libPromise;libPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86Starter!=='undefined'?resolve():reject(new Error('v86 library loaded but V86Starter was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library. The host may be unavailable or blocked.'));document.head.appendChild(s)});return libPromise}
+function loadLibrary(){if(libPromise)return libPromise;libPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86!=='undefined'?resolve():reject(new Error('v86 library loaded but V86 was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library. The host may be unavailable or blocked.'));document.head.appendChild(s)});return libPromise}
+function prepareScreen(){$('screen').replaceChildren();const textScreen=document.createElement('div');textScreen.style.cssText='white-space:pre;font:14px monospace;line-height:14px';const canvas=document.createElement('canvas');canvas.style.display='none';$('screen').append(textScreen,canvas)}
 function stop(){if(emulator){try{emulator.stop()}catch(e){}emulator=null}$('screen').replaceChildren();controls(false);status('PC stopped. The virtual machine memory was cleared.')}
 $('boot').addEventListener('click',async()=>{
  const file=$('diskFile').files&&$('diskFile').files[0];if(!file){status('Choose a disk image first.',true);return}
  if(file.size>1024*1024*1024){status('That image is over 1 GB. Choose a smaller image to reduce the risk of running out of memory.',true);return}
  if(booting)return;booting=true;$('boot').disabled=true;status('Loading the emulator and reading your local disk image…');
  try{
-  await loadLibrary();const buffer=await file.arrayBuffer();if(emulator)stop();
-  const kind=$('diskType').value,opts={wasm_path:'https://copy.sh/v86/build/',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('screen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
-  opts[kind]={buffer};$('screen').replaceChildren();
-  emulator=new V86Starter(opts);
+  await loadLibrary();const buffer=await file.arrayBuffer();if(emulator)stop();prepareScreen();
+  const kind=$('diskType').value,opts={wasm_path:'https://copy.sh/v86/build/v86.wasm',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('screen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
+  opts[kind]={buffer};
+  emulator=new V86(opts);
   emulator.add_listener('emulator-ready',()=>{controls(true);status('Virtual PC started. Click the screen to focus keyboard input.')});
   emulator.add_listener('emulator-started',()=>{controls(true);status('Emulation running. The guest may still be booting.')});
   emulator.add_listener('download-progress',p=>{if(p&&p.total)status('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
