@@ -115,4 +115,5 @@ function step(t){if(!last)last=t;let dt=Math.min(32,t-last);last=t;if(!paused&&!
 drawInitial();cancelAnimationFrame(raf);raf=requestAnimationFrame(step);
 })();
 </script>
+<script src="../touch-controls.js" defer></script>
 </body></html>
