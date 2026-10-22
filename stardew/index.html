@@ -28,6 +28,10 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 <section class="panel">
 <h2>Play Stardew Valley in this page</h2>
 <p class="muted">This loads the community browser-port demo from its author's site. It is not hosted by Classroom Arcade, and it may be unavailable or blocked by your network. First load may download a large amount of data; the demo offers options with or without music.</p>
+<div class="note" role="note" aria-label="Network access notice">
+<strong>Using a school-managed iPad?</strong> If Securly shows “Blocked by Category” for <code>degloved.net</code>, the network administrator has to review that decision. This page cannot override the filter. I added a short review request you can share with the administrator; any alternate hosting should only happen after the game files’ redistribution rights and the new destination are approved.
+<div class="actions"><a class="btn secondary" href="./NETWORK-REVIEW-REQUEST.md">Open network review request ↗</a></div>
+</div>
 <div class="actions">
 <a class="btn" href="https://degloved.net/games/public/gms/stardew-valley/index.html" target="_blank" rel="noopener noreferrer">Open browser game directly ↗</a>
 <button class="btn secondary" type="button" onclick="document.getElementById('stardewFrame').requestFullscreen?.()">Fullscreen game</button>
@@ -35,7 +39,7 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 <div class="framewrap">
 <iframe id="stardewFrame" class="playframe" src="https://degloved.net/games/public/gms/stardew-valley/index.html" title="Community-hosted Stardew Valley browser port" allow="autoplay; fullscreen; gamepad; pointer-lock" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe>
 </div>
-<p class="note">If the frame is blank, the host may block embedding. Use “Open browser game directly” instead. Touch controls on iPad depend on whether the community build implements them; this page cannot inject controls into a cross-origin frame.</p>
+<p class="note">If the frame is blank but the direct link opens, the host may block embedding. If the direct link itself shows a network block page, opening it in a new tab will not fix that. Touch controls on iPad depend on whether the community build implements them; this page cannot inject controls into a cross-origin frame.</p>
 <p class="muted">Project source and credit: <a href="https://github.com/degloved-net/stardew-wasm" target="_blank" rel="noopener noreferrer">degloved-net/stardew-wasm on GitHub ↗</a>. Its README asks sites that use the project to give credit. The source repository is not a complete open-source release of all game data, so this integration embeds the author's hosted demo rather than copying its files into our repo.</p>
 </section>
 <section class="panel">
