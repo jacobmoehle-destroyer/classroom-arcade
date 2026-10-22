@@ -12,7 +12,7 @@ header{text-align:center;padding:22px 14px 14px}h1{font-size:clamp(2rem,7vw,3rem
 main{width:min(1100px,100%);padding:12px 14px 36px;margin:auto}
 nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 18px}
 button,a.btn{font:inherit;border-radius:10px;border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;cursor:pointer;text-decoration:none;touch-action:manipulation}
-button:hover,a.btn:hover,button:focus-visible,a.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:hover,a.btn:hover,button:focus-visible,a.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}[hidden]{display:none!important}
 button.active{background:var(--accent);color:#07111f;border-color:var(--accent);font-weight:800}
 .panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
 .gamehead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}.gamehead h2{margin:0;font-size:1.3rem}.hint{color:var(--muted);font-size:.92rem;margin:8px 0 12px}
@@ -102,7 +102,7 @@ function resetBall(){state.bx=320;state.by=200;state.vx=(Math.random()>.5?1:-1)*
 function choose(name){game=name;title.textContent={snake:'Snake',pong:'Pong',breakout:'Breakout',platformer:'Mini Platformer',racing:'Neon Racer',sandbox:'Pixel Builder'}[name];instructions.textContent=descriptions[name];document.querySelectorAll('[data-game]').forEach(b=>b.classList.toggle('active',b.dataset.game===name));reset()}
 function keyName(e){if(['ArrowUp','w','W'].includes(e.key))return'up';if(['ArrowDown','s','S'].includes(e.key))return'down';if(['ArrowLeft','a','A'].includes(e.key))return'left';if(['ArrowRight','d','D'].includes(e.key))return'right';return e.key}
 function setKey(k,v){keys[k]=v;keys[({up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'})[k]||k]=v}
-window.addEventListener('keydown',e=>{let k=keyName(e);if(['up','down','left','right',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))e.preventDefault();setKey(k,true);if((k===' '||k==='up'||k==='ArrowUp')&&game==='platformer'&&state.ground){state.vy=-8;state.ground=false}if((k===' '||k==='Enter')&&game==='breakout'&&!state.launched){state.launched=true}if(k===' '&&game==='sandbox')state.erase=!state.erase});
+window.addEventListener('keydown',e=>{let k=keyName(e);if(['up','down','left','right',' '].includes(k))e.preventDefault();setKey(k,true);if(game==='snake'){if(k==='up'&&state.dir.y!==1)state.next={x:0,y:-1};if(k==='down'&&state.dir.y!==-1)state.next={x:0,y:1};if(k==='left'&&state.dir.x!==1)state.next={x:-1,y:0};if(k==='right'&&state.dir.x!==-1)state.next={x:1,y:0}}if((k===' '||k==='up')&&game==='platformer'&&state.ground){state.vy=-8;state.ground=false}if((k===' '||k==='Enter')&&game==='breakout'&&!state.launched){state.launched=true}if(k===' '&&game==='sandbox')state.erase=!state.erase});
 window.addEventListener('keyup',e=>setKey(keyName(e),false));
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;const down=e=>{e.preventDefault();setKey(k,true);if(k==='up'&&game==='platformer'&&state.ground){state.vy=-8;state.ground=false}};const up=e=>{e.preventDefault();setKey(k,false)};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up)});
 document.querySelectorAll('[data-game]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.game)));
