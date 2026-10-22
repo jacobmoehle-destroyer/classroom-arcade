@@ -22,10 +22,10 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <h2 id="searchTitle" style="margin:0 0 10px">Find a game</h2>
 <div class="tools">
 <div class="field"><label for="search">Search library</label><input id="search" type="search" placeholder="Search title, genre, system…"></div>
-<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
+<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
 <div class="field"><label for="sort">Show</label><select id="sort"><option value="all">All games and systems</option><option value="favorites">Favorites only</option><option value="recent">Recently played</option></select></div>
 </div>
-<div class="filters" aria-label="Genre filters"><button class="active" data-genre="all">All genres</button><button data-genre="arcade">Arcade</button><button data-genre="platformer">Platformer</button><button data-genre="racing">Racing</button><button data-genre="sandbox">Sandbox</button><button data-genre="action">Action</button><button data-genre="retro">Retro library</button></div>
+<div class="filters" aria-label="Genre filters"><button class="active" data-genre="all">All genres</button><button data-genre="arcade">Arcade</button><button data-genre="platformer">Platformer</button><button data-genre="racing">Racing</button><button data-genre="sandbox">Sandbox</button><button data-genre="simulation">Simulation</button><button data-genre="action">Action</button><button data-genre="retro">Retro library</button></div>
 <div id="library" class="grid" aria-live="polite"></div>
 </section>
 <div class="two">
@@ -78,7 +78,7 @@ const games=[
 {id:'platformer',title:'Mini Platformer',system:'browser',genre:'platformer',emoji:'🏃',desc:'Jump across platforms and collect stars.',url:'../arcade/',action:'Open Arcade Hub'},
 {id:'racing',title:'Neon Racer',system:'browser',genre:'racing',emoji:'🏎️',desc:'Dodge traffic in an original mini-game.',url:'../arcade/',action:'Open Arcade Hub'},
 {id:'builder',title:'Pixel Builder',system:'browser',genre:'sandbox',emoji:'🟩',desc:'Place and remove blocks in a tiny world.',url:'../arcade/',action:'Open Arcade Hub'},
-{id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},
+{id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},\n{id:'stardew-valley',title:'Stardew Valley',system:'steam',genre:'simulation',emoji:'🌱',desc:'Cozy farming, fishing, crafting, and exploration. This Windows build cannot run directly in the browser; use the guide for official Steam and Steam Link options.',url:'../stardew/',action:'Open launch guide'},
 {id:'doom',title:'DOOM / DOOM II',system:'doom',genre:'action',emoji:'💀',desc:'Open the existing Dwasm player with built-in presets and local WAD selection.',url:'../doom/',action:'Open DOOM player'},
 ...Object.entries(systems).map(([id,s])=>({id:'system-'+id,title:s.label,system:id,genre:'retro',emoji:'🎮',desc:'Load a compatible game file from your own device. '+s.ext,url:'#loader',action:'Choose file'}))
 ];
