@@ -25,6 +25,12 @@
     ul{padding-left:22px;color:var(--muted)}li{margin:7px 0}
     code{overflow-wrap:anywhere;color:#d7edff}
     footer{padding-bottom:calc(28px + env(safe-area-inset-bottom));color:var(--muted);font-size:.9rem}
+    .diagnostics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin-top:14px}
+    .check{border:1px solid var(--line);background:#0d1526;border-radius:12px;padding:12px}
+    .check strong{display:block;color:var(--text);margin-bottom:3px}
+    .check span{color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+    .check .value{color:#b8e9c7;font-weight:700}
+    .note{font-size:.9rem;border-left:3px solid var(--accent);padding-left:12px}
   </style>
 </head>
 <body>
@@ -56,6 +62,17 @@
         <li><strong>Device testing still needed:</strong> Safari/WebGL behavior, memory stability, audio, orientation, and touch controls.</li>
       </ul>
     </section>
+    <section class="panel" aria-labelledby="device-check-title">
+      <h2 id="device-check-title">Quick browser compatibility check</h2>
+      <p>This runs locally in your browser. It does not launch the game, contact the demo host, or change network settings; it only checks basic browser features.</p>
+      <div class="diagnostics" aria-live="polite">
+        <div class="check"><strong>WebAssembly</strong><span id="wasm-result">Checking…</span></div>
+        <div class="check"><strong>WebGL graphics</strong><span id="webgl-result">Checking…</span></div>
+        <div class="check"><strong>Touch input</strong><span id="touch-result">Checking…</span></div>
+        <div class="check"><strong>Browser-reported memory</strong><span id="memory-result">Checking…</span></div>
+      </div>
+      <p class="note">These are basic capability checks, not a guarantee that the experimental port will run. The game reportedly needs about 500 MB of memory, and some rendering features are incomplete.</p>
+    </section>
     <section class="panel">
       <h2>License and attribution</h2>
       <p>The SuperTuxKart code is licensed under GPL version 3 or later. Game artwork and assets have their own open-license and attribution requirements, so the code license alone is not blanket permission to redistribute every asset. Any locally hosted build must preserve the applicable notices and source/license obligations.</p>
@@ -76,5 +93,24 @@
     </section>
   </main>
   <footer>Classroom Arcade · Community project; not affiliated with the SuperTuxKart developers.</footer>
+  <script>
+    (function () {
+      const set = (id, text) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = text;
+      };
+      set('wasm-result', typeof WebAssembly === 'object' ? 'Supported by this browser' : 'Not detected');
+      let webgl = 'Not detected';
+      try {
+        const canvas = document.createElement('canvas');
+        if (canvas.getContext('webgl2')) webgl = 'WebGL 2 supported';
+        else if (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) webgl = 'WebGL supported; version may be limited';
+      } catch (e) {}
+      set('webgl-result', webgl);
+      set('touch-result', ('ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0) ? 'Touch input detected' : 'No touch input detected');
+      const memory = navigator.deviceMemory;
+      set('memory-result', Number.isFinite(memory) ? 'Approx. ' + memory + ' GB device memory reported' : 'Not exposed by this browser');
+    })();
+  </script>
 </body>
 </html>
