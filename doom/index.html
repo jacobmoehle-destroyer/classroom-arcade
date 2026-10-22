@@ -83,8 +83,17 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
 <section id="launcher">
   <label for="wadPicker">Choose a DOOM WAD file</label>
   <input id="wadPicker" type="file" accept=".wad,.WAD">
+  <label for="presetPicker" style="margin-top:10px">Or choose a built-in game</label>
+  <div class="toolbar" style="margin-bottom:8px">
+    <select id="presetPicker" style="max-width:100%;padding:8px;color:#fff;background:#292929;border:1px solid #555;border-radius:7px;font:inherit">
+      <option value="">Choose a preset…</option>
+      <option value="doom.wad">DOOM (Classic)</option>
+      <option value="doom2.wad">DOOM II</option>
+    </select>
+    <button id="presetButton" type="button">Play Preset</button>
+  </div>
   <div class="toolbar">
-    <button id="startButton" type="button">Load / Restart DOOM</button>
+    <button id="startButton" type="button">Load Selected File</button>
     <button id="backButton" type="button">Back to Arcade</button>
   </div>
   <div id="status">Choose a compatible IWAD file, then load DOOM.</div>
@@ -140,6 +149,8 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
 
   const wadPicker = document.getElementById("wadPicker");
   const startButton = document.getElementById("startButton");
+  const presetPicker = document.getElementById("presetPicker");
+  const presetButton = document.getElementById("presetButton");
   const statusBox = document.getElementById("status");
   const consoleBox = document.getElementById("console");
   const gameWrapper = document.getElementById("gameWrapper");
@@ -410,6 +421,44 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
     };
     document.body.appendChild(script);
   }
+
+  presetButton.addEventListener("click", async () => {
+    if (loading) {
+      setStatus("DOOM is still loading. Check the console.");
+      return;
+    }
+    if (runtimeReady || scriptRequested) {
+      setStatus("To switch games, reload this page and choose another preset.");
+      return;
+    }
+    const preset = presetPicker.value;
+    if (!preset) {
+      setStatus("Choose DOOM or DOOM II from the preset menu first.");
+      presetPicker.focus();
+      return;
+    }
+    loading = true;
+    presetButton.disabled = true;
+    startButton.disabled = true;
+    consoleBox.textContent = "Starting built-in preset...\\n";
+    setStatus("Loading " + (preset === "doom2.wad" ? "DOOM II" : "DOOM (Classic)") + "...");
+    try {
+      const response = await fetch("./" + preset);
+      if (!response.ok) throw new Error("Could not fetch the built-in WAD (HTTP " + response.status + ").");
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      if (bytes.length < 12) throw new Error("The built-in WAD file is too small.");
+      const signature = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+      if (signature !== "IWAD" && signature !== "PWAD") throw new Error("The built-in file does not have a valid WAD header.");
+      setStatus("Loading preset: " + (preset === "doom2.wad" ? "DOOM II" : "DOOM (Classic)") + "...");
+      loadEngine(bytes);
+    } catch (error) {
+      loading = false;
+      presetButton.disabled = false;
+      startButton.disabled = false;
+      setStatus("Preset loading failed: " + error.message);
+      log("Preset loading error: " + error.message);
+    }
+  });
 
   startButton.addEventListener("click", async () => {
     if (loading) {
