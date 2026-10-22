@@ -31,14 +31,25 @@ function dispatch(key,type){
  try{Object.defineProperty(event,'keyCode',{get:()=>({' ':32,Enter:13,Escape:27,ArrowUp:38,ArrowDown:40,ArrowLeft:37,ArrowRight:39,Shift:16,Control:17}[key]||key.toUpperCase().charCodeAt(0))});Object.defineProperty(event,'which',{get:()=>event.keyCode})}catch(_){}
  document.dispatchEvent(event);
 }
+function nativeTarget(key){
+ if(!document.querySelector('.touchButton'))return null;
+ const ids={'ArrowUp':'moveUp','ArrowDown':'moveDown','ArrowLeft':'moveLeft','ArrowRight':'moveRight',' ':'useButton','Control':'fireButton','e':'fireButton','Shift':'runButton','Escape':'menuButton','Enter':'enterButton','Tab':'mapButton'};
+ return ids[key]?document.getElementById(ids[key]):null;
+}
+function nativePointer(target,type,pointerId){
+ if(!target)return;
+ try{target.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId,pointerType:'touch',isPrimary:true,button:0,buttons:type==='pointerup'?0:1}))}catch(_){}
+}
 function press(button,pointerId){
  const key=button.dataset.key;if(active.has(pointerId))return;
- active.set(pointerId,{key,button});button.classList.add('ca-pressed');
- if(![...active.values()].some(x=>x.key===key&&x.button!==button))dispatch(key,'keydown');
+ const native=nativeTarget(key);active.set(pointerId,{key,button,native});button.classList.add('ca-pressed');
+ if(native)nativePointer(native,'pointerdown',pointerId);
+ else if(![...active.values()].some(x=>x.key===key&&x.button!==button))dispatch(key,'keydown');
 }
 function release(pointerId){
  const item=active.get(pointerId);if(!item)return;active.delete(pointerId);item.button.classList.remove('ca-pressed');
- if(![...active.values()].some(x=>x.key===item.key))dispatch(item.key,'keyup');
+ if(item.native)nativePointer(item.native,'pointerup',pointerId);
+ else if(![...active.values()].some(x=>x.key===item.key))dispatch(item.key,'keyup');
 }
 function releaseAll(){for(const id of [...active.keys()])release(id)}
 dock.querySelectorAll('[data-key]').forEach(button=>{
