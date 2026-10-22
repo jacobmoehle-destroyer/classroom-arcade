@@ -7,14 +7,16 @@
 <title>Stardew Valley | Classroom Arcade</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--green:#b8e9c7}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#254637,var(--bg) 62%);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
-header{text-align:center;padding:30px 16px 20px}header .eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.1rem,8vw,3.6rem);line-height:1.05;margin:10px 0}header p{max-width:720px;color:var(--muted);margin:12px auto}
-.playframe{width:100%;height:min(72vh,760px);min-height:420px;border:1px solid var(--line);border-radius:12px;background:#000}
-.framewrap{overflow:hidden;border-radius:12px;background:#000}
-@media(max-width:600px){.playframe{height:68vh;min-height:360px}}
-main{width:min(920px,100%);padding:0 14px 34px;margin:auto}.panel{border:1px solid var(--line);background:#151d31ee;border-radius:16px;padding:18px;margin:0 0 14px}.status{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 10px;font-size:.82rem;color:var(--green)}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btn{display:inline-block;text-align:center;text-decoration:none;border-radius:10px;background:var(--accent);color:#07111f;font-weight:800;padding:12px 15px;min-height:46px}.btn.secondary{background:#273650;color:var(--text);border:1px solid #53627c}.btn:focus-visible{outline:3px solid white;outline-offset:3px}
+*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100%;background:radial-gradient(ellipse at top,#254637,var(--bg) 62%);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
+header{text-align:center;padding:24px 16px 16px}header .eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.1rem,8vw,3.6rem);line-height:1.05;margin:10px 0}header p{max-width:720px;color:var(--muted);margin:12px auto}
+.playframe{display:block;width:100%;height:min(78vh,900px);min-height:420px;border:0;background:#000}@supports(height:1svh){.playframe{height:min(78svh,900px)}}
+.framewrap{overflow:hidden;border-radius:12px;background:#000;border:1px solid var(--line)}
+main{width:min(1100px,100%);padding:0 12px 34px;margin:auto}.panel{border:1px solid var(--line);background:#151d31ee;border-radius:16px;padding:18px;margin:0 0 14px}.status{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 10px;font-size:.82rem;color:var(--green)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;border-radius:10px;background:var(--accent);color:#07111f;font-weight:800;padding:12px 15px;min-height:48px;touch-action:manipulation}.btn.secondary{background:#273650;color:var(--text);border:1px solid #53627c}.btn:focus-visible{outline:3px solid white;outline-offset:3px}
 h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22px}.steps li{margin:8px 0}.note{border-left:3px solid var(--green);padding-left:12px;color:var(--muted)}footer{text-align:center;color:var(--muted);padding:0 12px 28px;font-size:.88rem}
+.game-tip{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}.game-tip p{margin:0}
+@media(max-width:600px){header{padding:18px 12px 12px}main{padding:0 8px 24px}.panel{padding:13px;border-radius:12px}.playframe{height:76vh;min-height:320px}.actions>*{flex:1 1 180px}}
+@media(orientation:landscape) and (max-height:600px){header{padding:8px}.eyebrow,header p,.status{display:none}h1{font-size:1.6rem;margin:4px}.playframe{height:84vh;min-height:250px}main{padding-bottom:12px}}
 </style>
 </head>
 <body>
@@ -26,27 +28,20 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 </header>
 <main>
 <section class="panel">
-<h2>Play a farm game right here 🌱</h2>
-<p class="muted">The third-party Stardew demo is blocked on some managed networks. So I also built <strong>Pocket Farm</strong>, an original little farming game hosted directly in Classroom Arcade. It does not need the blocked game host, and its controls work with touchscreens.</p>
-<div class="actions"><a class="btn" href="./farm.html">Play Pocket Farm full screen ↗</a></div>
-<iframe title="Pocket Farm original farming mini-game" src="./farm.html" loading="eager" style="display:block;width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:#101d1a;margin-top:12px" allow="fullscreen"></iframe>
-<p class="note">This is a playable original alternative, not Stardew Valley. I kept the separate community Stardew demo below for networks where its host is permitted.</p>
-</section>
-<section class="panel">
 <h2>Play Stardew Valley in this page</h2>
-<p class="muted">This loads the community browser-port demo from its author's site. It is not hosted by Classroom Arcade, and it may be unavailable or blocked by your network. First load may download a large amount of data; the demo offers options with or without music.</p>
+<p class="muted">This is the actual community browser port, running its own game engine in a canvas. On iPad, use landscape orientation for more room. For the first test, choose <strong>Play without music</strong> to reduce the download to about 64 MB; music adds roughly 540 MB. Keep this page open while it downloads and caches game data.</p>
 <div class="note" role="note" aria-label="Network access notice">
 <strong>Using a school-managed iPad?</strong> If Securly shows “Blocked by Category” for <code>degloved.net</code>, the network administrator has to review that decision. This page cannot override the filter. I added a short review request you can share with the administrator; any alternate hosting should only happen after the game files’ redistribution rights and the new destination are approved.
 <div class="actions"><a class="btn secondary" href="https://github.com/jacobmoehle-destroyer/classroom-arcade/blob/main/stardew/NETWORK-REVIEW-REQUEST.md" target="_blank" rel="noopener noreferrer">Open network review request ↗</a></div>
 </div>
 <div class="actions">
-<a class="btn" href="https://degloved.net/games/public/gms/stardew-valley/index.html" target="_blank" rel="noopener noreferrer">Open browser game directly ↗</a>
-<button class="btn secondary" type="button" onclick="document.getElementById('stardewFrame').requestFullscreen?.()">Fullscreen game</button>
+<a class="btn" href="https://degloved.net/games/public/gms/stardew-valley/index.html" target="_blank" rel="noopener noreferrer">Launch actual Stardew in its own tab ↗</a>
+<button class="btn secondary" type="button" onclick="const f=document.getElementById('stardewFrame'); if(f.requestFullscreen) f.requestFullscreen(); else window.open('https://degloved.net/games/public/gms/stardew-valley/index.html','_blank','noopener')">Fullscreen / open game ↗</button>
 </div>
 <div class="framewrap">
 <iframe id="stardewFrame" class="playframe" src="https://degloved.net/games/public/gms/stardew-valley/index.html" title="Community-hosted Stardew Valley browser port" allow="autoplay; fullscreen; gamepad; pointer-lock" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe>
 </div>
-<p class="note">If the frame is blank but the direct link opens, the host may block embedding. If the direct link itself shows a network block page, opening it in a new tab will not fix that. Touch controls on iPad depend on whether the community build implements them; this page cannot inject controls into a cross-origin frame.</p>
+<div class="note game-tip"><p><strong>iPad test:</strong> rotate to landscape, launch in its own tab, and try tapping the game. The port source currently has no explicit touch-control layer, so touch interaction may be incomplete; this page cannot inject controls into a cross-origin game frame.</p><p><a href="https://github.com/degloved-net/stardew-wasm" target="_blank" rel="noopener noreferrer">Upstream source ↗</a></p></div>
 <p class="muted">Project source and credit: <a href="https://github.com/degloved-net/stardew-wasm" target="_blank" rel="noopener noreferrer">degloved-net/stardew-wasm on GitHub ↗</a>. Its README asks sites that use the project to give credit. The source repository is not a complete open-source release of all game data, so this integration embeds the author's hosted demo rather than copying its files into our repo.</p>
 </section>
 <section class="panel">
