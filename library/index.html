@@ -151,7 +151,7 @@ let pcEmulator=null,pcLibraryPromise=null,pcBooting=false;
 function pcStatus(message,error=false){$('pcStatus').textContent=message;$('pcStatus').classList.toggle('error',error)}
 function pcControls(on){$('pcStop').disabled=!on;$('pcReset').disabled=!on;$('pcSave').disabled=!on;$('pcReleaseMouse').disabled=!on;$('pcBoot').disabled=on||pcBooting}
 function loadV86Library(){if(pcLibraryPromise)return pcLibraryPromise;pcLibraryPromise=new Promise((resolve,reject)=>{if(typeof V86!=='undefined'){resolve();return}const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86!=='undefined'?resolve():reject(new Error('v86 library loaded but V86 was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library from copy.sh. The host may be unavailable or unreachable on this network.'));document.head.appendChild(s)});return pcLibraryPromise}
-function stopPC(message='PC stopped. Virtual machine memory was cleared.'){if(pcEmulator){try{pcEmulator.stop()}catch(e){}pcEmulator=null}$('pcScreen').replaceChildren();pcControls(false);pcStatus(message)}
+function stopPC(message='PC stopped. Virtual machine memory was cleared.',error=false){if(pcEmulator){try{pcEmulator.stop()}catch(e){}pcEmulator=null}$('pcScreen').replaceChildren();pcControls(false);pcStatus(message,error)}
 async function bootPCFile(file,kind){
  if(!file){pcStatus('Choose a disk image first.',true);return}
  if(file.size>1024*1024*1024){pcStatus('That image is over 1 GB. Choose a smaller image to reduce the risk of running out of memory.',true);return}
