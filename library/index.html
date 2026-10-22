@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020"><title>Game Library | Classroom Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--good:#a8e6bd}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 60%);color:var(--text);font:16px/1.5 system-ui,-apple-system,sans-serif}
+header{text-align:center;padding:24px 14px 12px}h1{font-size:clamp(2rem,7vw,3rem);margin:5px 0}.sub{color:var(--muted);max-width:800px;margin:auto}
+main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--accent)}button,select,input{font:inherit}button,.btn{border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none;touch-action:manipulation}button:hover,.btn:hover,button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}button.primary{background:var(--accent);color:#07111f;border-color:var(--accent);font-weight:800}button:disabled{opacity:.55;cursor:wait}
+.panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:15px}.notice{color:var(--muted);font-size:.92rem}.notice strong{color:var(--text)}.tools{display:grid;grid-template-columns:1fr;gap:10px}.field label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:10px;padding:9px}.filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.filters button.active{background:var(--accent);color:#07111f;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));gap:12px}.tile{background:linear-gradient(145deg,#1a2540,#111827);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;min-height:175px}.tile .emoji{font-size:1.8rem}.tile h3{margin:5px 0}.tile p{color:var(--muted);font-size:.92rem;margin:0 0 12px;flex:1}.tile .actions{display:flex;gap:7px;flex-wrap:wrap}.tile .actions button,.tile .actions a{flex:1;text-align:center}.status{min-height:1.5em;color:var(--good);overflow-wrap:anywhere}.status.error{color:#ffb4b4}
+#emulatorWrap[hidden]{display:none}#game{width:100%;min-height:220px;max-height:75vh;aspect-ratio:4/3;background:#05070c;border-radius:10px;overflow:hidden}#game canvas{max-width:100%;height:auto}#emulatorTop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}#emulatorTop h2{margin:0}#fileHint{font-size:.88rem;color:var(--muted);margin:8px 0 0}.badge{display:inline-block;border:1px solid #53627c;border-radius:99px;padding:2px 8px;font-size:.75rem;color:var(--muted)}.empty{padding:20px;border:1px dashed #53627c;border-radius:12px;color:var(--muted);grid-column:1/-1}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
+@media(min-width:760px){.tools{grid-template-columns:1.3fr 1fr 1fr}.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,.8fr);gap:14px;align-items:start}}
+</style>
+</head>
+<body>
+<header><div>🕹️ CLASSROOM ARCADE</div><h1>Universal Game Library</h1><p class="sub">One searchable shelf for the site’s browser games and a local-file launcher for supported retro systems. Your selected ROM stays in your browser session; this page does not upload it to this repository.</p></header>
+<main>
+<div class="panel notice"><strong>Quick note:</strong> EmulatorJS is loaded from its public CDN, so internet access to that service is required. Use game files you are allowed to use, and follow the rules for your network or school. Console performance and game compatibility vary by device; N64 and PlayStation can be demanding on phones.</div>
+<section class="panel" aria-labelledby="searchTitle">
+<h2 id="searchTitle" style="margin:0 0 10px">Find a game</h2>
+<div class="tools">
+<div class="field"><label for="search">Search library</label><input id="search" type="search" placeholder="Search title, genre, system…"></div>
+<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
+<div class="field"><label for="sort">Show</label><select id="sort"><option value="all">All games and systems</option><option value="favorites">Favorites only</option><option value="recent">Recently played</option></select></div>
+</div>
+<div class="filters" aria-label="Genre filters"><button class="active" data-genre="all">All genres</button><button data-genre="arcade">Arcade</button><button data-genre="platformer">Platformer</button><button data-genre="racing">Racing</button><button data-genre="sandbox">Sandbox</button><button data-genre="action">Action</button><button data-genre="retro">Retro library</button></div>
+<div id="library" class="grid" aria-live="polite"></div>
+</section>
+<div class="two">
+<section class="panel" aria-labelledby="loaderTitle">
+<h2 id="loaderTitle" style="margin-top:0">Load a game file from this device</h2>
+<p class="notice">Choose the console first, then pick a compatible game file. The launcher passes the selected file to EmulatorJS as a temporary browser object URL; it does not commit or upload the file. File extensions are only a hint—some titles need a BIOS, special disc layout, or a different dump.</p>
+<div class="tools">
+<div class="field"><label for="console">Target system</label><select id="console"><option value="gb">Game Boy / Game Boy Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">Super Nintendo / SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
+<div class="field"><label for="rom">Game file</label><input id="rom" type="file" accept=".gb,.gbc,.gba,.nes,.fds,.sfc,.smc,.n64,.z64,.v64,.iso,.chd,.pbp,.cue,.bin,.md,.gen,.smd,.zip"></div>
+<div class="field"><label for="gameName">Display name (optional)</label><input id="gameName" type="text" maxlength="90" placeholder="Use file name if blank"></div>
+</div>
+<p id="fileHint">Tip: .CHD or .PBP is usually easier for a single-file PlayStation image; a .CUE may refer to other track files which browsers cannot automatically select together.</p>
+<div class="filters"><button id="loadRom" class="primary">Load selected game</button><button id="stopRom">Close emulator</button><button id="clearRecent">Clear recent list</button></div>
+<div id="loaderStatus" class="status" role="status">Ready. Select a system and a game file.</div>
+</section>
+<section class="panel">
+<h2 style="margin-top:0">Playing & saves</h2>
+<ul class="notice">
+<li><strong>Controller:</strong> EmulatorJS includes on-screen controls for supported systems and controller/key-mapping settings. A connected Bluetooth controller may work if your browser exposes it.</li>
+<li><strong>Save states:</strong> use the emulator’s menu to save or load a state. Its interface supports downloading a state to your device and loading a state file later.</li>
+<li><strong>Game saves:</strong> core support varies. Don’t assume every title or system can save the same way.</li>
+<li><strong>Privacy:</strong> favorites and recent titles are stored in this browser’s local storage. ROM data is not stored by this launcher after you close/reload it.</li>
+<li><strong>Legal files:</strong> only use game files and BIOS files you are authorized to use. This site does not provide ROM downloads or BIOS files.</li>
+</ul>
+<p class="notice">The current integrated systems are based on EmulatorJS’s documented core names: gb, gba, nes, snes, n64, psx and segaMD. Actual compatibility still depends on the file, core, browser, and device.</p>
+</section>
+</div>
+<section id="emulatorWrap" class="panel" hidden>
+<div id="emulatorTop"><h2 id="nowPlaying">Now playing</h2><button id="hideEmulator">Hide player</button></div>
+<div id="game" aria-label="Emulator player"></div>
+<p class="notice">If the emulator fails to start, check that the system matches the file, try a compatible file format, or close the player and select another game. Some BIOS files are optional, but others may be required for specific games.</p>
+</section>
+<p><a class="btn" href="../">← Back to Classroom Arcade</a> <a class="btn" href="../arcade/">Open original mini-games</a> <a class="btn" href="../doom/">Open DOOM player</a></p>
+</main><footer>Universal Game Library · Local-file launcher · Classroom Arcade</footer>
+<script>
+(()=>{'use strict';
+const systems={
+ gb:{label:'Game Boy / Color',core:'gb',ext:'.gb .gbc .zip'},
+ gba:{label:'Game Boy Advance',core:'gba',ext:'.gba .zip'},
+ nes:{label:'NES / Famicom',core:'nes',ext:'.nes .fds .zip'},
+ snes:{label:'SNES',core:'snes',ext:'.sfc .smc .zip'},
+ n64:{label:'Nintendo 64',core:'n64',ext:'.n64 .z64 .v64 .zip'},
+ psx:{label:'PlayStation',core:'psx',ext:'.chd .pbp .iso .cue .bin .zip'},
+ segaMD:{label:'Sega Genesis / Mega Drive',core:'segaMD',ext:'.md .gen .smd .bin .zip'}
+};
+const games=[
+{id:'snake',title:'Snake',system:'browser',genre:'arcade',emoji:'🐍',desc:'Eat dots, grow longer, and avoid your tail.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'pong',title:'Pong',system:'browser',genre:'arcade',emoji:'🏓',desc:'Classic paddle-and-ball arcade game.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'breakout',title:'Breakout',system:'browser',genre:'arcade',emoji:'🧱',desc:'Bounce the ball to clear every brick.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'platformer',title:'Mini Platformer',system:'browser',genre:'platformer',emoji:'🏃',desc:'Jump across platforms and collect stars.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'racing',title:'Neon Racer',system:'browser',genre:'racing',emoji:'🏎️',desc:'Dodge traffic in an original mini-game.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'builder',title:'Pixel Builder',system:'browser',genre:'sandbox',emoji:'🟩',desc:'Place and remove blocks in a tiny world.',url:'../arcade/',action:'Open Arcade Hub'},
+{id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},
+{id:'doom',title:'DOOM / DOOM II',system:'doom',genre:'action',emoji:'💀',desc:'Open the existing Dwasm player with built-in presets and local WAD selection.',url:'../doom/',action:'Open DOOM player'},
+...Object.entries(systems).map(([id,s])=>({id:'system-'+id,title:s.label,system:id,genre:'retro',emoji:'🎮',desc:'Load a compatible game file from your own device. '+s.ext,url:'#loader',action:'Choose file'}))
+];
+const $=id=>document.getElementById(id),lib=$('library');let genre='all',activeObjectUrl=null,loaderScript=null;
+const safeRead=(k,f)=>{try{const x=JSON.parse(localStorage.getItem(k)||'null');return x??f}catch{return f}};
+const favs=()=>safeRead('ca-library-favorites',[]),recent=()=>safeRead('ca-library-recent',[]);
+function setStatus(message,error=false){$('loaderStatus').textContent=message;$('loaderStatus').classList.toggle('error',error)}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ const q=$('search').value.trim().toLowerCase(),sys=$('systemFilter').value,sort=$('sort').value,fs=favs(),rs=recent();
+ let arr=games.filter(g=>(sys==='all'||g.system===sys)&&(genre==='all'||g.genre===genre)&&(!q||(g.title+' '+g.system+' '+g.genre+' '+g.desc).toLowerCase().includes(q))&&(sort!=='favorites'||fs.includes(g.id))&&(sort!=='recent'||rs.includes(g.id)));
+ if(sort==='recent')arr.sort((a,b)=>rs.indexOf(a.id)-rs.indexOf(b.id));
+ lib.innerHTML=arr.length?arr.map(g=>'<article class="tile"><div class="emoji">'+g.emoji+'</div><h3>'+escapeHtml(g.title)+'</h3><p>'+escapeHtml(g.desc)+'</p><div><span class="badge">'+escapeHtml(g.system==='segaMD'?'Sega Genesis':g.system.toUpperCase())+'</span> <span class="badge">'+escapeHtml(g.genre)+'</span></div><div class="actions" style="margin-top:10px"><a class="btn" href="'+g.url+'" '+(g.url==='#loader'?'data-system="'+g.system+'"':'')+'>'+escapeHtml(g.action)+'</a><button data-fav="'+g.id+'" aria-pressed="'+fs.includes(g.id)+'">'+(fs.includes(g.id)?'★ Saved':'☆ Favorite')+'</button></div></article>').join(''):'<div class="empty">No matching games. Try another search, filter, or show all games.</div>';
+ lib.querySelectorAll('[data-fav]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.fav;let a=favs();a=a.includes(id)?a.filter(x=>x!==id):[...a,id];localStorage.setItem('ca-library-favorites',JSON.stringify(a));render()}));
+ lib.querySelectorAll('[data-system]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();$('console').value=a.dataset.system;$('console').scrollIntoView({behavior:'smooth',block:'center'});$('rom').click()}));
+}
+$('search').addEventListener('input',render);$('systemFilter').addEventListener('change',render);$('sort').addEventListener('change',render);
+document.querySelectorAll('[data-genre]').forEach(b=>b.addEventListener('click',()=>{genre=b.dataset.genre;document.querySelectorAll('[data-genre]').forEach(x=>x.classList.toggle('active',x===b));render()}));
+function dispose(){
+ if(loaderScript){loaderScript.remove();loaderScript=null}
+ if(activeObjectUrl){URL.revokeObjectURL(activeObjectUrl);activeObjectUrl=null}
+ $('game').replaceChildren();$('emulatorWrap').hidden=true;
+}
+$('stopRom').addEventListener('click',()=>{dispose();setStatus('Emulator closed. Your selected file was not uploaded or added to the repository.')});
+$('hideEmulator').addEventListener('click',()=>$('emulatorWrap').hidden=true);
+$('clearRecent').addEventListener('click',()=>{localStorage.removeItem('ca-library-recent');render();setStatus('Recent list cleared.')});
+$('loadRom').addEventListener('click',()=>{
+ const file=$('rom').files&&$('rom').files[0],sys=$('console').value;
+ if(!file){setStatus('Choose a game file first.',true);return}
+ if(!systems[sys]){setStatus('Select a supported system.',true);return}
+ if(file.size>1024*1024*1024){setStatus('That file is over 1 GB. Choose a smaller compatible image to avoid exhausting browser memory.',true);return}
+ dispose();
+ const objectUrl=URL.createObjectURL(file);activeObjectUrl=objectUrl;
+ const name=$('gameName').value.trim()||file.name.replace(/\.[^.]+$/,'')||'Local game';
+ $('nowPlaying').textContent='Now playing: '+name;$('emulatorWrap').hidden=false;
+ $('game').style.minHeight='320px';
+ const r=recent().filter(x=>x!==('local:'+name+'|'+sys));r.unshift('local:'+name+'|'+sys);localStorage.setItem('ca-library-recent',JSON.stringify(r.slice(0,30)));
+ const playerUrl='https://cdn.emulatorjs.org/stable/data/';
+ window.EJS_player='#game';window.EJS_core=systems[sys].core;window.EJS_gameUrl=objectUrl;window.EJS_gameName=name;window.EJS_pathtodata=playerUrl;window.EJS_startOnLoaded=true;window.EJS_color='#8bd3ff';window.EJS_gameID=1000+Object.keys(systems).indexOf(sys);
+ setStatus('Loading '+name+' with '+systems[sys].label+' core…');
+ const script=document.createElement('script');script.src=playerUrl+'loader.js';script.async=true;script.onload=()=>setStatus('Emulator loader downloaded. If the game does not start, check format, BIOS requirements, and device compatibility.');script.onerror=()=>setStatus('Could not load EmulatorJS from its CDN. Check your connection or whether the network blocks the CDN.',true);loaderScript=script;document.body.appendChild(script);
+ $('emulatorWrap').scrollIntoView({behavior:'smooth',block:'start'});render();
+});
+$('console').addEventListener('change',()=>{const s=systems[$('console').value];$('fileHint').textContent='Suggested formats for '+s.label+': '+s.ext+'. BIOS requirements and support vary by game. For PlayStation, a .CUE may need companion track files; a single .CHD or .PBP is often easier.';$('rom').value='';const accept={gb:'.gb,.gbc,.zip',gba:'.gba,.zip',nes:'.nes,.fds,.zip',snes:'.sfc,.smc,.zip',n64:'.n64,.z64,.v64,.zip',psx:'.chd,.pbp,.iso,.cue,.bin,.zip',segaMD:'.md,.gen,.smd,.bin,.zip'};$('rom').accept=accept[$('console').value]});
+render();
+})();
+</script>
+</body></html>
