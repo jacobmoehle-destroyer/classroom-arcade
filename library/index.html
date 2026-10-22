@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020"><title>Game Library | Classroom Arcade</title>
+<meta name="theme-color" content="#0b1020"><title>Universal Emulator &amp; Game Library | Classroom Arcade</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--good:#a8e6bd}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 60%);color:var(--text);font:16px/1.5 system-ui,-apple-system,sans-serif}
@@ -15,9 +15,9 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 </style>
 </head>
 <body>
-<header><div>🕹️ CLASSROOM ARCADE</div><h1>Universal Game Library</h1><p class="sub">One searchable shelf for the site’s browser games and a local-file launcher for supported retro systems. Your selected ROM stays in your browser session; this page does not upload it to this repository.</p></header>
+<header><div>🕹️ CLASSROOM ARCADE</div><h1>Universal Emulator &amp; Game Library</h1><p class="sub">Search the site’s games, or load a compatible game file into the built-in browser emulator. Touch controls, keyboard input, and save states are provided where the emulator core supports them.</p></header>
 <main>
-<div class="panel notice"><strong>Quick note:</strong> EmulatorJS is loaded from its public CDN, so internet access to that service is required. Use game files you are allowed to use, and follow the rules for your network or school. Console performance and game compatibility vary by device; N64 and PlayStation can be demanding on phones.</div>
+<div class="panel notice"><strong>Quick note:</strong> The emulator engine loads from EmulatorJS’s public CDN, so that service must be reachable on your network. On supported touch devices, EmulatorJS provides its own on-screen controls. Use game files you are authorized to use and follow your school or network rules. N64 and PlayStation can be demanding on phones.</div>
 <section class="panel" aria-labelledby="searchTitle">
 <h2 id="searchTitle" style="margin:0 0 10px">Find a game</h2>
 <div class="tools">
@@ -59,7 +59,7 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <p class="notice">If the emulator fails to start, check that the system matches the file, try a compatible file format, or close the player and select another game. Some BIOS files are optional, but others may be required for specific games.</p>
 </section>
 <p><a class="btn" href="../">← Back to Classroom Arcade</a> <a class="btn" href="../arcade/">Open original mini-games</a> <a class="btn" href="../doom/">Open DOOM player</a></p>
-</main><footer>Universal Game Library · Local-file launcher · Classroom Arcade</footer>
+</main><footer>Universal Emulator & Game Library · Local-file launcher · Classroom Arcade</footer>
 <script>
 (()=>{'use strict';
 const systems={
@@ -78,7 +78,8 @@ const games=[
 {id:'platformer',title:'Mini Platformer',system:'browser',genre:'platformer',emoji:'🏃',desc:'Jump across platforms and collect stars.',url:'../arcade/',action:'Open Arcade Hub'},
 {id:'racing',title:'Neon Racer',system:'browser',genre:'racing',emoji:'🏎️',desc:'Dodge traffic in an original mini-game.',url:'../arcade/',action:'Open Arcade Hub'},
 {id:'builder',title:'Pixel Builder',system:'browser',genre:'sandbox',emoji:'🟩',desc:'Place and remove blocks in a tiny world.',url:'../arcade/',action:'Open Arcade Hub'},
-{id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},\n{id:'stardew-valley',title:'Stardew Valley',system:'steam',genre:'simulation',emoji:'🌱',desc:'Cozy farming, fishing, crafting, and exploration. This Windows build cannot run directly in the browser; use the guide for official Steam and Steam Link options.',url:'../stardew/',action:'Open launch guide'},
+{id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},
+{id:'stardew-valley',title:'Stardew Valley',system:'steam',genre:'simulation',emoji:'🌱',desc:'Cozy farming, fishing, crafting, and exploration. This Windows build cannot run directly in the browser; use the guide for official Steam and Steam Link options.',url:'../stardew/',action:'Open launch guide'},
 {id:'doom',title:'DOOM / DOOM II',system:'doom',genre:'action',emoji:'💀',desc:'Open the existing Dwasm player with built-in presets and local WAD selection.',url:'../doom/',action:'Open DOOM player'},
 ...Object.entries(systems).map(([id,s])=>({id:'system-'+id,title:s.label,system:id,genre:'retro',emoji:'🎮',desc:'Load a compatible game file from your own device. '+s.ext,url:'#loader',action:'Choose file'}))
 ];
@@ -129,5 +130,5 @@ $('console').addEventListener('change',()=>{const s=systems[$('console').value];
 render();
 })();
 </script>
-<script src="../touch-controls.js" defer></script>
+
 </body></html>
