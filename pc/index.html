@@ -10,7 +10,7 @@
 header{text-align:center;padding:25px 14px 12px}h1{font-size:clamp(2rem,7vw,3rem);margin:5px 0}.sub{color:var(--muted);max-width:850px;margin:auto}
 main{width:min(1100px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--accent)}button,.btn,input,select{font:inherit}button,.btn{border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}button.primary{background:var(--accent);color:#07111f;font-weight:800;border-color:var(--accent)}button:disabled{opacity:.5;cursor:not-allowed}
 .panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:15px}.muted{color:var(--muted)}.notice{background:#10192b;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.fields{display:grid;grid-template-columns:1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:10px;padding:9px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.status{min-height:1.5em;color:var(--good);overflow-wrap:anywhere}.status.error{color:#ffb4b4}
-#screen{background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:4px}#screen>div{margin:auto}#screen canvas{max-width:100%;height:auto}#screen:empty:after{content:'PC screen appears here';color:#7f8aa3}
+#screen{background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:block;position:relative;border-radius:10px;padding:4px}#screen canvas{max-width:100%;height:auto}#screen canvas:not([style*="display: none"]){display:block!important}#screen>div{margin:auto}#screen canvas{max-width:100%;height:auto}#screen:empty:after{content:'PC screen appears here';color:#7f8aa3}
 code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
 @media(min-width:720px){.fields{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}}
 </style>
@@ -31,7 +31,7 @@ code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:
 </section>
 <section class="panel">
 <h2>2. Virtual PC screen</h2>
-<p class="muted">Click the screen to give it keyboard/mouse focus. The emulator is CPU-emulation only; performance depends on your device and browser. If the guest operating system does not boot, the image may be unsupported or may need a different boot configuration.</p>
+<p class="muted">Click the screen to give it keyboard/mouse focus. A black screen can mean the image is not bootable, the wrong image type was selected, or the guest has not produced video yet. Use a bootable operating-system image—not just a game data disc. The emulator is CPU-emulation only.</p>
 <div id="screen" aria-label="Virtual PC display"></div>
 <div class="actions"><button id="releaseMouse" disabled>Release mouse</button></div>
 </section>
@@ -65,10 +65,11 @@ $('boot').addEventListener('click',async()=>{
   const kind=$('diskType').value,opts={wasm_path:'https://copy.sh/v86/build/v86.wasm',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('screen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
   opts[kind]={buffer};
   emulator=new V86(opts);
-  emulator.add_listener('emulator-ready',()=>{controls(true);status('Virtual PC started. Click the screen to focus keyboard input.')});
+  emulator.add_listener('emulator-ready',()=>{controls(true);status('Emulator initialized. If the display stays black, verify that this is a bootable OS image and that the image type is correct.')});
   emulator.add_listener('emulator-started',()=>{controls(true);status('Emulation running. The guest may still be booting.')});
   emulator.add_listener('download-progress',p=>{if(p&&p.total)status('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
   emulator.add_listener('download-error',e=>status('A required emulator asset failed to load: '+String(e||'unknown error'),true));
+  emulator.add_listener('emulator-error',e=>status('v86 reported an emulator error: '+String(e||'unknown error'),true));
   controls(true);status('Emulator initialized. Waiting for the guest system to boot…');
  }catch(e){stop();status('Could not start the PC: '+(e&&e.message?e.message:String(e)),true)}
  finally{booting=false;$('boot').disabled=!!emulator}
