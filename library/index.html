@@ -78,7 +78,7 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <div id="pcScanResults" class="grid" style="margin-top:10px"></div>
 </div>
 <h3>Virtual PC screen</h3>
-<p class="notice">Click the screen to focus keyboard input. Large images can be slow or exceed browser memory. Booting a system does not grant a license to use it; use images you are authorized to use.</p>
+<p class="notice">Click the screen to focus keyboard input. A black screen can mean the image is not bootable, the wrong image type was selected, or the guest has not produced video yet. Use a bootable operating-system image—not just a game data disc. Large images can be slow or exceed browser memory.</p>
 <div id="pcScreen" style="background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:4px" aria-label="Virtual PC display"></div>
 <div class="filters"><button id="pcReleaseMouse" disabled>Release mouse</button><a class="btn" href="../pc/">Open standalone PC emulator page</a></div>
 </section>
@@ -161,10 +161,11 @@ async function bootPCFile(file,kind){
   $('pcScreen').replaceChildren();const textScreen=document.createElement('div');textScreen.style.cssText='white-space:pre;font:14px monospace;line-height:14px';const canvas=document.createElement('canvas');canvas.style.display='none';$('pcScreen').append(textScreen,canvas);
   const opts={wasm_path:'https://copy.sh/v86/build/v86.wasm',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('pcScreen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
   opts[kind]={buffer};pcEmulator=new V86(opts);
-  pcEmulator.add_listener('emulator-ready',()=>{pcControls(true);pcStatus('Virtual PC started. Click the screen to focus keyboard input.')});
+  pcEmulator.add_listener('emulator-ready',()=>{pcControls(true);pcStatus('Emulator initialized. If the display stays black, verify that this is a bootable OS image and that the image type is correct.')});
   pcEmulator.add_listener('emulator-started',()=>{pcControls(true);pcStatus('Emulation running. The guest may still be booting.')});
   pcEmulator.add_listener('download-progress',p=>{if(p&&p.total)pcStatus('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
   pcEmulator.add_listener('download-error',e=>pcStatus('A required emulator asset failed to load: '+String(e||'unknown error'),true));
+  pcEmulator.add_listener('emulator-error',e=>pcStatus('v86 reported an emulator error: '+String(e||'unknown error'),true));
   pcControls(true);pcStatus('Emulator initialized. Waiting for the guest system to boot…');$('pc-emulator').scrollIntoView({behavior:'smooth',block:'start'});
  }catch(e){stopPC('Could not start the PC: '+(e&&e.message?e.message:String(e)),true)}
  finally{pcBooting=false;$('pcBoot').disabled=!!pcEmulator}
