@@ -9,6 +9,9 @@
 :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--green:#b8e9c7}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#254637,var(--bg) 62%);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
 header{text-align:center;padding:30px 16px 20px}header .eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.1rem,8vw,3.6rem);line-height:1.05;margin:10px 0}header p{max-width:720px;color:var(--muted);margin:12px auto}
+.playframe{width:100%;height:min(72vh,760px);min-height:420px;border:1px solid var(--line);border-radius:12px;background:#000}
+.framewrap{overflow:hidden;border-radius:12px;background:#000}
+@media(max-width:600px){.playframe{height:68vh;min-height:360px}}
 main{width:min(920px,100%);padding:0 14px 34px;margin:auto}.panel{border:1px solid var(--line);background:#151d31ee;border-radius:16px;padding:18px;margin:0 0 14px}.status{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 10px;font-size:.82rem;color:var(--green)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btn{display:inline-block;text-align:center;text-decoration:none;border-radius:10px;background:var(--accent);color:#07111f;font-weight:800;padding:12px 15px;min-height:46px}.btn.secondary{background:#273650;color:var(--text);border:1px solid #53627c}.btn:focus-visible{outline:3px solid white;outline-offset:3px}
 h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22px}.steps li{margin:8px 0}.note{border-left:3px solid var(--green);padding-left:12px;color:var(--muted)}footer{text-align:center;color:var(--muted);padding:0 12px 28px;font-size:.88rem}
@@ -18,17 +21,26 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 <header>
 <div class="eyebrow">Classroom Arcade · Steam game guide</div>
 <h1>🌱 Stardew Valley</h1>
-<p>Farm, fish, explore, and build a cozy little valley. This page is a launch guide for the game files you provided—not a browser port.</p>
-<span class="status">Desktop game · Not playable directly in this webpage</span>
+<p>Farm, fish, explore, and build a cozy little valley. We found a community browser-port experiment hosted by its author, so try it below without copying its large game-data files into this repository.</p>
+<span class="status">Browser experiment · Hosted by a third party</span>
 </header>
 <main>
 <section class="panel">
-<h2>Launch Stardew Valley</h2>
-<p class="muted">The ZIP you supplied contains a Windows desktop build and supporting DLLs. A normal GitHub Pages website cannot run that Windows executable directly, and the site should not publicly host the game's proprietary files.</p>
+<h2>Play Stardew Valley in this page</h2>
+<p class="muted">This loads the community browser-port demo from its author's site. It is not hosted by Classroom Arcade, and it may be unavailable or blocked by your network. First load may download a large amount of data; the demo offers options with or without music.</p>
 <div class="actions">
-<a class="btn" href="https://store.steampowered.com/app/413150/Stardew_Valley/" target="_blank" rel="noopener noreferrer">Open official Steam page ↗</a>
-<a class="btn secondary" href="https://apps.apple.com/us/app/steam-link/id1246969117" target="_blank" rel="noopener noreferrer">Get Steam Link for iPad ↗</a>
+<a class="btn" href="https://degloved.net/games/public/gms/stardew-valley/index.html" target="_blank" rel="noopener noreferrer">Open browser game directly ↗</a>
+<button class="btn secondary" type="button" onclick="document.getElementById('stardewFrame').requestFullscreen?.()">Fullscreen game</button>
 </div>
+<div class="framewrap">
+<iframe id="stardewFrame" class="playframe" src="https://degloved.net/games/public/gms/stardew-valley/index.html" title="Community-hosted Stardew Valley browser port" allow="autoplay; fullscreen; gamepad; pointer-lock" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe>
+</div>
+<p class="note">If the frame is blank, the host may block embedding. Use “Open browser game directly” instead. Touch controls on iPad depend on whether the community build implements them; this page cannot inject controls into a cross-origin frame.</p>
+<p class="muted">Project source and credit: <a href="https://github.com/degloved-net/stardew-wasm" target="_blank" rel="noopener noreferrer">degloved-net/stardew-wasm on GitHub ↗</a>. Its README asks sites that use the project to give credit. The source repository is not a complete open-source release of all game data, so this integration embeds the author's hosted demo rather than copying its files into our repo.</p>
+</section>
+<section class="panel">
+<h2>About your Windows ZIP</h2>
+<p class="muted">Your uploaded Windows files are still useful for the desktop version, but they are not themselves a browser-ready HTML/WebAssembly build. This embedded experiment is a separate community port.</p>
 </section>
 <section class="panel">
 <h2>Play on your iPad with Steam Link</h2>
