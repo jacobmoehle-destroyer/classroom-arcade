@@ -10,7 +10,7 @@ header{text-align:center;padding:24px 14px 12px}h1{font-size:clamp(2rem,7vw,3rem
 main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--accent)}button,select,input{font:inherit}button,.btn{border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none;touch-action:manipulation}button:hover,.btn:hover,button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}button.primary{background:var(--accent);color:#07111f;border-color:var(--accent);font-weight:800}button:disabled{opacity:.55;cursor:wait}
 .panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:15px}.notice{color:var(--muted);font-size:.92rem}.notice strong{color:var(--text)}.tools{display:grid;grid-template-columns:1fr;gap:10px}.field label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:10px;padding:9px}.filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.filters button.active{background:var(--accent);color:#07111f;font-weight:800}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));gap:12px}.tile{background:linear-gradient(145deg,#1a2540,#111827);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;min-height:175px}.tile .emoji{font-size:1.8rem}.tile h3{margin:5px 0}.tile p{color:var(--muted);font-size:.92rem;margin:0 0 12px;flex:1}.tile .actions{display:flex;gap:7px;flex-wrap:wrap}.tile .actions button,.tile .actions a{flex:1;text-align:center}.status{min-height:1.5em;color:var(--good);overflow-wrap:anywhere}.status.error{color:#ffb4b4}
-#emulatorWrap[hidden]{display:none}#game{width:100%;min-height:220px;max-height:75vh;aspect-ratio:4/3;background:#05070c;border-radius:10px;overflow:hidden}#game canvas{max-width:100%;height:auto}#emulatorTop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}#emulatorTop h2{margin:0}#fileHint{font-size:.88rem;color:var(--muted);margin:8px 0 0}.badge{display:inline-block;border:1px solid #53627c;border-radius:99px;padding:2px 8px;font-size:.75rem;color:var(--muted)}.empty{padding:20px;border:1px dashed #53627c;border-radius:12px;color:var(--muted);grid-column:1/-1}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
+#emulatorWrap[hidden]{display:none}#game{width:100%;min-height:220px;max-height:75vh;aspect-ratio:4/3;background:#05070c;border-radius:10px;overflow:hidden}#game canvas{max-width:100%;height:auto}#emulatorTop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}#emulatorTop h2{margin:0}#fileHint{font-size:.88rem;color:var(--muted);margin:8px 0 0}.badge{display:inline-block;border:1px solid #53627c;border-radius:99px;padding:2px 8px;font-size:.75rem;color:var(--muted)}.empty{padding:20px;border:1px dashed #53627c;border-radius:12px;color:var(--muted);grid-column:1/-1}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}#pcScreen canvas{max-width:100%;height:auto}
 @media(min-width:760px){.tools{grid-template-columns:1.3fr 1fr 1fr}.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,.8fr);gap:14px;align-items:start}}
 </style>
 </head>
@@ -22,7 +22,7 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <h2 id="searchTitle" style="margin:0 0 10px">Find a game</h2>
 <div class="tools">
 <div class="field"><label for="search">Search library</label><input id="search" type="search" placeholder="Search title, genre, system…"></div>
-<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="dosbox_pure">Classic PC / MS-DOS</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
+<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="dosbox_pure">Classic PC / MS-DOS</option><option value="pc">Modern PC Emulator (v86)</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
 <div class="field"><label for="sort">Show</label><select id="sort"><option value="all">All games and systems</option><option value="favorites">Favorites only</option><option value="recent">Recently played</option></select></div>
 </div>
 <div class="filters"><a class="btn" href="#file-scanner">🔎 Jump to file scanner</a></div>
@@ -61,6 +61,27 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <p class="notice">The current integrated systems are based on EmulatorJS’s documented core names: gb, gba, nes, snes, n64, psx and segaMD. Actual compatibility still depends on the file, core, browser, and device.</p>
 </section>
 </div>
+<section class="panel" id="pc-emulator" aria-labelledby="pcTitle">
+<h2 id="pcTitle" style="margin-top:0">💾 Modern PC Emulator (v86)</h2>
+<p class="notice"><strong>What it supports:</strong> DOS, FreeDOS, Windows 3.x/95/98 and some older x86 systems, depending on the disk image. It is not a general emulator for modern Windows games, modern 3D graphics, 64-bit software, or high-performance DirectX titles. Emulator code and BIOS files load from the public v86 host.</p>
+<div class="tools">
+<div class="field"><label for="pcDiskType">Image type</label><select id="pcDiskType"><option value="hda">Hard drive image (.img, .bin)</option><option value="cdrom">CD/DVD image (.iso)</option><option value="fda">Floppy image (.ima, .flp)</option></select></div>
+<div class="field"><label for="pcDiskFile">Choose a PC disk image</label><input id="pcDiskFile" type="file" accept=".img,.bin,.iso,.ima,.flp"></div>
+</div>
+<div class="filters"><button id="pcBoot" class="primary">Boot selected image</button><button id="pcStop" disabled>Stop PC</button><button id="pcReset" disabled>Restart PC</button><button id="pcSave" disabled>Download emulator state</button></div>
+<div id="pcStatus" class="status" role="status">Choose a PC disk image or scan a folder below.</div>
+<div style="margin-top:14px;padding:12px;border:1px solid var(--accent);border-radius:12px">
+<h3 style="margin:0 0 5px">🔎 Scan for PC disk images</h3>
+<p class="notice">Choose a folder or multiple files. The scanner checks filenames/extensions in your browser and shows likely PC images; it does not scan your whole computer or upload your files.</p>
+<div class="filters"><label class="btn" for="pcScanFiles">Choose folder / files to scan</label><input id="pcScanFiles" type="file" multiple webkitdirectory directory style="max-width:100%;padding:8px" aria-label="Choose a folder or multiple files to scan for PC disk images"></div>
+<div id="pcScanSummary" class="notice" role="status">No PC folder scanned yet.</div>
+<div id="pcScanResults" class="grid" style="margin-top:10px"></div>
+</div>
+<h3>Virtual PC screen</h3>
+<p class="notice">Click the screen to focus keyboard input. Large images can be slow or exceed browser memory. Booting a system does not grant a license to use it; use images you are authorized to use.</p>
+<div id="pcScreen" style="background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:4px" aria-label="Virtual PC display"></div>
+<div class="filters"><button id="pcReleaseMouse" disabled>Release mouse</button><a class="btn" href="../pc/">Open standalone PC emulator page</a></div>
+</section>
 <section class="panel" id="file-guide" aria-labelledby="fileGuideTitle">
 <h2 id="fileGuideTitle" style="margin-top:0">Which game file goes with which system?</h2>
 <p class="notice">Choose the system that matches the game file you have. Extensions below are common supported formats, not a guarantee that every file will work. This page does not provide game ROMs or BIOS files—use files you’re authorized to use.</p>
@@ -119,12 +140,48 @@ const games=[
 {id:'sandbox3d',title:'Classroom Sandbox',system:'browser',genre:'sandbox',emoji:'🌎',desc:'Explore the site’s existing 3D block world.',url:'../sandbox/',action:'Open sandbox'},
 {id:'stardew-valley',title:'Stardew Valley',system:'steam',genre:'simulation',emoji:'🌱',desc:'Cozy farming, fishing, crafting, and exploration. This Windows build cannot run directly in the browser; use the guide for official Steam and Steam Link options.',url:'../stardew/',action:'Open launch guide'},
 {id:'doom',title:'DOOM / DOOM II',system:'doom',genre:'action',emoji:'💀',desc:'Open the existing Dwasm player with built-in presets and local WAD selection.',url:'../doom/',action:'Open DOOM player'},
+{id:'modern-pc',title:'Modern PC Emulator (v86)',system:'pc',genre:'retro',emoji:'💾',desc:'Scan for and boot compatible PC disk images, DOS, and older x86 operating systems. Not a general emulator for modern 3D Windows games.',url:'#pc-emulator',action:'Open PC emulator'},
 ...Object.entries(systems).map(([id,s])=>({id:'system-'+id,title:s.label,system:id,genre:'retro',emoji:'🎮',desc:'Load a compatible game file from your own device. '+s.ext,url:'#loader',action:'Choose file'}))
 ];
 const $=id=>document.getElementById(id),lib=$('library');let genre='all',activeObjectUrl=null,loaderScript=null;
 const safeRead=(k,f)=>{try{const x=JSON.parse(localStorage.getItem(k)||'null');return x??f}catch{return f}};
 const favs=()=>safeRead('ca-library-favorites',[]),recent=()=>safeRead('ca-library-recent',[]);
 function setStatus(message,error=false){$('loaderStatus').textContent=message;$('loaderStatus').classList.toggle('error',error)}
+let pcEmulator=null,pcLibraryPromise=null,pcBooting=false;
+function pcStatus(message,error=false){$('pcStatus').textContent=message;$('pcStatus').classList.toggle('error',error)}
+function pcControls(on){$('pcStop').disabled=!on;$('pcReset').disabled=!on;$('pcSave').disabled=!on;$('pcReleaseMouse').disabled=!on;$('pcBoot').disabled=on||pcBooting}
+function loadV86Library(){if(pcLibraryPromise)return pcLibraryPromise;pcLibraryPromise=new Promise((resolve,reject)=>{if(typeof V86!=='undefined'){resolve();return}const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86!=='undefined'?resolve():reject(new Error('v86 library loaded but V86 was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library from copy.sh. The host may be unavailable or unreachable on this network.'));document.head.appendChild(s)});return pcLibraryPromise}
+function stopPC(message='PC stopped. Virtual machine memory was cleared.'){if(pcEmulator){try{pcEmulator.stop()}catch(e){}pcEmulator=null}$('pcScreen').replaceChildren();pcControls(false);pcStatus(message)}
+async function bootPCFile(file,kind){
+ if(!file){pcStatus('Choose a disk image first.',true);return}
+ if(file.size>1024*1024*1024){pcStatus('That image is over 1 GB. Choose a smaller image to reduce the risk of running out of memory.',true);return}
+ if(pcBooting)return;pcBooting=true;$('pcBoot').disabled=true;pcStatus('Loading v86 and reading your local disk image…');
+ try{
+  await loadV86Library();const buffer=await file.arrayBuffer();if(pcEmulator)stopPC('Replacing the currently running virtual PC…');
+  $('pcScreen').replaceChildren();const textScreen=document.createElement('div');textScreen.style.cssText='white-space:pre;font:14px monospace;line-height:14px';const canvas=document.createElement('canvas');canvas.style.display='none';$('pcScreen').append(textScreen,canvas);
+  const opts={wasm_path:'https://copy.sh/v86/build/v86.wasm',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('pcScreen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
+  opts[kind]={buffer};pcEmulator=new V86(opts);
+  pcEmulator.add_listener('emulator-ready',()=>{pcControls(true);pcStatus('Virtual PC started. Click the screen to focus keyboard input.')});
+  pcEmulator.add_listener('emulator-started',()=>{pcControls(true);pcStatus('Emulation running. The guest may still be booting.')});
+  pcEmulator.add_listener('download-progress',p=>{if(p&&p.total)pcStatus('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
+  pcEmulator.add_listener('download-error',e=>pcStatus('A required emulator asset failed to load: '+String(e||'unknown error'),true));
+  pcControls(true);pcStatus('Emulator initialized. Waiting for the guest system to boot…');$('pc-emulator').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){stopPC('Could not start the PC: '+(e&&e.message?e.message:String(e)),true)}
+ finally{pcBooting=false;$('pcBoot').disabled=!!pcEmulator}
+}
+$('pcBoot').addEventListener('click',()=>bootPCFile($('pcDiskFile').files&&$('pcDiskFile').files[0],$('pcDiskType').value));
+$('pcStop').addEventListener('click',()=>stopPC());
+$('pcReset').addEventListener('click',()=>{if(pcEmulator){pcEmulator.restart();pcStatus('Restarting virtual PC…')}});
+$('pcReleaseMouse').addEventListener('click',()=>{if(pcEmulator&&pcEmulator.mouse_release)pcEmulator.mouse_release()});
+$('pcSave').addEventListener('click',async()=>{if(!pcEmulator)return;pcStatus('Creating emulator state…');try{const state=await pcEmulator.save_state();const blob=new Blob([state],{type:'application/octet-stream'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='classroom-arcade-pc-state.bin';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);pcStatus('State file download requested. This saves emulator memory/state, not a portable copy of your virtual hard drive.')}catch(e){pcStatus('Could not save emulator state: '+(e.message||e),true)}});
+$('pcScanFiles').addEventListener('change',()=>{
+ const files=Array.from($('pcScanFiles').files||[]),matches=files.filter(file=>/\.(img|bin|iso|ima|flp)$/i.test(file.name));
+ $('pcScanResults').replaceChildren();$('pcScanSummary').textContent=files.length+' file(s) checked · '+matches.length+' likely PC disk image(s) found. Extension is only a clue; a file may not be bootable.';
+ if(!files.length)return;if(!matches.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No .img, .bin, .iso, .ima, or .flp files found in that selection.';$('pcScanResults').appendChild(empty);return}
+ for(const file of matches){const card=document.createElement('article');card.className='tile';const title=document.createElement('h3');title.textContent=file.webkitRelativePath||file.name;const info=document.createElement('p');info.textContent=typeof prettySize==='function'?prettySize(file.size):Math.round(file.size/1024)+' KB';const select=document.createElement('select');select.style.cssText='width:100%;margin:5px 0 10px;padding:8px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:8px';const ext=file.name.toLowerCase().split('.').pop();const suggested=ext==='iso'?'cdrom':(['ima','flp'].includes(ext)?'fda':'hda');[['hda','Hard drive image'],['cdrom','CD/DVD image'],['fda','Floppy image']].forEach(([value,label])=>{const op=document.createElement('option');op.value=value;op.textContent=label;select.appendChild(op)});select.value=suggested;const run=document.createElement('button');run.className='primary';run.textContent='Boot this image';run.addEventListener('click',()=>{$('pcDiskType').value=select.value;bootPCFile(file,select.value)});card.append(title,info,select,run);$('pcScanResults').appendChild(card)}
+});
+window.addEventListener('beforeunload',()=>{if(pcEmulator)try{pcEmulator.stop()}catch(e){}});
+
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function render(){
  const q=$('search').value.trim().toLowerCase(),sys=$('systemFilter').value,sort=$('sort').value,fs=favs(),rs=recent();
