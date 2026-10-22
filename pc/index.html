@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>Browser PC Emulator | Classroom Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--good:#a8e6bd}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 60%);color:var(--text);font:16px/1.5 system-ui,sans-serif}
+header{text-align:center;padding:25px 14px 12px}h1{font-size:clamp(2rem,7vw,3rem);margin:5px 0}.sub{color:var(--muted);max-width:850px;margin:auto}
+main{width:min(1100px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--accent)}button,.btn,input,select{font:inherit}button,.btn{border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}button.primary{background:var(--accent);color:#07111f;font-weight:800;border-color:var(--accent)}button:disabled{opacity:.5;cursor:not-allowed}
+.panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:15px}.muted{color:var(--muted)}.notice{background:#10192b;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.fields{display:grid;grid-template-columns:1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:10px;padding:9px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.status{min-height:1.5em;color:var(--good);overflow-wrap:anywhere}.status.error{color:#ffb4b4}
+#screen{background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:4px}#screen>div{margin:auto}#screen canvas{max-width:100%;height:auto}#screen:empty:after{content:'PC screen appears here';color:#7f8aa3}
+code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
+@media(min-width:720px){.fields{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div>💾 CLASSROOM ARCADE</div><h1>Browser PC Emulator</h1><p class="sub">Boot a compatible x86 PC disk image directly in this page using the open-source v86 emulator.</p></header>
+<main>
+<section class="panel">
+<div class="notice"><strong>What this can run:</strong> DOS, FreeDOS, Windows 3.x/95/98 and some other older 32-bit operating systems, depending on the image and configuration. It is best for classic PC games. It is <strong>not</strong> a general emulator for every Windows game released before 2015: modern 3D graphics, DirectX, 64-bit software, and high system requirements are not supported reliably. <a href="https://github.com/copy/v86" target="_blank" rel="noopener noreferrer">v86 compatibility details ↗</a></div>
+<div class="notice"><strong>Important:</strong> This page does not include an operating system, BIOS image, or commercial games. Choose a disk image you are authorized to use. Large images may be slow or exceed browser memory. Changes made inside the virtual PC are temporary unless you use a guest-OS save feature; downloading an emulator state is not the same as saving the virtual hard drive.</div>
+<h2>1. Choose a disk image</h2>
+<div class="fields">
+<div class="field"><label for="diskType">Image type</label><select id="diskType"><option value="hda">Hard drive image (.img, .bin)</option><option value="cdrom">CD/DVD image (.iso)</option><option value="fda">Floppy image (.img, .ima)</option></select></div>
+<div class="field"><label for="diskFile">Your image file</label><input id="diskFile" type="file" accept=".img,.bin,.iso,.ima,.flp"></div>
+</div>
+<div class="actions"><button id="boot" class="primary">Boot PC</button><button id="stop" disabled>Stop PC</button><button id="reset" disabled>Restart PC</button><button id="saveState" disabled>Download emulator state</button><label class="btn" for="stateFile">Restore state file</label><input id="stateFile" type="file" accept=".bin,.state" hidden></div>
+<div id="status" class="status" role="status">Ready. Choose a compatible disk image to start.</div>
+</section>
+<section class="panel">
+<h2>2. Virtual PC screen</h2>
+<p class="muted">Click the screen to give it keyboard/mouse focus. The emulator is CPU-emulation only; performance depends on your device and browser. If the guest operating system does not boot, the image may be unsupported or may need a different boot configuration.</p>
+<div id="screen" aria-label="Virtual PC display"></div>
+<div class="actions"><button id="releaseMouse" disabled>Release mouse</button></div>
+</section>
+<section class="panel">
+<h2>Game compatibility tips</h2>
+<ul class="muted">
+<li>Classic DOS games are usually the best fit for this emulator.</li>
+<li>Windows 95/98 games may work if they use supported 2D graphics and older APIs, but many require drivers or hardware that v86 does not emulate.</li>
+<li>Games that need 3D acceleration, modern DirectX, 64-bit Windows, online activation, or anti-cheat generally will not work here.</li>
+<li>For a DOS game that will not boot as a disk image, try the site's <a href="../library/?system=dosbox_pure">Classic PC / MS-DOS launcher</a> with a compatible game package.</li>
+<li>Emulator code and BIOS are fetched from the public v86 host, so that host must be reachable. This page does not bypass network restrictions.</li>
+</ul>
+</section>
+<p><a class="btn" href="../">← Back to Classroom Arcade</a> <a class="btn" href="../library/">Open Universal Emulator</a></p>
+</main>
+<footer>Browser PC Emulator · Powered by the open-source v86 project · No disk images are hosted by this site</footer>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);let emulator=null,libPromise=null,booting=false;
+function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error)}
+function controls(on){$('stop').disabled=!on;$('reset').disabled=!on;$('saveState').disabled=!on;$('releaseMouse').disabled=!on;$('boot').disabled=on||booting}
+function loadLibrary(){if(libPromise)return libPromise;libPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86Starter!=='undefined'?resolve():reject(new Error('v86 library loaded but V86Starter was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library. The host may be unavailable or blocked.'));document.head.appendChild(s)});return libPromise}
+function stop(){if(emulator){try{emulator.stop()}catch(e){}emulator=null}$('screen').replaceChildren();controls(false);status('PC stopped. The virtual machine memory was cleared.')}
+$('boot').addEventListener('click',async()=>{
+ const file=$('diskFile').files&&$('diskFile').files[0];if(!file){status('Choose a disk image first.',true);return}
+ if(file.size>1024*1024*1024){status('That image is over 1 GB. Choose a smaller image to reduce the risk of running out of memory.',true);return}
+ if(booting)return;booting=true;$('boot').disabled=true;status('Loading the emulator and reading your local disk image…');
+ try{
+  await loadLibrary();const buffer=await file.arrayBuffer();if(emulator)stop();
+  const kind=$('diskType').value,opts={wasm_path:'https://copy.sh/v86/build/',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('screen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
+  opts[kind]={buffer};$('screen').replaceChildren();
+  emulator=new V86Starter(opts);
+  emulator.add_listener('emulator-ready',()=>{controls(true);status('Virtual PC started. Click the screen to focus keyboard input.')});
+  emulator.add_listener('emulator-started',()=>{controls(true);status('Emulation running. The guest may still be booting.')});
+  emulator.add_listener('download-progress',p=>{if(p&&p.total)status('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
+  emulator.add_listener('download-error',e=>status('A required emulator asset failed to load: '+String(e||'unknown error'),true));
+  controls(true);status('Emulator initialized. Waiting for the guest system to boot…');
+ }catch(e){stop();status('Could not start the PC: '+(e&&e.message?e.message:String(e)),true)}
+ finally{booting=false;$('boot').disabled=!!emulator}
+});
+$('stop').addEventListener('click',stop);
+$('reset').addEventListener('click',()=>{if(emulator){emulator.restart();status('Restarting virtual PC…')}});
+$('releaseMouse').addEventListener('click',()=>{if(emulator&&emulator.mouse_release)emulator.mouse_release()});
+$('saveState').addEventListener('click',async()=>{if(!emulator)return;status('Creating emulator state…');try{const state=await emulator.save_state();const blob=new Blob([state],{type:'application/octet-stream'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='classroom-arcade-pc-state.bin';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status('State file download requested. This saves emulator memory/state, not a portable copy of your virtual hard drive.')}catch(e){status('Could not save emulator state: '+(e.message||e),true)}});
+$('stateFile').addEventListener('change',async()=>{const file=$('stateFile').files&&$('stateFile').files[0];if(!file)return;if(!emulator){status('Boot the same compatible disk image first, then restore the state file.',true);return}try{await emulator.restore_state(await file.arrayBuffer());status('State restore requested.')}catch(e){status('Could not restore that state file: '+(e.message||e),true)}});
+window.addEventListener('beforeunload',()=>{if(emulator)try{emulator.stop()}catch(e){}});
+})();
+</script>
+</body>
+</html>
