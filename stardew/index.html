@@ -8,12 +8,12 @@
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--green:#b8e9c7}
 *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100%;background:radial-gradient(ellipse at top,#254637,var(--bg) 62%);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
-header{text-align:center;padding:24px 16px 16px}header .eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.1rem,8vw,3.6rem);line-height:1.05;margin:10px 0}header p{max-width:720px;color:var(--muted);margin:12px auto}
+header{text-align:center;padding:calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left))}header .eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.1rem,8vw,3.6rem);line-height:1.05;margin:10px 0}header p{max-width:720px;color:var(--muted);margin:12px auto}
 .playframe{display:block;width:100%;height:min(78vh,900px);min-height:420px;border:0;background:#000}@supports(height:1svh){.playframe{height:min(78svh,900px)}}
 .framewrap{overflow:hidden;border-radius:12px;background:#000;border:1px solid var(--line)}
-main{width:min(1100px,100%);padding:0 12px 34px;margin:auto}.panel{border:1px solid var(--line);background:#151d31ee;border-radius:16px;padding:18px;margin:0 0 14px}.status{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 10px;font-size:.82rem;color:var(--green)}
+main{width:min(1100px,100%);padding:0 calc(12px + env(safe-area-inset-right)) calc(34px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));margin:auto}.panel{border:1px solid var(--line);background:#151d31ee;border-radius:16px;padding:18px;margin:0 0 14px}.status{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 10px;font-size:.82rem;color:var(--green)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;border-radius:10px;background:var(--accent);color:#07111f;font-weight:800;padding:12px 15px;min-height:48px;touch-action:manipulation}.btn.secondary{background:#273650;color:var(--text);border:1px solid #53627c}.btn:focus-visible{outline:3px solid white;outline-offset:3px}
-h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22px}.steps li{margin:8px 0}.note{border-left:3px solid var(--green);padding-left:12px;color:var(--muted)}footer{text-align:center;color:var(--muted);padding:0 12px 28px;font-size:.88rem}
+h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22px}.steps li{margin:8px 0}.note{border-left:3px solid var(--green);padding-left:12px;color:var(--muted)}footer{text-align:center;color:var(--muted);padding:0 calc(12px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));font-size:.88rem}
 .game-tip{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}.game-tip p{margin:0}
 @media(max-width:600px){header{padding:18px 12px 12px}main{padding:0 8px 24px}.panel{padding:13px;border-radius:12px}.playframe{height:76vh;min-height:320px}.actions>*{flex:1 1 180px}}
 @media(orientation:landscape) and (max-height:600px){header{padding:8px}.eyebrow,header p,.status{display:none}h1{font-size:1.6rem;margin:4px}.playframe{height:84vh;min-height:250px}main{padding-bottom:12px}}
@@ -36,7 +36,7 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 </div>
 <div class="actions">
 <a class="btn" href="https://degloved.net/games/public/gms/stardew-valley/index.html" target="_blank" rel="noopener noreferrer">Launch actual Stardew in its own tab ↗</a>
-<button class="btn secondary" type="button" onclick="const f=document.getElementById('stardewFrame'); if(f.requestFullscreen) f.requestFullscreen(); else window.open('https://degloved.net/games/public/gms/stardew-valley/index.html','_blank','noopener')">Fullscreen / open game ↗</button>
+<button class="btn secondary" type="button" onclick="const f=document.getElementById('stardewFrame'); const url='https://degloved.net/games/public/gms/stardew-valley/index.html'; if(f.requestFullscreen) { const p=f.requestFullscreen(); if(p && p.catch) p.catch(()=>window.open(url,'_blank','noopener')); } else { window.open(url,'_blank','noopener'); }">Fullscreen / open game ↗</button>
 </div>
 <div class="framewrap">
 <iframe id="stardewFrame" class="playframe" src="https://degloved.net/games/public/gms/stardew-valley/index.html" title="Community-hosted Stardew Valley browser port" allow="autoplay; fullscreen; gamepad; pointer-lock" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe>
