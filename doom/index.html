@@ -392,6 +392,7 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
         runtimeReady = true;
         loading = false;
         startButton.disabled = false;
+        presetButton.disabled = false;
         startButton.textContent = "Restart DOOM";
         setStatus("DOOM engine initialized.");
         setTimeout(correctViewport, 100);
@@ -400,6 +401,7 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
       onAbort(reason) {
         loading = false;
         startButton.disabled = false;
+        presetButton.disabled = false;
         setStatus("Dwasm stopped: " + reason);
         log("Engine aborted: " + reason);
       }
@@ -416,6 +418,7 @@ kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5p
       scriptRequested = false;
       loading = false;
       startButton.disabled = false;
+      presetButton.disabled = false;
       setStatus("Could not load index.js. Check the DOOM engine files.");
       log("ERROR: Failed to load ./index.js");
     };
