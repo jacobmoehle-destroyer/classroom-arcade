@@ -53,6 +53,34 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <p class="notice">The current integrated systems are based on EmulatorJS’s documented core names: gb, gba, nes, snes, n64, psx and segaMD. Actual compatibility still depends on the file, core, browser, and device.</p>
 </section>
 </div>
+<section class="panel" id="file-guide" aria-labelledby="fileGuideTitle">
+<h2 id="fileGuideTitle" style="margin-top:0">Which game file goes with which system?</h2>
+<p class="notice">Choose the system that matches the game file you have. Extensions below are common supported formats, not a guarantee that every file will work. This page does not provide game ROMs or BIOS files—use files you’re authorized to use.</p>
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse;min-width:520px;text-align:left">
+<thead><tr><th style="padding:9px;border-bottom:1px solid var(--line)">System in the emulator</th><th style="padding:9px;border-bottom:1px solid var(--line)">File extensions to try</th><th style="padding:9px;border-bottom:1px solid var(--line)">Notes</th></tr></thead>
+<tbody>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Game Boy / Game Boy Color</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.gb</code>, <code>.gbc</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Choose GB for original Game Boy games and GBC for Color games.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Game Boy Advance</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.gba</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Select the GBA system.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>NES / Famicom</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.nes</code>, <code>.fds</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">FDS disk images may have extra requirements.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Super Nintendo / SNES</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.sfc</code>, <code>.smc</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Some titles or formats may need additional setup.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Nintendo 64</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.n64</code>, <code>.z64</code>, <code>.v64</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Can be demanding on older phones and school laptops.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>PlayStation (PS1)</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.chd</code>, <code>.pbp</code>, <code>.iso</code>, <code>.cue</code>, <code>.bin</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">A single-file CHD/PBP is often easiest. A CUE may depend on separate BIN track files; BIOS may be needed.</td></tr>
+<tr><td style="padding:9px"><strong>Sega Genesis / Mega Drive</strong></td><td style="padding:9px"><code>.md</code>, <code>.gen</code>, <code>.smd</code>, sometimes <code>.bin</code> or <code>.zip</code></td><td style="padding:9px">Select Sega Genesis / Mega Drive in the system list.</td></tr>
+</tbody>
+</table>
+</div>
+<div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px">
+<strong>Quick tips</strong>
+<ul>
+<li>Set the matching system first, then choose the file and press <strong>Load selected game</strong>.</li>
+<li>If a ZIP does not load, try an uncompressed supported file.</li>
+<li>PlayStation multi-track games may need all related files together; this simple file picker cannot always provide companion files automatically.</li>
+<li>Some systems require a BIOS file that is not included here.</li>
+<li>Use only game and BIOS files you have permission to use; the site does not include downloads for commercial game ROMs.</li>
+</ul>
+</div>
+</section>
 <section id="emulatorWrap" class="panel" hidden>
 <div id="emulatorTop"><h2 id="nowPlaying">Now playing</h2><button id="hideEmulator">Hide player</button></div>
 <div id="game" aria-label="Emulator player"></div>
