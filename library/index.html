@@ -39,6 +39,13 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 </div>
 <p id="fileHint">Tip: .CHD or .PBP is usually easier for a single-file PlayStation image; a .CUE may refer to other track files which browsers cannot automatically select together.</p>
 <div class="filters"><button id="loadRom" class="primary">Load selected game</button><button id="stopRom">Close emulator</button><button id="clearRecent">Clear recent list</button></div>
+<div style="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px">
+<h3 style="margin:0 0 5px">Scan a folder for compatible games</h3>
+<p class="notice">Choose a folder (or select multiple files) and this page will check the filenames/extensions in your browser. It cannot silently scan your whole computer. Your files stay on your device.</p>
+<div class="filters"><label class="btn" for="scanFiles">Choose folder / files to scan</label><input id="scanFiles" type="file" multiple webkitdirectory directory style="max-width:100%;padding:8px" aria-label="Choose a folder or multiple game files to scan"></div>
+<div id="scanSummary" class="notice" role="status">No folder scanned yet.</div>
+<div id="scanResults" class="grid" style="margin-top:10px"></div>
+</div>
 <div id="loaderStatus" class="status" role="status">Ready. Select a system and a game file.</div>
 </section>
 <section class="panel">
@@ -155,6 +162,28 @@ $('loadRom').addEventListener('click',()=>{
  $('emulatorWrap').scrollIntoView({behavior:'smooth',block:'start'});render();
 });
 $('console').addEventListener('change',()=>{const s=systems[$('console').value];$('fileHint').textContent='Suggested formats for '+s.label+': '+s.ext+'. BIOS requirements and support vary by game. For PlayStation, a .CUE may need companion track files; a single .CHD or .PBP is often easier.';$('rom').value='';const accept={gb:'.gb,.gbc,.zip',gba:'.gba,.zip',nes:'.nes,.fds,.zip',snes:'.sfc,.smc,.zip',n64:'.n64,.z64,.v64,.zip',psx:'.chd,.pbp,.iso,.cue,.bin,.zip',segaMD:'.md,.gen,.smd,.bin,.zip'};$('rom').accept=accept[$('console').value]});
+const scanInput=$('scanFiles'),scanResults=$('scanResults'),scanSummary=$('scanSummary');
+const extensions={'.gb':['gb'],'.gbc':['gb'],'.gba':['gba'],'.nes':['nes'],'.fds':['nes'],'.sfc':['snes'],'.smc':['snes'],'.n64':['n64'],'.z64':['n64'],'.v64':['n64'],'.chd':['psx'],'.pbp':['psx'],'.iso':['psx'],'.cue':['psx'],'.bin':['psx','segaMD'],'.md':['segaMD'],'.gen':['segaMD'],'.smd':['segaMD'],'.zip':['gb','gba','nes','snes','n64','psx','segaMD']};
+function prettySize(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';if(n<1024*1024*1024)return (n/1024/1024).toFixed(1)+' MB';return (n/1024/1024/1024).toFixed(2)+' GB'}
+function suggestedSystems(file,ext){const path=(file.webkitRelativePath||file.name).toLowerCase();let choices=extensions[ext]||[];const clues=[['gba','gba'],['game boy','gb'],['gameboy','gb'],['gbc','gb'],['nes','nes'],['famicom','nes'],['snes','snes'],['sfc','snes'],['super nintendo','snes'],['n64','n64'],['nintendo 64','n64'],['psx','psx'],['ps1','psx'],['playstation','psx'],['genesis','segaMD'],['megadrive','segaMD'],['mega drive','segaMD'],['sega','segaMD']];for(const [hint,id] of clues){if(path.includes(hint)&&choices.includes(id))return [id];}return choices}
+scanInput.addEventListener('change',()=>{
+ const files=Array.from(scanInput.files||[]),matches=[];
+ for(const file of files){const name=file.name.toLowerCase(),dot=name.lastIndexOf('.'),ext=dot>=0?name.slice(dot):'';const choices=suggestedSystems(file,ext);if(choices.length)matches.push({file,ext,choices})}
+ scanResults.replaceChildren();
+ scanSummary.textContent=files.length+' file(s) checked · '+matches.length+' compatible-looking file(s) found. Extensions are only clues; actual compatibility varies.';
+ if(!files.length)return;
+ if(!matches.length){scanResults.innerHTML='<div class="empty">No supported-looking files found. Try a folder containing .gb, .gbc, .gba, .nes, .sfc, .smc, .n64, .z64, .chd, .pbp, .iso, .md, .gen, or .smd files.</div>';return}
+ for(const item of matches){
+  const card=document.createElement('article');card.className='tile';
+  const title=document.createElement('h3');title.textContent=item.file.webkitRelativePath||item.file.name;
+  const info=document.createElement('p');info.textContent=prettySize(item.file.size)+' · '+item.ext+' · '+(item.choices.length>1?'Choose the system to try':systems[item.choices[0]].label);
+  const label=document.createElement('label');label.className='notice';label.textContent='Run with system';
+  const select=document.createElement('select');select.style.width='100%';select.style.margin='5px 0 10px';select.style.padding='8px';select.style.background='#0c1425';select.style.color='var(--text)';select.style.border='1px solid #53627c';select.style.borderRadius='8px';
+  item.choices.forEach(id=>{const op=document.createElement('option');op.value=id;op.textContent=systems[id].label;select.appendChild(op)});
+  const run=document.createElement('button');run.className='primary';run.textContent='Run this file';run.addEventListener('click',()=>{const dt=new DataTransfer();dt.items.add(item.file);$('rom').files=dt.files;$('console').value=select.value;$('console').dispatchEvent(new Event('change'));const dt2=new DataTransfer();dt2.items.add(item.file);$('rom').files=dt2.files;$('gameName').value=item.file.name.replace(/\\.[^.]+$/,'');$('loadRom').click()});
+  card.append(title,info,label,select,run);scanResults.appendChild(card);
+ }
+});
 render();
 })();
 </script>
