@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101426">
+<title>Arcade Hub | Classroom Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 60%);color:var(--text);font:16px/1.45 system-ui,-apple-system,sans-serif}
+header{text-align:center;padding:22px 14px 14px}h1{font-size:clamp(2rem,7vw,3rem);margin:4px 0}.sub{color:var(--muted);max-width:720px;margin:auto}
+main{width:min(1100px,100%);padding:12px 14px 36px;margin:auto}
+nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 18px}
+button,a.btn{font:inherit;border-radius:10px;border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;cursor:pointer;text-decoration:none;touch-action:manipulation}
+button:hover,a.btn:hover,button:focus-visible,a.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.active{background:var(--accent);color:#07111f;border-color:var(--accent);font-weight:800}
+.panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
+.gamehead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}.gamehead h2{margin:0;font-size:1.3rem}.hint{color:var(--muted);font-size:.92rem;margin:8px 0 12px}
+canvas{display:block;width:100%;max-width:760px;height:auto;aspect-ratio:16/10;margin:0 auto;background:#070b14;border:1px solid #3c4964;border-radius:10px;touch-action:none}
+.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}.mobilepad{display:grid;grid-template-columns:repeat(3,54px);gap:6px;justify-content:center;margin-top:12px}.mobilepad button{min-height:48px;padding:6px}.mobilepad .empty{visibility:hidden}
+.catalog{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.tile{background:linear-gradient(145deg,#1a2540,#111827);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;min-height:145px}
+.tile .emoji{font-size:1.8rem}.tile h3{margin:5px 0}.tile p{color:var(--muted);font-size:.92rem;margin:0 0 12px;flex:1}.tile button{width:100%}
+.notice{color:var(--muted);font-size:.9rem}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
+@media(min-width:760px){.layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:14px;align-items:start}.side{position:sticky;top:10px}}
+</style>
+</head>
+<body>
+<header><div>🕹️ CLASSROOM ARCADE</div><h1>Arcade Hub</h1><p class="sub">Instant-play games built into this site. Pick a game below—no extra game website or downloads needed.</p></header>
+<main>
+<nav aria-label="Game categories">
+<button class="active" data-filter="all">All Games</button><button data-filter="arcade">Arcade Classics</button><button data-filter="platformer">Platformers</button><button data-filter="racing">Racing</button><button data-filter="sandbox">Sandbox</button>
+</nav>
+<div class="layout">
+<section>
+<div class="panel">
+<div class="gamehead"><h2 id="gameTitle">Snake</h2><div><span id="score">Score: 0</span> &nbsp; <button id="restart">Restart</button></div></div>
+<p class="hint" id="instructions">Use arrow keys or WASD. On touch screens, use the directional pad below.</p>
+<canvas id="screen" width="640" height="400" aria-label="Game canvas"></canvas>
+<div class="mobilepad" id="pad" aria-label="Touch controls">
+<button class="empty" tabindex="-1"> </button><button data-key="up" aria-label="Up">▲</button><button class="empty" tabindex="-1"> </button>
+<button data-key="left" aria-label="Left">◀</button><button data-key="down" aria-label="Down">▼</button><button data-key="right" aria-label="Right">▶</button>
+</div>
+<div class="controls"><button id="pause">Pause</button><button id="action">Action / Jump</button><a class="btn" href="../">← Back to Home</a></div>
+</div>
+<div class="notice">These are original mini-games made for this site. The separate <strong>3D Classroom Sandbox</strong> and DOOM player remain available from the homepage. Games are best-effort on mobile Safari; rotate to landscape for more room.</div>
+</section>
+<aside class="side">
+<div class="panel"><h2 style="margin-top:0">Choose a game</h2><div class="catalog" id="catalog">
+<div class="tile" data-category="arcade"><div class="emoji">🐍</div><h3>Snake</h3><p>Eat dots, grow longer, and avoid your tail.</p><button data-game="snake">Play Snake</button></div>
+<div class="tile" data-category="arcade"><div class="emoji">🏓</div><h3>Pong</h3><p>Keep the ball in play and beat the computer.</p><button data-game="pong">Play Pong</button></div>
+<div class="tile" data-category="arcade"><div class="emoji">🧱</div><h3>Breakout</h3><p>Bounce the ball to clear every brick.</p><button data-game="breakout">Play Breakout</button></div>
+<div class="tile" data-category="platformer"><div class="emoji">🏃</div><h3>Mini Platformer</h3><p>Jump across platforms and collect stars.</p><button data-game="platformer">Play Platformer</button></div>
+<div class="tile" data-category="racing"><div class="emoji">🏎️</div><h3>Neon Racer</h3><p>Dodge traffic and survive as the road speeds up.</p><button data-game="racing">Race now</button></div>
+<div class="tile" data-category="sandbox"><div class="emoji">🟩</div><h3>Pixel Builder</h3><p>Place and remove blocks to make your own tiny world.</p><button data-game="sandbox">Build something</button></div>
+</div></div>
+<div class="panel"><h3 style="margin-top:0">More games already on your site</h3><p class="notice">Explore the existing 3D world, DOOM and DOOM II player, and searchable movie catalog from the home page.</p><a class="btn" href="../">Open home page</a></div>
+</aside>
+</div>
+</main><footer>Arcade Hub · Original browser mini-games · Classroom Arcade</footer>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('screen'),ctx=canvas.getContext('2d'),title=document.getElementById('gameTitle'),instructions=document.getElementById('instructions'),scoreEl=document.getElementById('score'),restart=document.getElementById('restart'),pauseBtn=document.getElementById('pause'),actionBtn=document.getElementById('action');
+let game='snake',paused=false,over=false,score=0,last=0,keys={},state={},raf=0;
+const W=640,H=400;
+const descriptions={snake:'Use arrow keys or WASD. On touch screens, use the directional pad below.',pong:'Move your paddle with ↑ / ↓ or W / S. Tap the directional pad on mobile.',breakout:'Move with ← / → or A / D. Action launches the ball.',platformer:'Move with ← / → or A / D. Press Space, ↑, or Action to jump.',racing:'Steer with ← / → or A / D. Avoid other cars and stay on the road.',sandbox:'Tap/click the grid to place a block. Action toggles erase mode.'};
+function rnd(n){return Math.floor(Math.random()*n)}
+function setScore(n){score=n;scoreEl.textContent='Score: '+score}
+function base(){ctx.fillStyle='#070b14';ctx.fillRect(0,0,W,H)}
+function text(t,x,y,size=20,color='#f4f7ff'){ctx.fillStyle=color;ctx.font='bold '+size+'px system-ui';ctx.fillText(t,x,y)}
+function reset(){
+ paused=false;over=false;setScore(0);pauseBtn.textContent='Pause';actionBtn.textContent=game==='sandbox'?'Mode: Build':'Action / Jump';
+ if(game==='snake'){state={cell:20,snake:[{x:8,y:9},{x:7,y:9},{x:6,y:9}],dir:{x:1,y:0},next:{x:1,y:0},food:{x:20,y:9},tick:0};placeFood()}
+ if(game==='pong')state={pY:160,cY:160,bx:320,by:200,vx:4,vy:2,player:0,computer:0};
+ if(game==='breakout'){state={px:270,ball:{x:320,y:340,vx:3,vy:-4},launched:false,bricks:[]};for(let r=0;r<5;r++)for(let c=0;c<10;c++)state.bricks.push({x:30+c*58,y:35+r*24,w:50,h:14,alive:true})}
+ if(game==='platformer')state={x:45,y:310,vx:0,vy:0,ground:false,stars:[{x:160,y:270},{x:300,y:205},{x:460,y:145},{x:570,y:290}],plats:[{x:0,y:360,w:640,h:40},{x:110,y:310,w:100,h:12},{x:250,y:245,w:110,h:12},{x:405,y:185,w:105,h:12},{x:520,y:320,w:90,h:12}],goal:false}
+ if(game==='racing')state={x:320,traffic:[],ticks:0,speed:3,roadOffset:0}
+ if(game==='sandbox'){state={cell:20,blocks:new Set(),erase:false};for(let x=0;x<32;x++)state.blocks.add(x+',18');for(let x=6;x<12;x++)state.blocks.add(x+',14');for(let x=19;x<25;x++)state.blocks.add(x+',11')}
+ draw()
+}
+function placeFood(){let p;do{p={x:rnd(30),y:rnd(18)}}while(state.snake.some(s=>s.x===p.x&&s.y===p.y));state.food=p}
+function draw(){
+ base();
+ if(game==='snake')drawSnake();if(game==='pong')drawPong();if(game==='breakout')drawBreakout();if(game==='platformer')drawPlatformer();if(game==='racing')drawRacing();if(game==='sandbox')drawSandbox();
+ if(paused||over){ctx.fillStyle='#070b14cc';ctx.fillRect(0,0,W,H);text(paused?'PAUSED':'GAME OVER',220,185,32);text('Press Restart to play again',190,220,17,'#b9c4da')}
+}
+function drawSnake(){let c=state.cell;ctx.fillStyle='#0f1728';for(let x=0;x<30;x++)for(let y=0;y<18;y++){ctx.strokeStyle='#172238';ctx.strokeRect(x*c,y*c,c,c)}ctx.fillStyle='#ffcc66';ctx.fillRect(state.food.x*c+3,state.food.y*c+3,c-6,c-6);state.snake.forEach((p,i)=>{ctx.fillStyle=i?'#39b87b':'#8bd3ff';ctx.fillRect(p.x*c+2,p.y*c+2,c-4,c-4)})}
+function drawPong(){ctx.setLineDash([8,8]);ctx.strokeStyle='#34415c';ctx.beginPath();ctx.moveTo(320,0);ctx.lineTo(320,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#8bd3ff';ctx.fillRect(20,state.pY,12,80);ctx.fillStyle='#f5b6ff';ctx.fillRect(608,state.cY,12,80);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(state.bx,state.by,8,0,Math.PI*2);ctx.fill();text(state.player+'  :  '+state.computer,278,28,20)}
+function drawBreakout(){state.bricks.forEach((b,i)=>{if(!b.alive)return;ctx.fillStyle=['#8bd3ff','#76d6a4','#ffd166','#f5a4d1','#b9a0ff'][Math.floor(i/10)];ctx.fillRect(b.x,b.y,b.w,b.h)});ctx.fillStyle='#f4f7ff';ctx.fillRect(state.px,370,100,12);ctx.beginPath();ctx.arc(state.ball.x,state.ball.y,7,0,Math.PI*2);ctx.fill()}
+function drawPlatformer(){ctx.fillStyle='#121d34';ctx.fillRect(0,0,W,H);state.plats.forEach(p=>{ctx.fillStyle='#4b9a73';ctx.fillRect(p.x,p.y,p.w,p.h)});state.stars.forEach(s=>{ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(s.x,s.y,8,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#8bd3ff';ctx.fillRect(state.x,state.y,22,30);ctx.fillStyle='#fff';ctx.fillRect(570,270,24,50);text('⭐ '+score,12,25,16)}
+function drawRacing(){ctx.fillStyle='#182b28';ctx.fillRect(0,0,W,H);ctx.fillStyle='#30394b';ctx.fillRect(130,0,380,H);ctx.strokeStyle='#f6f0b0';ctx.lineWidth=4;for(let y=-40+(state.roadOffset%70);y<H;y+=70){ctx.beginPath();ctx.moveTo(320,y);ctx.lineTo(320,y+35);ctx.stroke()}ctx.fillStyle='#ff6961';ctx.fillRect(state.x-16,300,32,54);state.traffic.forEach(c=>{ctx.fillStyle='#f5b6ff';ctx.fillRect(c.x-15,c.y,30,50)});text('DODGE THE TRAFFIC',12,25,16)}
+function drawSandbox(){let c=state.cell;for(let y=0;y<20;y++)for(let x=0;x<32;x++){ctx.strokeStyle='#1c2940';ctx.strokeRect(x*c,y*c,c,c);if(state.blocks.has(x+','+y)){ctx.fillStyle=y<13?'#8bd3ff':y<18?'#63b86d':'#9a704b';ctx.fillRect(x*c+1,y*c+1,c-2,c-2)}}text('Tap grid to build · Action toggles erase',12,24,16)}
+function step(t){if(!last)last=t;let dt=Math.min(32,t-last);last=t;if(!paused&&!over){update(dt)}draw();raf=requestAnimationFrame(step)}
+function update(dt){
+ if(game==='snake'){state.tick+=dt;if(state.tick>115){state.tick=0;state.dir=state.next;let h={x:state.snake[0].x+state.dir.x,y:state.snake[0].y+state.dir.y};if(h.x<0||h.x>=30||h.y<0||h.y>=18||state.snake.some(p=>p.x===h.x&&p.y===h.y)){over=true;return}state.snake.unshift(h);if(h.x===state.food.x&&h.y===state.food.y){setScore(score+10);placeFood()}else state.snake.pop()}}
+ if(game==='pong'){if(keys.up||keys.ArrowUp)state.pY-=5;if(keys.down||keys.ArrowDown)state.pY+=5;state.pY=Math.max(0,Math.min(H-80,state.pY));state.cY+=(state.by-(state.cY+40))*.045;state.bx+=state.vx;state.by+=state.vy;if(state.by<8||state.by>H-8)state.vy*=-1;if(state.bx<32&&state.by>state.pY&&state.by<state.pY+80){state.vx=Math.abs(state.vx)*1.04;state.vy+=(state.by-state.pY-40)*.04;setScore(score+1)}if(state.bx>608&&state.by>state.cY&&state.by<state.cY+80){state.vx=-Math.abs(state.vx)*1.04}if(state.bx<0){state.computer++;resetBall()}if(state.bx>W){state.player++;setScore(score+5);resetBall()}if(state.computer>=5||state.player>=5)over=true}
+ if(game==='breakout'){if(keys.left||keys.ArrowLeft)state.px-=6;if(keys.right||keys.ArrowRight)state.px+=6;state.px=Math.max(0,Math.min(W-100,state.px));let b=state.ball;if(state.launched){b.x+=b.vx;b.y+=b.vy;if(b.x<7||b.x>W-7)b.vx*=-1;if(b.y<7)b.vy=Math.abs(b.vy);if(b.y>360&&b.y<390&&b.x>state.px&&b.x<state.px+100){b.vy=-Math.abs(b.vy);b.vx+=(b.x-(state.px+50))*.04}for(let br of state.bricks){if(br.alive&&b.x>br.x&&b.x<br.x+br.w&&b.y>br.y&&b.y<br.y+br.h){br.alive=false;b.vy*=-1;setScore(score+10);break}}if(b.y>H+5)over=true;if(state.bricks.every(x=>!x.alive)){over=true;setScore(score+100)}}}
+ if(game==='platformer'){state.vx=((keys.right||keys.ArrowRight)?3.5:0)-((keys.left||keys.ArrowLeft)?3.5:0);state.x=Math.max(0,Math.min(W-22,state.x+state.vx));state.vy+=.35;let oldY=state.y;state.y+=state.vy;state.ground=false;state.plats.forEach(p=>{if(state.vy>=0&&oldY+30<=p.y&&state.y+30>=p.y&&state.x+22>p.x&&state.x<p.x+p.w){state.y=p.y-30;state.vy=0;state.ground=true}});state.stars=state.stars.filter(s=>{if(Math.hypot(state.x+11-s.x,state.y+15-s.y)<22){setScore(score+10);return false}return true});if(state.y>H){over=true}if(state.x>555&&state.y>230){over=true;setScore(score+50);instructions.textContent='Level complete! Press Restart to play again.'}}
+ if(game==='racing'){state.ticks+=dt;state.roadOffset+=state.speed;state.speed=Math.min(8,3+score/100);if(keys.left||keys.ArrowLeft)state.x-=4;if(keys.right||keys.ArrowRight)state.x+=4;state.x=Math.max(155,Math.min(485,state.x));if(state.ticks>650){state.ticks=0;state.traffic.push({x:190+rnd(260),y:-55})}state.traffic.forEach(c=>c.y+=state.speed);state.traffic=state.traffic.filter(c=>{if(c.y>H){setScore(score+10);return false}if(Math.abs(c.x-state.x)<28&&c.y>285&&c.y<355)over=true;return true})}
+}
+function resetBall(){state.bx=320;state.by=200;state.vx=(Math.random()>.5?1:-1)*4;state.vy=(Math.random()-.5)*5}
+function choose(name){game=name;title.textContent={snake:'Snake',pong:'Pong',breakout:'Breakout',platformer:'Mini Platformer',racing:'Neon Racer',sandbox:'Pixel Builder'}[name];instructions.textContent=descriptions[name];document.querySelectorAll('[data-game]').forEach(b=>b.classList.toggle('active',b.dataset.game===name));reset()}
+function keyName(e){if(['ArrowUp','w','W'].includes(e.key))return'up';if(['ArrowDown','s','S'].includes(e.key))return'down';if(['ArrowLeft','a','A'].includes(e.key))return'left';if(['ArrowRight','d','D'].includes(e.key))return'right';return e.key}
+function setKey(k,v){keys[k]=v;keys[({up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'})[k]||k]=v}
+window.addEventListener('keydown',e=>{let k=keyName(e);if(['up','down','left','right',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))e.preventDefault();setKey(k,true);if((k===' '||k==='up'||k==='ArrowUp')&&game==='platformer'&&state.ground){state.vy=-8;state.ground=false}if((k===' '||k==='Enter')&&game==='breakout'&&!state.launched){state.launched=true}if(k===' '&&game==='sandbox')state.erase=!state.erase});
+window.addEventListener('keyup',e=>setKey(keyName(e),false));
+document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;const down=e=>{e.preventDefault();setKey(k,true);if(k==='up'&&game==='platformer'&&state.ground){state.vy=-8;state.ground=false}};const up=e=>{e.preventDefault();setKey(k,false)};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up)});
+document.querySelectorAll('[data-game]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.game)));
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tile').forEach(t=>t.hidden=b.dataset.filter!=='all'&&t.dataset.category!==b.dataset.filter)}));
+restart.addEventListener('click',reset);pauseBtn.addEventListener('click',()=>{paused=!paused;pauseBtn.textContent=paused?'Resume':'Pause'});actionBtn.addEventListener('click',()=>{if(game==='platformer'&&state.ground){state.vy=-8;state.ground=false}else if(game==='breakout')state.launched=true;else if(game==='sandbox')state.erase=!state.erase;actionBtn.textContent=game==='sandbox'?(state.erase?'Mode: Erase':'Mode: Build'):'Action / Jump'});
+canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;if(game==='sandbox'){let gx=Math.floor(x/20),gy=Math.floor(y/20),k=gx+','+gy;if(state.erase)state.blocks.delete(k);else state.blocks.add(k)}if(game==='platformer'&&state.ground){state.vy=-8;state.ground=false}if(game==='breakout'&&!state.launched)state.launched=true;if(game==='pong'){if(y<H/2)setKey('up',true);else setKey('down',true)}});
+canvas.addEventListener('pointerup',()=>{setKey('up',false);setKey('down',false)});
+function drawInitial(){choose('snake')}
+function step(t){if(!last)last=t;let dt=Math.min(32,t-last);last=t;if(!paused&&!over)update(dt);draw();raf=requestAnimationFrame(step)}
+drawInitial();cancelAnimationFrame(raf);raf=requestAnimationFrame(step);
+})();
+</script>
+</body></html>
