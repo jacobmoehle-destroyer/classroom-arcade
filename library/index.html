@@ -22,7 +22,7 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <h2 id="searchTitle" style="margin:0 0 10px">Find a game</h2>
 <div class="tools">
 <div class="field"><label for="search">Search library</label><input id="search" type="search" placeholder="Search title, genre, system…"></div>
-<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
+<div class="field"><label for="systemFilter">System</label><select id="systemFilter"><option value="all">All systems</option><option value="browser">Browser games</option><option value="steam">Steam / desktop</option><option value="dosbox_pure">Classic PC / MS-DOS</option><option value="doom">DOOM engine</option><option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
 <div class="field"><label for="sort">Show</label><select id="sort"><option value="all">All games and systems</option><option value="favorites">Favorites only</option><option value="recent">Recently played</option></select></div>
 </div>
 <div class="filters" aria-label="Genre filters"><button class="active" data-genre="all">All genres</button><button data-genre="arcade">Arcade</button><button data-genre="platformer">Platformer</button><button data-genre="racing">Racing</button><button data-genre="sandbox">Sandbox</button><button data-genre="simulation">Simulation</button><button data-genre="action">Action</button><button data-genre="retro">Retro library</button></div>
@@ -33,8 +33,8 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <h2 id="loaderTitle" style="margin-top:0">Load a game file from this device</h2>
 <p class="notice">Choose the console first, then pick a compatible game file. The launcher passes the selected file to EmulatorJS as a temporary browser object URL; it does not commit or upload the file. File extensions are only a hint—some titles need a BIOS, special disc layout, or a different dump.</p>
 <div class="tools">
-<div class="field"><label for="console">Target system</label><select id="console"><option value="gb">Game Boy / Game Boy Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">Super Nintendo / SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option></select></div>
-<div class="field"><label for="rom">Game file</label><input id="rom" type="file" accept=".gb,.gbc,.gba,.nes,.fds,.sfc,.smc,.n64,.z64,.v64,.iso,.chd,.pbp,.cue,.bin,.md,.gen,.smd,.zip"></div>
+<div class="field"><label for="console">Target system</label><select id="console"><option value="gb">Game Boy / Game Boy Color</option><option value="gba">Game Boy Advance</option><option value="nes">NES / Famicom</option><option value="snes">Super Nintendo / SNES</option><option value="n64">Nintendo 64</option><option value="psx">PlayStation</option><option value="segaMD">Sega Genesis / Mega Drive</option><option value="dosbox_pure">Classic PC / MS-DOS</option></select></div>
+<div class="field"><label for="rom">Game file</label><input id="rom" type="file" accept=".gb,.gbc,.gba,.nes,.fds,.sfc,.smc,.n64,.z64,.v64,.iso,.chd,.pbp,.cue,.bin,.md,.gen,.smd,.dosz,.exe,.com,.bat,.zip"></div>
 <div class="field"><label for="gameName">Display name (optional)</label><input id="gameName" type="text" maxlength="90" placeholder="Use file name if blank"></div>
 </div>
 <p id="fileHint">Tip: .CHD or .PBP is usually easier for a single-file PlayStation image; a .CUE may refer to other track files which browsers cannot automatically select together.</p>
@@ -73,7 +73,8 @@ main{width:min(1180px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--acc
 <tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Super Nintendo / SNES</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.sfc</code>, <code>.smc</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Some titles or formats may need additional setup.</td></tr>
 <tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Nintendo 64</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.n64</code>, <code>.z64</code>, <code>.v64</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Can be demanding on older phones and school laptops.</td></tr>
 <tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>PlayStation (PS1)</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.chd</code>, <code>.pbp</code>, <code>.iso</code>, <code>.cue</code>, <code>.bin</code>, sometimes <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">A single-file CHD/PBP is often easiest. A CUE may depend on separate BIN track files; BIOS may be needed.</td></tr>
-<tr><td style="padding:9px"><strong>Sega Genesis / Mega Drive</strong></td><td style="padding:9px"><code>.md</code>, <code>.gen</code>, <code>.smd</code>, sometimes <code>.bin</code> or <code>.zip</code></td><td style="padding:9px">Select Sega Genesis / Mega Drive in the system list.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid var(--line)"><strong>Sega Genesis / Mega Drive</strong></td><td style="padding:9px;border-bottom:1px solid var(--line)"><code>.md</code>, <code>.gen</code>, <code>.smd</code>, sometimes <code>.bin</code> or <code>.zip</code></td><td style="padding:9px;border-bottom:1px solid var(--line)">Select Sega Genesis / Mega Drive in the system list.</td></tr>
+<tr><td style="padding:9px"><strong>Classic PC / MS-DOS</strong></td><td style="padding:9px"><code>.zip</code>, <code>.dosz</code>, <code>.exe</code>, <code>.com</code>, <code>.bat</code>, <code>.iso</code>, <code>.chd</code>, <code>.cue</code></td><td style="padding:9px">Best for classic DOS games, not modern Windows/Steam games. ZIP files often need the game files and a suitable launch file together.</td></tr>
 </tbody>
 </table>
 </div>
@@ -104,7 +105,8 @@ const systems={
  snes:{label:'SNES',core:'snes',ext:'.sfc .smc .zip'},
  n64:{label:'Nintendo 64',core:'n64',ext:'.n64 .z64 .v64 .zip'},
  psx:{label:'PlayStation',core:'psx',ext:'.chd .pbp .iso .cue .bin .zip'},
- segaMD:{label:'Sega Genesis / Mega Drive',core:'segaMD',ext:'.md .gen .smd .bin .zip'}
+ segaMD:{label:'Sega Genesis / Mega Drive',core:'segaMD',ext:'.md .gen .smd .bin .zip'},
+ dosbox_pure:{label:'Classic PC / MS-DOS',core:'dosbox_pure',ext:'.zip .dosz .exe .com .bat .iso .chd .cue'}
 };
 const games=[
 {id:'snake',title:'Snake',system:'browser',genre:'arcade',emoji:'🐍',desc:'Eat dots, grow longer, and avoid your tail.',url:'../arcade/',action:'Open Arcade Hub'},
@@ -156,23 +158,23 @@ $('loadRom').addEventListener('click',()=>{
  $('game').style.minHeight='320px';
  const r=recent().filter(x=>x!==('local:'+name+'|'+sys));r.unshift('local:'+name+'|'+sys);localStorage.setItem('ca-library-recent',JSON.stringify(r.slice(0,30)));
  const playerUrl='https://cdn.emulatorjs.org/stable/data/';
- window.EJS_player='#game';window.EJS_core=systems[sys].core;window.EJS_gameUrl=objectUrl;window.EJS_gameName=name;window.EJS_pathtodata=playerUrl;window.EJS_startOnLoaded=true;window.EJS_color='#8bd3ff';window.EJS_gameID=1000+Object.keys(systems).indexOf(sys);
+ window.EJS_player='#game';window.EJS_core=systems[sys].core;window.EJS_threads=sys==='dosbox_pure';window.EJS_gameUrl=objectUrl;window.EJS_gameName=name;window.EJS_pathtodata=playerUrl;window.EJS_startOnLoaded=true;window.EJS_color='#8bd3ff';window.EJS_gameID=1000+Object.keys(systems).indexOf(sys);
  setStatus('Loading '+name+' with '+systems[sys].label+' core…');
  const script=document.createElement('script');script.src=playerUrl+'loader.js';script.async=true;script.onload=()=>setStatus('Emulator loader downloaded. If the game does not start, check format, BIOS requirements, and device compatibility.');script.onerror=()=>setStatus('Could not load EmulatorJS from its CDN. Check your connection or whether the network blocks the CDN.',true);loaderScript=script;document.body.appendChild(script);
  $('emulatorWrap').scrollIntoView({behavior:'smooth',block:'start'});render();
 });
-$('console').addEventListener('change',()=>{const s=systems[$('console').value];$('fileHint').textContent='Suggested formats for '+s.label+': '+s.ext+'. BIOS requirements and support vary by game. For PlayStation, a .CUE may need companion track files; a single .CHD or .PBP is often easier.';$('rom').value='';const accept={gb:'.gb,.gbc,.zip',gba:'.gba,.zip',nes:'.nes,.fds,.zip',snes:'.sfc,.smc,.zip',n64:'.n64,.z64,.v64,.zip',psx:'.chd,.pbp,.iso,.cue,.bin,.zip',segaMD:'.md,.gen,.smd,.bin,.zip'};$('rom').accept=accept[$('console').value]});
+$('console').addEventListener('change',()=>{const s=systems[$('console').value];$('fileHint').textContent='Suggested formats for '+s.label+': '+s.ext+'. BIOS requirements and support vary by game. For PlayStation, a .CUE may need companion track files; a single .CHD or .PBP is often easier.';$('rom').value='';const accept={gb:'.gb,.gbc,.zip',gba:'.gba,.zip',nes:'.nes,.fds,.zip',snes:'.sfc,.smc,.zip',n64:'.n64,.z64,.v64,.zip',psx:'.chd,.pbp,.iso,.cue,.bin,.zip',segaMD:'.md,.gen,.smd,.bin,.zip',dosbox_pure:'.zip,.dosz,.exe,.com,.bat,.iso,.chd,.cue'};$('rom').accept=accept[$('console').value]});
 const scanInput=$('scanFiles'),scanResults=$('scanResults'),scanSummary=$('scanSummary');
-const extensions={'.gb':['gb'],'.gbc':['gb'],'.gba':['gba'],'.nes':['nes'],'.fds':['nes'],'.sfc':['snes'],'.smc':['snes'],'.n64':['n64'],'.z64':['n64'],'.v64':['n64'],'.chd':['psx'],'.pbp':['psx'],'.iso':['psx'],'.cue':['psx'],'.bin':['psx','segaMD'],'.md':['segaMD'],'.gen':['segaMD'],'.smd':['segaMD'],'.zip':['gb','gba','nes','snes','n64','psx','segaMD']};
+const extensions={'.gb':['gb'],'.gbc':['gb'],'.gba':['gba'],'.nes':['nes'],'.fds':['nes'],'.sfc':['snes'],'.smc':['snes'],'.n64':['n64'],'.z64':['n64'],'.v64':['n64'],'.chd':['psx','dosbox_pure'],'.pbp':['psx'],'.iso':['psx','dosbox_pure'],'.cue':['psx','dosbox_pure'],'.bin':['psx','segaMD'],'.md':['segaMD'],'.gen':['segaMD'],'.smd':['segaMD'],'.dosz':['dosbox_pure'],'.exe':['dosbox_pure'],'.com':['dosbox_pure'],'.bat':['dosbox_pure'],'.zip':['gb','gba','nes','snes','n64','psx','segaMD','dosbox_pure']};
 function prettySize(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';if(n<1024*1024*1024)return (n/1024/1024).toFixed(1)+' MB';return (n/1024/1024/1024).toFixed(2)+' GB'}
-function suggestedSystems(file,ext){const path=(file.webkitRelativePath||file.name).toLowerCase();let choices=extensions[ext]||[];const clues=[['gba','gba'],['game boy','gb'],['gameboy','gb'],['gbc','gb'],['nes','nes'],['famicom','nes'],['snes','snes'],['sfc','snes'],['super nintendo','snes'],['n64','n64'],['nintendo 64','n64'],['psx','psx'],['ps1','psx'],['playstation','psx'],['genesis','segaMD'],['megadrive','segaMD'],['mega drive','segaMD'],['sega','segaMD']];for(const [hint,id] of clues){if(path.includes(hint)&&choices.includes(id))return [id];}return choices}
+function suggestedSystems(file,ext){const path=(file.webkitRelativePath||file.name).toLowerCase();let choices=extensions[ext]||[];const clues=[['ms-dos','dosbox_pure'],['dosbox','dosbox_pure'],['dos game','dosbox_pure'],['gba','gba'],['game boy','gb'],['gameboy','gb'],['gbc','gb'],['nes','nes'],['famicom','nes'],['snes','snes'],['sfc','snes'],['super nintendo','snes'],['n64','n64'],['nintendo 64','n64'],['psx','psx'],['ps1','psx'],['playstation','psx'],['genesis','segaMD'],['megadrive','segaMD'],['mega drive','segaMD'],['sega','segaMD']];for(const [hint,id] of clues){if(path.includes(hint)&&choices.includes(id))return [id];}return choices}
 scanInput.addEventListener('change',()=>{
  const files=Array.from(scanInput.files||[]),matches=[];
  for(const file of files){const name=file.name.toLowerCase(),dot=name.lastIndexOf('.'),ext=dot>=0?name.slice(dot):'';const choices=suggestedSystems(file,ext);if(choices.length)matches.push({file,ext,choices})}
  scanResults.replaceChildren();
  scanSummary.textContent=files.length+' file(s) checked · '+matches.length+' compatible-looking file(s) found. Extensions are only clues; actual compatibility varies.';
  if(!files.length)return;
- if(!matches.length){scanResults.innerHTML='<div class="empty">No supported-looking files found. Try a folder containing .gb, .gbc, .gba, .nes, .sfc, .smc, .n64, .z64, .chd, .pbp, .iso, .md, .gen, or .smd files.</div>';return}
+ if(!matches.length){scanResults.innerHTML='<div class="empty">No supported-looking files found. Try a folder containing console files or classic PC .zip, .dosz, .exe, .com, or .bat files.</div>';return}
  for(const item of matches){
   const card=document.createElement('article');card.className='tile';
   const title=document.createElement('h3');title.textContent=item.file.webkitRelativePath||item.file.name;
