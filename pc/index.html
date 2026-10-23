@@ -51,27 +51,29 @@ code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:
 <footer>Browser PC Emulator · Powered by the open-source v86 project · No disk images are hosted by this site</footer>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id);let emulator=null,libPromise=null,booting=false;
+const $=id=>document.getElementById(id);let emulator=null,libPromise=null,booting=false,readyTimer=null,emulatorReady=false;
 function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error)}
 function controls(on){$('stop').disabled=!on;$('reset').disabled=!on;$('saveState').disabled=!on;$('releaseMouse').disabled=!on;$('boot').disabled=on||booting}
 function loadLibrary(){if(libPromise)return libPromise;libPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://copy.sh/v86/build/libv86.js';s.onload=()=>typeof V86!=='undefined'?resolve():reject(new Error('v86 library loaded but V86 was not found'));s.onerror=()=>reject(new Error('Could not load the v86 library. The host may be unavailable or blocked.'));document.head.appendChild(s)});return libPromise}
 function prepareScreen(){$('screen').replaceChildren();const textScreen=document.createElement('div');textScreen.style.cssText='white-space:pre;font:14px monospace;line-height:14px';const canvas=document.createElement('canvas');canvas.style.display='none';$('screen').append(textScreen,canvas)}
-function stop(){if(emulator){try{emulator.stop()}catch(e){}emulator=null}$('screen').replaceChildren();controls(false);status('PC stopped. The virtual machine memory was cleared.')}
+function stop(){if(readyTimer){clearTimeout(readyTimer);readyTimer=null}emulatorReady=false;if(emulator){try{emulator.stop()}catch(e){}emulator=null}$('screen').replaceChildren();controls(false);status('PC stopped. The virtual machine memory was cleared.')}
 $('boot').addEventListener('click',async()=>{
- const file=$('diskFile').files&&$('diskFile').files[0];if(!file){status('Choose a disk image first.',true);return}
+ const file=$('diskFile').files&&$('diskFile').files[0];if(!file){status('Choose a bootable PC disk image first—not an individual game .exe or data file.',true);return}
+ if(!file.size){status('That file is empty (0 bytes). Choose a valid disk image.',true);return}
  if(file.size>1024*1024*1024){status('That image is over 1 GB. Choose a smaller image to reduce the risk of running out of memory.',true);return}
  if(booting)return;booting=true;$('boot').disabled=true;status('Loading the emulator and reading your local disk image…');
  try{
   await loadLibrary();const buffer=await file.arrayBuffer();if(emulator)stop();prepareScreen();
   const kind=$('diskType').value,opts={wasm_path:'https://copy.sh/v86/build/v86.wasm',bios:{url:'https://copy.sh/v86/bios/seabios.bin'},vga_bios:{url:'https://copy.sh/v86/bios/vgabios.bin'},screen_container:$('screen'),memory_size:128*1024*1024,vga_memory_size:8*1024*1024,autostart:true};
   opts[kind]={buffer};
-  emulator=new V86(opts);
-  emulator.add_listener('emulator-ready',()=>{controls(true);status('Emulator initialized. If the display stays black, verify that this is a bootable OS image and that the image type is correct.')});
+  emulatorReady=false;clearTimeout(readyTimer);emulator=new V86(opts);
+  readyTimer=setTimeout(()=>{if(emulator&&!emulatorReady)status('Still waiting for v86, WebAssembly, or BIOS assets. Check whether the required copy.sh host is reachable; if assets loaded, verify this is a bootable OS disk image.',true)},30000);
+  emulator.add_listener('emulator-ready',()=>{emulatorReady=true;clearTimeout(readyTimer);readyTimer=null;controls(true);status('Emulator initialized. If the display stays black, verify that this is a bootable OS image and that the image type is correct.')});
   emulator.add_listener('emulator-started',()=>{controls(true);status('Emulation running. The guest may still be booting.')});
   emulator.add_listener('download-progress',p=>{if(p&&p.total)status('Loading emulator assets: '+Math.round(p.loaded/p.total*100)+'%')});
   emulator.add_listener('download-error',e=>status('A required emulator asset failed to load: '+String(e||'unknown error'),true));
   emulator.add_listener('emulator-error',e=>status('v86 reported an emulator error: '+String(e||'unknown error'),true));
-  controls(true);status('Emulator initialized. Waiting for the guest system to boot…');
+  status('Starting v86 and loading required WebAssembly/BIOS assets…');
  }catch(e){stop();status('Could not start the PC: '+(e&&e.message?e.message:String(e)),true)}
  finally{booting=false;$('boot').disabled=!!emulator}
 });
@@ -80,7 +82,7 @@ $('reset').addEventListener('click',()=>{if(emulator){emulator.restart();status(
 $('releaseMouse').addEventListener('click',()=>{if(emulator&&emulator.mouse_release)emulator.mouse_release()});
 $('saveState').addEventListener('click',async()=>{if(!emulator)return;status('Creating emulator state…');try{const state=await emulator.save_state();const blob=new Blob([state],{type:'application/octet-stream'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='classroom-arcade-pc-state.bin';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status('State file download requested. This saves emulator memory/state, not a portable copy of your virtual hard drive.')}catch(e){status('Could not save emulator state: '+(e.message||e),true)}});
 $('stateFile').addEventListener('change',async()=>{const file=$('stateFile').files&&$('stateFile').files[0];if(!file)return;if(!emulator){status('Boot the same compatible disk image first, then restore the state file.',true);return}try{await emulator.restore_state(await file.arrayBuffer());status('State restore requested.')}catch(e){status('Could not restore that state file: '+(e.message||e),true)}});
-window.addEventListener('beforeunload',()=>{if(emulator)try{emulator.stop()}catch(e){}});
+window.addEventListener('beforeunload',()=>{if(readyTimer)clearTimeout(readyTimer);if(emulator)try{emulator.stop()}catch(e){}});
 })();
 </script>
 </body>
