@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101827">
-  <title>SuperTuxKart | Classroom Arcade</title>
+  <meta name="description" content="Check browser compatibility and launch information for SuperTuxKart in Classroom Arcade.">
+<title>SuperTuxKart | Classroom Arcade</title>
   <style>
     :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff}
     *{box-sizing:border-box}
@@ -31,15 +32,23 @@
     .check span{color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
     .check .value{color:#b8e9c7;font-weight:700}
     .note{font-size:.9rem;border-left:3px solid var(--accent);padding-left:12px}
-  </style>
+  
+/* Shared accessibility improvements */
+.skip-link{position:fixed;top:max(8px,env(safe-area-inset-top));left:8px;z-index:10000;transform:translateY(calc(-100% - 14px));background:var(--panel,#151d31);color:var(--text,#fff);border:2px solid var(--accent,#8bd3ff);border-radius:10px;padding:10px 14px;font-weight:800;text-decoration:none;box-shadow:0 4px 18px #0008}
+.skip-link:focus{transform:translateY(0);outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+#main-content{scroll-margin-top:1rem}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
   <header>
     <div class="eyebrow">Classroom Arcade · Existing game port</div>
     <h1>🏁 SuperTuxKart</h1>
     <p>A real open-source kart racer. This page tracks browser-port readiness and the steps needed before the game is enabled in this site.</p>
   </header>
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="panel" aria-labelledby="status-title">
       <span class="status">Awaiting network approval</span>
       <h2 id="status-title" style="margin-top:12px">Why it isn't embedded here yet</h2>
