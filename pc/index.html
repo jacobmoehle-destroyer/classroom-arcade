@@ -6,21 +6,47 @@
 <meta name="description" content="Run compatible DOS and older x86 operating-system disk images in the browser with the v86 virtual PC emulator. Bring your own disk image.">
 <title>Browser PC Emulator | Classroom Arcade</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--good:#a8e6bd}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 60%);color:var(--text);font:16px/1.5 system-ui,sans-serif}
-header{text-align:center;padding:25px 14px 12px}h1{font-size:clamp(2rem,7vw,3rem);margin:5px 0}.sub{color:var(--muted);max-width:850px;margin:auto}
-main{width:min(1100px,100%);padding:12px 14px 36px;margin:auto}a{color:var(--accent)}button,.btn,input,select{font:inherit}button,.btn{border:1px solid #53627c;background:#273650;color:var(--text);padding:10px 13px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}button.primary{background:var(--accent);color:#07111f;font-weight:800;border-color:var(--accent)}button:disabled{opacity:.5;cursor:not-allowed}
-.panel{background:#151d31e8;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:15px}.muted{color:var(--muted)}.notice{background:#10192b;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.fields{display:grid;grid-template-columns:1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;background:#0c1425;color:var(--text);border:1px solid #53627c;border-radius:10px;padding:9px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.status{min-height:1.5em;color:var(--good);overflow-wrap:anywhere}.status.error{color:#ffb4b4}
-#screen{background:#000;min-height:280px;aspect-ratio:4/3;max-height:75vh;overflow:auto;display:block;position:relative;border-radius:10px;padding:4px}#screen canvas{max-width:100%;height:auto}#screen canvas:not([style*="display: none"]){display:block!important}#screen>div{margin:auto}#screen canvas{max-width:100%;height:auto}#screen:empty:after{content:'PC screen appears here';color:#7f8aa3}
-code{overflow-wrap:anywhere}footer{text-align:center;color:var(--muted);padding:10px 14px 26px;font-size:.85rem}
-@media(min-width:720px){.fields{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}}
-
-/* Shared accessibility improvements */
-.skip-link{position:fixed;top:max(8px,env(safe-area-inset-top));left:8px;z-index:10000;transform:translateY(calc(-100% - 14px));background:var(--panel,#151d31);color:var(--text,#fff);border:2px solid var(--accent,#8bd3ff);border-radius:10px;padding:10px 14px;font-weight:800;text-decoration:none;box-shadow:0 4px 18px #0008}
-.skip-link:focus{transform:translateY(0);outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
-#main-content{scroll-margin-top:1rem}
-@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* Modern PC workspace */
+:root{color-scheme:dark;--bg:#070b16;--panel:#111a2c;--line:#2b3b59;--text:#f3f7ff;--muted:#a9b8d2;--accent:#7dd3fc;--good:#86efac;--purple:#a78bfa}
+html{scroll-behavior:smooth}body{min-height:100vh;background:radial-gradient(ellipse at 12% -10%,#243d68 0,transparent 38%),radial-gradient(ellipse at 100% 0%,#30265b 0,transparent 32%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.005em}
+header{padding:28px 16px 22px;text-align:left;width:min(1180px,100%);margin:auto}
+header>div:first-child{display:inline-flex;align-items:center;gap:8px;border:1px solid #405477;background:#14233b;color:#bdeaff;padding:7px 11px;border-radius:999px;font-size:.76rem;font-weight:850;letter-spacing:.13em}
+h1{font-size:clamp(2.5rem,7vw,4.5rem);line-height:1.03;letter-spacing:-.055em;margin:20px 0 12px;font-weight:850;background:linear-gradient(100deg,#fff 20%,#a5dcff 60%,#c4b5fd);background-clip:text;-webkit-background-clip:text;color:transparent}
+.sub{max-width:800px;margin:0;color:var(--muted);font-size:1.02rem}
+header .sub[style]{margin-top:20px!important;display:flex;flex-wrap:wrap;gap:9px}
+main{width:min(1180px,100%);padding:8px 16px 48px;margin:auto}
+.panel{position:relative;background:linear-gradient(145deg,#141e32f5,#0e1627f5);border:1px solid #2d3d5a;border-radius:22px;padding:clamp(17px,3vw,27px);margin-bottom:18px;box-shadow:0 16px 45px #0002}
+.panel h2{font-size:clamp(1.2rem,2.5vw,1.55rem);letter-spacing:-.025em;margin:0 0 15px;display:flex;align-items:center;gap:10px}
+.panel h2:before{content:"";width:5px;height:1.25em;border-radius:5px;background:linear-gradient(var(--accent),var(--purple));flex:0 0 auto}
+.notice{background:#0b1425;border:1px solid #2a3a57;border-radius:15px;padding:14px 16px;margin:12px 0;color:#c8d5e9}
+.notice strong{color:#f3f7ff}.notice a{font-weight:700}
+.fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field label{font-weight:750;color:#c5d2e7;font-size:.87rem}
+.field input,.field select{background:#080f1d;border:1px solid #354968;border-radius:12px;min-height:48px;padding:10px 12px;transition:border-color .15s,box-shadow .15s}
+.field input:hover,.field select:hover{border-color:#6b8db9}
+button,.btn{border:1px solid #405474;background:#1a2941;color:var(--text);padding:11px 15px;border-radius:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:750;transition:transform .15s,border-color .15s,background .15s;min-height:44px}
+button:hover:not(:disabled),.btn:hover{transform:translateY(-1px);border-color:#86bce8;background:#243956}
+button.primary{background:linear-gradient(110deg,#7dd3fc,#a5b4fc);color:#07111f;font-weight:900;border-color:transparent;box-shadow:0 5px 22px #7dd3fc24}
+button.primary:hover:not(:disabled){background:linear-gradient(110deg,#a5e5ff,#c4b5fd)}
+button:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.actions{gap:9px;margin:16px 0 12px}
+.status{background:#0a1424;border:1px solid #28415b;border-radius:12px;padding:12px 14px;min-height:48px;color:var(--good);font-weight:650;overflow-wrap:anywhere}
+.status.error{color:#fecaca;border-color:#7f343e;background:#27121b}
+#screen{background:#020409;min-height:320px;aspect-ratio:4/3;max-height:72vh;overflow:auto;display:block;position:relative;border-radius:15px;padding:8px;border:1px solid #35435a;box-shadow:inset 0 0 0 1px #ffffff08,0 15px 40px #0005}
+#screen:empty:after{content:'PC DISPLAY  ·  Waiting for boot';position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#64748b;font-size:.9rem;font-weight:800;letter-spacing:.15em}
+#screen canvas{max-width:100%;height:auto}#screen canvas:not([style*="display: none"]){display:block!important}#screen>div{margin:auto}
+#screen:fullscreen{max-height:none;aspect-ratio:auto;width:100vw;height:100vh;border:0;border-radius:0;padding:0;display:grid;place-content:center}
+#screen:fullscreen canvas{max-height:100vh;max-width:100vw;object-fit:contain}
+.screen-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.screen-label{display:flex;align-items:center;gap:9px;color:#c8d6ed;font-size:.85rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.screen-dot{width:8px;height:8px;border-radius:50%;background:#64748b;box-shadow:0 0 0 4px #64748b22}
+#status:not(.error):not(:empty){} 
+.muted{color:var(--muted)}ul.muted{padding-left:22px}ul.muted li{padding:4px 0}
+code{overflow-wrap:anywhere}footer{color:#8595b1;padding:14px 16px 32px;font-size:.85rem}
+a{color:#9ddfff}a:hover{color:#d4f2ff}
+@media(max-width:620px){header{padding-top:20px}.fields{grid-template-columns:1fr}.panel{border-radius:17px}#screen{min-height:230px;padding:4px}.actions button,.actions .btn{flex:1 1 auto}header .sub[style]{gap:8px}}
+@media(min-width:900px){main{display:block}.panel:first-child{padding:28px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 </style>
 </head>
 <body>
@@ -36,13 +62,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="field"><label for="diskFile">Your image file</label><input id="diskFile" type="file" accept=".img,.bin,.iso,.ima,.flp"></div>
 </div>
 <div class="actions"><button id="boot" class="primary">Boot PC</button><button id="stop" disabled>Stop PC</button><button id="reset" disabled>Restart PC</button><button id="saveState" disabled>Download emulator state</button><label class="btn" for="stateFile">Restore state file</label><input id="stateFile" type="file" accept=".bin,.state" hidden></div>
-<div id="status" class="status" role="status">Ready. Choose a compatible disk image to start.</div>
+<div id="status" class="status" role="status" aria-live="polite">Ready. Choose a compatible disk image to start.</div>
 </section>
 <section class="panel">
 <h2>2. Virtual PC screen</h2>
 <p class="muted">Click the screen to give it keyboard/mouse focus. A black screen can mean the image is not bootable, the wrong image type was selected, or the guest has not produced video yet. Use a bootable operating-system image—not just a game data disc. The emulator is CPU-emulation only.</p>
 <div id="screen" aria-label="Virtual PC display"></div>
-<div class="actions"><button id="releaseMouse" disabled>Release mouse</button></div>
+<div class="actions"><button id="releaseMouse" disabled>↗ Release mouse</button></div>
 </section>
 <section class="panel">
 <h2>Game compatibility tips</h2>
@@ -86,6 +112,8 @@ $('boot').addEventListener('click',async()=>{
  finally{booting=false;$('boot').disabled=!!emulator}
 });
 $('stop').addEventListener('click',stop);
+$('screenFullscreen').addEventListener('click',async()=>{const screen=$('screen');try{if(!document.fullscreenElement){if(screen.requestFullscreen)await screen.requestFullscreen();else status('Fullscreen is not supported by this browser.',true)}else if(document.exitFullscreen)await document.exitFullscreen()}catch(e){status('Could not enter fullscreen: '+(e.message||e),true)}});
+document.addEventListener('fullscreenchange',()=>{$('screenFullscreen').textContent=document.fullscreenElement?'⤢ Exit fullscreen':'⛶ Fullscreen'});
 $('reset').addEventListener('click',()=>{if(emulator){emulator.restart();status('Restarting virtual PC…')}});
 $('releaseMouse').addEventListener('click',()=>{if(emulator&&emulator.mouse_release)emulator.mouse_release()});
 $('saveState').addEventListener('click',async()=>{if(!emulator)return;status('Creating emulator state…');try{const state=await emulator.save_state();const blob=new Blob([state],{type:'application/octet-stream'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='classroom-arcade-pc-state.bin';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status('State file download requested. This saves emulator memory/state, not a portable copy of your virtual hard drive.')}catch(e){status('Could not save emulator state: '+(e.message||e),true)}});
