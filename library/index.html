@@ -217,7 +217,7 @@ $('loadRom').addEventListener('click',()=>{
  if(file.size===0){setStatus('That file is empty (0 bytes). Choose a complete game file.',true);return}
  if(file.size>1024*1024*1024){setStatus('That file is over 1 GB. Choose a smaller compatible image to avoid exhausting browser memory.',true);return}
  const ext='.'+(file.name.split('.').pop()||'').toLowerCase();
- const accepted=systems[sys].ext.toLowerCase().split(/\\s+/);
+ const accepted=systems[sys].ext.toLowerCase().split(/\s+/);
  const extensionWarning=!accepted.includes(ext);
  dispose();
  const objectUrl=URL.createObjectURL(file);activeObjectUrl=objectUrl;
