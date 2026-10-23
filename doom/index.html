@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="Play DOOM in your browser using a compatible local WAD file with the Classroom Arcade launcher.">
 <title>Classroom Arcade | DOOM</title>
 <style>
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -72,15 +74,23 @@ h1 { margin: 0 0 5px; font-size: 23px; }
 kbd { display: inline-block; min-width: 22px; margin-right: 3px; padding: 2px 5px; text-align: center; color: #fff; background: #333; border: 1px solid #555; border-radius: 4px; font: bold 11px monospace; }
 @media (max-width: 360px) { .keyGrid { grid-template-columns: 1fr; } }
 
+
+/* Shared accessibility improvements */
+.skip-link{position:fixed;top:max(8px,env(safe-area-inset-top));left:8px;z-index:10000;transform:translateY(calc(-100% - 14px));background:var(--panel,#151d31);color:var(--text,#fff);border:2px solid var(--accent,#8bd3ff);border-radius:10px;padding:10px 14px;font-weight:800;text-decoration:none;box-shadow:0 4px 18px #0008}
+.skip-link:focus{transform:translateY(0);outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+#main-content{scroll-margin-top:1rem}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#launcher">Skip to main content</a>
 <header>
   <h1>CLASSROOM ARCADE: DOOM</h1>
   <div id="subtitle">Dwasm browser player</div>
 </header>
 
-<section id="launcher">
+<section id="launcher" tabindex="-1">
   <label for="wadPicker">Choose a DOOM WAD file</label>
   <input id="wadPicker" type="file" accept=".wad,.WAD">
   <label for="presetPicker" style="margin-top:10px">Or choose a built-in game</label>
