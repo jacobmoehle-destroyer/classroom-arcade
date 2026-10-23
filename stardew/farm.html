@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#152b24">
+<meta name="description" content="Play Pocket Farm, a small browser farming game in Classroom Arcade.">
 <title>Pocket Farm | Classroom Arcade</title>
 <style>
 :root{color-scheme:dark;--bg:#101d1a;--panel:#1c3028;--line:#42614e;--text:#f2f6e8;--muted:#c1d1bd;--accent:#f6d77b}
@@ -16,10 +17,18 @@ main{max-width:820px;margin:auto}header{text-align:center;padding:8px 0 16px}h1{
 .tile.soil{background:#78563a;border-color:#9d7650}.tile.wet{background:#4a5545;border-color:#6b8065}.tile span{filter:drop-shadow(0 1px 1px #0008)}.tile small{position:absolute;bottom:2px;right:4px;font-size:.65rem;color:#fff;background:#15251dcc;border-radius:4px;padding:0 3px}
 .actions{display:flex;flex-wrap:wrap;gap:8px}.actions button{flex:1}.primary{background:var(--accent);color:#242515;border-color:#ffedac}.log{min-height:2.8em;color:var(--muted);padding:8px 2px}.hint{font-size:.9rem}.footer{text-align:center;font-size:.82rem;color:var(--muted);padding:10px}
 @media(max-width:430px){body{padding:10px}.panel{padding:10px}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}#farm{gap:4px;padding:5px}.tile{border-radius:5px}}
+
+/* Shared accessibility improvements */
+.skip-link{position:fixed;top:max(8px,env(safe-area-inset-top));left:8px;z-index:10000;transform:translateY(calc(-100% - 14px));background:var(--panel,#151d31);color:var(--text,#fff);border:2px solid var(--accent,#8bd3ff);border-radius:10px;padding:10px 14px;font-weight:800;text-decoration:none;box-shadow:0 4px 18px #0008}
+.skip-link:focus{transform:translateY(0);outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+#main-content{scroll-margin-top:1rem}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
 <header><div>🌱 CLASSROOM ARCADE ORIGINAL</div><h1>Pocket Farm</h1><p>Grow a tiny garden, harvest crops, and expand your patch.</p></header>
 <section class="panel">
 <div class="stats" aria-live="polite">
