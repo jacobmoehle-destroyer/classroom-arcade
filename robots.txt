@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jacobmoehle-destroyer.github.io/classroom-arcade/sitemap.xml
