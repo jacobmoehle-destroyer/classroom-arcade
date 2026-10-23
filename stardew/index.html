@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
+<meta name="description" content="Read the Classroom Arcade Stardew Valley guide and setup notes for supported play options.">
 <title>Stardew Valley | Classroom Arcade</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#34415c;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--green:#b8e9c7}
@@ -17,16 +18,24 @@ h2{margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}ol,ul{padding-left:22
 .game-tip{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}.game-tip p{margin:0}
 @media(max-width:600px){header{padding:18px 12px 12px}main{padding:0 8px 24px}.panel{padding:13px;border-radius:12px}.playframe{height:76vh;min-height:320px}.actions>*{flex:1 1 180px}}
 @media(orientation:landscape) and (max-height:600px){header{padding:8px}.eyebrow,header p,.status{display:none}h1{font-size:1.6rem;margin:4px}.playframe{height:84vh;min-height:250px}main{padding-bottom:12px}}
+
+/* Shared accessibility improvements */
+.skip-link{position:fixed;top:max(8px,env(safe-area-inset-top));left:8px;z-index:10000;transform:translateY(calc(-100% - 14px));background:var(--panel,#151d31);color:var(--text,#fff);border:2px solid var(--accent,#8bd3ff);border-radius:10px;padding:10px 14px;font-weight:800;text-decoration:none;box-shadow:0 4px 18px #0008}
+.skip-link:focus{transform:translateY(0);outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent,#8bd3ff);outline-offset:3px}
+#main-content{scroll-margin-top:1rem}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <header>
 <div class="eyebrow">Classroom Arcade · Steam game guide</div>
 <h1>🌱 Stardew Valley</h1>
 <p>Farm, fish, explore, and build a cozy little valley. We found a community browser-port experiment hosted by its author, so try it below without copying its large game-data files into this repository.</p>
 <span class="status">Browser experiment · Hosted by a third party</span>
 </header>
-<main>
+<main id="main-content" tabindex="-1">
 <section class="panel">
 <h2>Play Stardew Valley in this page</h2>
 <p class="muted">This is the actual community browser port, running its own game engine in a canvas. On iPad, use landscape orientation for more room. For the first test, choose <strong>Play without music</strong> to reduce the download to about 64 MB; music adds roughly 540 MB. Keep this page open while it downloads and caches game data.</p>
