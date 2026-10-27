@@ -1,0 +1,1 @@
+This folder is for the MP3 files used by Arcade Music. Upload the 11 MP3 files here. Keep the filenames matching the paths in ../tracks.json.
