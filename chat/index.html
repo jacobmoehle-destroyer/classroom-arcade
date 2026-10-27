@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<meta name="description" content="Chat with other Classroom Arcade visitors in the shared global chat room.">
+<title>Global Chat | Classroom Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--text:#f4f7ff;--muted:#b9c4da;--accent:#8bd3ff;--border:#34415c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c2d4c,var(--bg) 58%);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+a{color:var(--accent)}header{text-align:center;padding:24px 16px 12px}h1{margin:8px 0;font-size:clamp(2rem,6vw,3rem)}header p{color:var(--muted);margin:8px auto;max-width:620px}.nav{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:16px 0}.nav a,.button{display:inline-block;padding:9px 13px;border-radius:10px;border:1px solid #53627c;background:#273650;color:var(--text);text-decoration:none;font:inherit;cursor:pointer}.nav a:hover,.button:hover{outline:2px solid var(--accent)}
+main{width:min(900px,100%);margin:auto;padding:10px 14px 30px}.safety{padding:12px 14px;border:1px solid #53627c;border-radius:12px;background:#151d31;color:var(--muted);margin-bottom:12px}.safety strong{color:var(--text)}
+.chat{background:#111a2c;border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;height:min(68vh,720px);min-height:420px}.chat-head{padding:12px 15px;background:#151d31;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}.status{font-size:.88rem;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#9ca3af;margin-right:6px}.messages{list-style:none;margin:0;padding:14px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px}.msg{padding:10px 12px;border:1px solid #34415c;border-radius:12px;background:#151d31;overflow-wrap:anywhere}.meta{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.name{font-weight:800;color:var(--accent)}time{font-size:.78rem;color:var(--muted)}.body{white-space:pre-wrap;margin-top:4px}.empty{color:var(--muted);text-align:center;margin:auto;padding:20px}.compose{border-top:1px solid var(--border);padding:12px;display:grid;grid-template-columns:1fr auto;gap:8px;background:#151d31}.compose textarea,.field input{width:100%;min-width:0;padding:12px;border-radius:10px;border:1px solid #53627c;background:#0c1425;color:var(--text);font:inherit}.compose textarea{resize:vertical;min-height:48px;max-height:130px}.primary{background:var(--accent);color:#07111f;border:0;font-weight:800;border-radius:10px;padding:10px 16px;cursor:pointer}.primary:disabled{opacity:.5;cursor:not-allowed}.fine{color:var(--muted);font-size:.84rem;margin:8px 2px}.overlay{position:fixed;inset:0;z-index:5;background:#050914eF;display:grid;place-items:center;padding:18px}.dialog{width:min(420px,100%);background:#151d31;border:1px solid #53627c;border-radius:18px;padding:22px;box-shadow:0 20px 70px #0008}.dialog h2{margin-top:0}.dialog p{color:var(--muted)}.field label{display:block;font-weight:700;margin-bottom:6px}.field{margin:14px 0}.error{color:#ffb4b4;min-height:1.4em}.hidden{display:none!important}
+@media(max-width:520px){.chat{height:68vh;min-height:390px}.compose{grid-template-columns:1fr}.compose .primary{min-height:44px}.chat-head{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div>🌐 CLASSROOM ARCADE</div><h1>Global Chat</h1><p>One room for the Classroom Arcade community.</p><nav class="nav" aria-label="Site navigation"><a href="../">← Back to Arcade</a><a href="../movie-theater/">Movie Theater</a></nav></header>
+<main>
+<div class="safety"><strong>Quick safety reminder:</strong> Choose a nickname, not your real full name. Never share your address, school, phone number, passwords, or other private information. Messages are visible to other visitors.</div>
+<section class="chat" aria-label="Global chat">
+<div class="chat-head"><strong>💬 The Lobby</strong><div class="status" id="status" role="status" aria-live="polite"><span class="dot"></span>Setting up chat…</div><button class="button" id="changeName" type="button">Change name</button></div>
+<ol class="messages" id="messages" aria-live="polite"><li class="empty" id="empty">Messages will appear here.</li></ol>
+<form class="compose" id="compose"><label class="hidden" for="message">Your message</label><textarea id="message" maxlength="500" placeholder="Write a message… (max 500 characters)" required></textarea><button class="primary" id="send" type="submit">Send ↗</button></form>
+</section>
+<p class="fine">Be respectful. This is a public room, not a private conversation. The room keeps recent messages; please don't post anything sensitive.</p>
+</main>
+<div class="overlay" id="nameOverlay" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+<form class="dialog" id="nameForm"><h2 id="nameTitle">Pick your chat name</h2><p>This name is shown with your messages. You can change it later.</p><div class="field"><label for="displayName">Display name</label><input id="displayName" maxlength="24" minlength="2" autocomplete="nickname" placeholder="e.g. PixelPenguin" required></div><p class="fine">Use 2–24 letters, numbers, spaces, underscores, or hyphens. Avoid using your real name.</p><p class="error" id="nameError" role="alert"></p><button class="primary" type="submit" style="width:100%">Enter chat</button></form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/*
+SETUP: Create a Supabase project, run ../global-chat-setup.sql in its SQL Editor,
+then replace the two values below with your project's Project URL and anon/public key.
+The anon/public key is designed for browser use; never put a service_role key here.
+*/
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY";
+const $=id=>document.getElementById(id);
+let client=null, channel=null, displayName="", lastSentAt=0, seenIds=new Set();
+const namePattern=/^[\p{L}\p{N}_ -]{2,24}$/u;
+function setStatus(text,ok=false){$("status").innerHTML='<span class="dot" style="background:'+(ok?'#6ee7a8':'#fbbf24')+'"></span>'; $("status").append(document.createTextNode(text))}
+function safeName(value){return value.trim().replace(/\s+/g," ")}
+function showNamePrompt(){ $("displayName").value=displayName;$("nameOverlay").classList.remove("hidden");setTimeout(()=>$("displayName").focus(),20)}
+function formatTime(value){const d=new Date(value);return Number.isNaN(d.getTime())?"":d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}
+function renderMessage(m){if(!m||seenIds.has(m.id))return;seenIds.add(m.id);const empty=$("empty");if(empty)empty.remove();const li=document.createElement("li");li.className="msg";const meta=document.createElement("div");meta.className="meta";const name=document.createElement("span");name.className="name";name.textContent=String(m.display_name||"Guest").slice(0,24);const time=document.createElement("time");time.dateTime=m.created_at||"";time.textContent=formatTime(m.created_at);const body=document.createElement("div");body.className="body";body.textContent=String(m.body||"").slice(0,500);meta.append(name,time);li.append(meta,body);$("messages").append(li);while($("messages").children.length>150){$("messages").firstElementChild.remove()}$("messages").scrollTop=$("messages").scrollHeight}
+async function loadRecent(){const {data,error}=await client.from("chat_messages").select("id,display_name,body,created_at").order("created_at",{ascending:false}).limit(100);if(error)throw error;(data||[]).reverse().forEach(renderMessage);if(!$("messages").children.length){const e=document.createElement("li");e.id="empty";e.className="empty";e.textContent="No messages yet. Say hi!";$("messages").append(e)}}
+async function connect(){if(!/^https:\/\//.test(SUPABASE_URL)||SUPABASE_ANON_KEY.includes("YOUR_")){setStatus("Needs database setup");$("send").disabled=true;return}try{client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);await loadRecent();channel=client.channel("global-chat-room").on("postgres_changes",{event:"INSERT",schema:"public",table:"chat_messages"},payload=>renderMessage(payload.new)).subscribe(s=>{if(s==="SUBSCRIBED")setStatus("Connected · live updates on",true);else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")setStatus("Reconnecting…")});$("send").disabled=false}catch(e){console.error(e);setStatus("Could not connect — check setup");$("send").disabled=true}}
+$("nameForm").addEventListener("submit",e=>{e.preventDefault();const n=safeName($("displayName").value);if(!namePattern.test(n)){ $("nameError").textContent="Please use 2–24 letters, numbers, spaces, underscores, or hyphens.";return}displayName=n;localStorage.setItem("classroomArcadeChatName",n);$("nameError").textContent="";$("nameOverlay").classList.add("hidden");$("message").focus()});
+$("changeName").addEventListener("click",showNamePrompt);
+$("compose").addEventListener("submit",async e=>{e.preventDefault();const body=$("message").value.trim();if(!displayName){showNamePrompt();return}if(!body||body.length>500)return;if(!client){setStatus("Chat database setup is not finished");return}const now=Date.now();if(now-lastSentAt<1800){setStatus("Please wait a moment before sending again");return}lastSentAt=now;$("send").disabled=true;try{const {error}=await client.from("chat_messages").insert({display_name:displayName,body});if(error)throw error;$("message").value="";setStatus("Message sent",true)}catch(err){console.error(err);setStatus("Message failed — check connection")}finally{$("send").disabled=false}});
+displayName=localStorage.getItem("classroomArcadeChatName")||"";if(displayName&&namePattern.test(displayName))$("nameOverlay").classList.add("hidden");else showNamePrompt();connect();
+</script>
+</body>
+</html>
