@@ -126,7 +126,7 @@ async function readDriveFile(path){const res=await fetch(path);if(!res.ok)throw 
     driveMap[key]=id;
     const existing=raw.find(x=>normalize(x[2])===key);
     if(existing){existing[3]=id}
-    else{raw.push([category,title.replace(/^\\s*[#]/,'').charAt(0).toUpperCase()||'#',title,id])}
+    else{raw.push([category,title.charAt(0).toUpperCase()||'#',title,id])}
   });
   drawLetters();drawQuicknav();render();
 });
