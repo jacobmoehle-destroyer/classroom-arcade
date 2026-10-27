@@ -1,1 +1,0 @@
-This folder holds the MP3 files for Arcade Music. Open this folder on GitHub and choose Add file → Upload files to upload the MP3 files. GitHub does not import a ZIP as a folder; extract the ZIP on your computer first, then upload the MP3 files from its audio folder here.
