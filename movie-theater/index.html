@@ -111,5 +111,23 @@ function playDrive(id,title){$('playerTitle').textContent=title;$('drivePlayer')
 function bindWatchButtons(){document.querySelectorAll('button.watch[data-drive-id]').forEach(b=>b.addEventListener('click',()=>playDrive(b.dataset.driveId,b.dataset.title)))}
 $('closePlayer').onclick=()=>{$('drivePlayer').src='about:blank';$('playerSection').classList.add('hidden')};
 $('q').addEventListener('input',()=>{letter='all';drawLetters();render()});$('category').addEventListener('change',()=>{drawQuicknav();render()});$('genre').addEventListener('change',render);$('clear').onclick=()=>{$('q').value='';$('category').value='all';$('genre').value='all';letter='all';drawLetters();drawQuicknav();render();$('q').focus()};drawLetters();drawQuicknav();render();
-async function readDriveFile(path){const res=await fetch(path);if(!res.ok)throw new Error(path+' did not load');const b64=(await res.text()).trim();const bytes=Uint8Array.from(atob(b64),ch=>ch.charCodeAt(0));const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return await new Response(stream).json()}async function loadDriveCatalog(){try{const datasets=await Promise.all(['./drive-catalog-part1.txt','./drive-catalog-part2.txt','./drive-catalog-part3.txt','./drive-catalog-part4.txt'].map(readDriveFile));let total=0;datasets.flat().forEach(entry=>{total++;const category=entry.length===3?entry[0]:'Movies';const title=entry.length===3?entry[1]:entry[0];const id=entry.length===3?entry[2]:entry[1];const key=normalize(title);driveMap[key]=id;const existing=raw.find(x=>normalize(x[2])===key);if(existing){existing[3]=id}else{raw.push([category,title.replace(/^\s*[#]/,'').charAt(0).toUpperCase()||'#',title,id])}});drawLetters();drawQuicknav();render();$('count').textContent+=' · '+total+' Drive links loaded'}catch(err){console.error(err);$('count').textContent+=' · Drive links could not be loaded'}}loadDriveCatalog();
+async function readDriveFile(path){const res=await fetch(path);if(!res.ok)throw new Error(path+' did not load');const b64=(await res.text()).trim();const bytes=Uint8Array.from(atob(b64),ch=>ch.charCodeAt(0));const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return await new Response(stream).json()}async function loadDriveCatalog(){try{const datasets=await Promise.all(['./drive-catalog-part1.txt','./drive-catalog-part2.txt','./drive-catalog-part3.txt','./drive-catalog-part4.txt'].map(readDriveFile));let total=0;datasets.flat().forEach(entry=>{total++;const category=entry.length===3?entry[0]:'Movies';const title=entry.length===3?entry[1]:entry[0];const id=entry.length===3?entry[2]:entry[1];const key=normalize(title);driveMap[key]=id;const existing=raw.find(x=>normalize(x[2])===key);if(existing){existing[3]=id}else{raw.push([category,title.replace(/^\s*[#]/,'').charAt(0).toUpperCase()||'#',title,id])}});drawLetters();drawQuicknav();render();$('count').textContent+=' · '+total+' Drive links loaded'}catch(err){console.error(err);$('count').textContent+=' · Drive links could not be loaded'}}loadDriveCatalog().then(()=>{
+  // User-supplied Drive files: keep these explicit mappings in one place.
+  const suppliedVideos=[
+    ["Movies","Backrooms","13AeLqb40xJ4UjIVxUTpEtYSkaYqoR2jR"],
+    ["Movies","Dumb and Dumber","1KD9FHuAjO5UuoCW9dWnLRxq6Adtemto1"],
+    ["Anime Shows","Jujutsu Kaisen (2020) — S1E1","1NiPmDeOVp8E6zEHuxfrwhxPebWixjGU8"],
+    ["Anime Movies","Jujutsu Kaisen 0 (2021)","1O1bWDpldR3BcEDiBK0jbVX8vq-N8Nmw5"],
+    ["TV Shows","South Park (1997) — S1E1","1IiBoyBiNTobJjmfJh--Sr2GFSccLZLht"],
+    ["TV Shows","South Park (1997) — S2E1","165ZbznH2xwtVdAjUsaWiY2IYGaK3jomU"]
+  ];
+  suppliedVideos.forEach(([category,title,id])=>{
+    const key=normalize(title);
+    driveMap[key]=id;
+    const existing=raw.find(x=>normalize(x[2])===key);
+    if(existing){existing[3]=id}
+    else{raw.push([category,title.replace(/^\\s*[#]/,'').charAt(0).toUpperCase()||'#',title,id])}
+  });
+  drawLetters();drawQuicknav();render();
+});
 </script></body></html>
