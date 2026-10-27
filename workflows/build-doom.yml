@@ -1,0 +1,73 @@
+
+name: Build Dwasm DOOM Player
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out Classroom Arcade
+        uses: actions/checkout@v4
+
+      - name: Check out Dwasm source
+        uses: actions/checkout@v4
+        with:
+          repository: GMH-Code/Dwasm
+          path: dwasm
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake git python3 \
+            libsdl2-dev libsdl2-image-dev \
+            libsdl2-mixer-dev libsdl2-net-dev \
+            libpcre3-dev zlib1g-dev libmad0-dev \
+            libfluidsynth-dev libdumb1-dev \
+            libvorbis-dev libportmidi-dev \
+            libasound2-dev
+
+      - name: Build native PrBoomX resources
+        run: |
+          cmake -S dwasm -B dwasm/build_native \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build dwasm/build_native --parallel 2
+          test -f dwasm/build_native/prboomx.wad
+          sha256sum dwasm/build_native/prboomx.wad
+
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git \
+            "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install latest
+          "$RUNNER_TEMP/emsdk/emsdk" activate latest
+
+      - name: Build WebAssembly player
+        shell: bash
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          cp dwasm/build_native/prboomx.wad \
+            dwasm/wasm/fs/prboomx.wad
+          cd dwasm
+          mkdir build
+          cd build
+          emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --parallel 2
+          ls -lah
+
+      - name: Upload browser build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dwasm-browser-player
+          path: |
+            dwasm/build/index.html
+            dwasm/build/index.js
+            dwasm/build/index.data
+            dwasm/build/index.wasm
+          if-no-files-found: error
+
