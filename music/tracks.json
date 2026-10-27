@@ -1,0 +1,104 @@
+{
+  "tracks": [
+    {
+      "title": "01 About A Girl",
+      "artist": "Nirvana",
+      "url": "./audio/01%20About%20A%20Girl.mp3"
+    },
+    {
+      "title": "01 All Apologies",
+      "artist": "Nirvana",
+      "url": "./audio/01%20All%20Apologies.mp3"
+    },
+    {
+      "title": "01 Come As You Are",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Come%20As%20You%20Are.mp3"
+    },
+    {
+      "title": "01 Drain You",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Drain%20You.mp3"
+    },
+    {
+      "title": "01 Heart-Shaped Box",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Heart-Shaped%20Box.mp3"
+    },
+    {
+      "title": "01 In Bloom",
+      "artist": "Nirvana",
+      "url": "./audio/01%20In%20Bloom.mp3"
+    },
+    {
+      "title": "01 Lithium",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Lithium.mp3"
+    },
+    {
+      "title": "01 Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Smells%20Like%20Teen%20Spirit.mp3"
+    },
+    {
+      "title": "01 Smells Like Teen Spirit_1",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Smells%20Like%20Teen%20Spirit_1.mp3"
+    },
+    {
+      "title": "01 Something In The Way",
+      "artist": "Nirvana",
+      "url": "./audio/01%20Something%20In%20The%20Way.mp3"
+    },
+    {
+      "title": "01 The Man Who Sold The World - Live",
+      "artist": "Nirvana",
+      "url": "./audio/01%20The%20Man%20Who%20Sold%20The%20World%20-%20Live.mp3"
+    },
+    {
+      "title": "02 In Bloom",
+      "artist": "Nirvana",
+      "url": "./audio/02%20In%20Bloom.mp3"
+    },
+    {
+      "title": "03 Come As You Are",
+      "artist": "Nirvana",
+      "url": "./audio/03%20Come%20As%20You%20Are.mp3"
+    },
+    {
+      "title": "04 Breed",
+      "artist": "Nirvana",
+      "url": "./audio/04%20Breed.mp3"
+    },
+    {
+      "title": "05 Lithium",
+      "artist": "Nirvana",
+      "url": "./audio/05%20Lithium.mp3"
+    },
+    {
+      "title": "06 Polly",
+      "artist": "Nirvana",
+      "url": "./audio/06%20Polly.mp3"
+    },
+    {
+      "title": "07 Territorial Pissings",
+      "artist": "Nirvana",
+      "url": "./audio/07%20Territorial%20Pissings.mp3"
+    },
+    {
+      "title": "08 Drain You",
+      "artist": "Nirvana",
+      "url": "./audio/08%20Drain%20You.mp3"
+    },
+    {
+      "title": "09 Lounge Act",
+      "artist": "Nirvana",
+      "url": "./audio/09%20Lounge%20Act.mp3"
+    },
+    {
+      "title": "10 Stay Away",
+      "artist": "Nirvana",
+      "url": "./audio/10%20Stay%20Away.mp3"
+    }
+  ]
+}
